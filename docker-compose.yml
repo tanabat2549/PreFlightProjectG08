@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: khorsuanboon-db
+    restart: always
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: '5678'
+      POSTGRES_DB: khorsuanboon_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - khorsuanboon_pgdata:/var/lib/postgresql/data
+
+volumes:
+  khorsuanboon_pgdata:

@@ -1,0 +1,14 @@
+# Ignore node_modules for all subfolders
+**/node_modules/
+
+# Ignore environment variables
+**/.env
+**/.env.local
+
+# Ignore build outputs
+**/dist/
+**/build/
+
+# OS / IDE files
+.DS_Store
+.vscode/

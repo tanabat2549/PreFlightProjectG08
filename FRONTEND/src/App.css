@@ -1,0 +1,42 @@
+/* 🥠 การ์ดเซียมซีขอบเส้นประคล้ายกระดาษยันต์ */
+.talisman-card {
+  background: #FFFDF9;
+  border: 2px dashed var(--primary-red);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(140, 59, 59, 0.08);
+  position: relative;
+}
+
+/* 🏮 ตราประทับตราวัดแบบวงกลม */
+.temple-stamp {
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--primary-red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-red);
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* 🔘 ปุ่มกดสีทองนวล */
+.btn-gold {
+  background-color: var(--primary-gold);
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(201, 160, 61, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-gold:active {
+  transform: scale(0.98);
+}

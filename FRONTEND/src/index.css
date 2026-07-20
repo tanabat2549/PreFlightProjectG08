@@ -1,0 +1,49 @@
+:root {
+  /* 🎨 โทนสีหลักของแอป "ขอส่วนบุญ" */
+  --primary-gold: #C9A03D;
+  --primary-red: #8C3B3B;
+  --bg-cream: #FDFBF7;
+  --card-bg: #FFFFFF;
+  --text-main: #332C27;
+  --text-sub: #7A726A;
+
+  /* 🔤 ฟอนต์ประจำแอป */
+  --font-heading: 'Noto Serif Thai', serif;
+  --font-body: 'Noto Sans Thai', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #ECE8DF; /* สีพื้นหลังรอบนอกหน้าจอ Desktop */
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+
+#root {
+  width: 100%;
+  max-width: 1200px; /* ขยายรองรับหน้าจอ PC */
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: var(--bg-cream);
+  display: flex;
+  flex-direction: column;
+}
+
+/* คอลัมน์การ์ดสำหรับ PC */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--primary-red);
+}
