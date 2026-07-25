@@ -42,7 +42,7 @@ export const reviews = pgTable('reviews', {
 // 4. ตารางใบเซียมซี (คำทำนายแยก 5 หมวด)
 export const fortunes = pgTable('fortunes', {
   id: serial('id').primaryKey(),
-  number: integer('number').notNull().unique(), // ใบที่ 1-28
+  number: integer('number').notNull().unique(), // ใบที่ 1-17
   title: varchar('title', { length: 255 }).notNull(), // เช่น "ใบที่ 1 มหาโชค"
   workFortune: text('work_fortune').notNull(),     // การงาน
   loveFortune: text('love_fortune').notNull(),     // ความรัก
