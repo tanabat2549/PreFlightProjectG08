@@ -7,7 +7,7 @@ export const api = axios.create({
   },
 });
 
-// แถม: ตัวแทรก JWT Token อัตโนมัติ (สำหรับอนาคตตอนทำ Auth)
+// Interceptor ใส่ Token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {

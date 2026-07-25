@@ -1,0 +1,215 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { drawFortune } from '../api/siemsee';  
+import { type Fortune } from '../types/fortune';
+import cylinderImg from '../assets/cylinder.png';
+import stickImg from '../assets/stick.png';
+import smokeImg from '../assets/smoke.png';
+import lightImg from '../assets/light.png';
+import './SiemseePage.css';
+
+const STICK_COUNT = 17;
+
+type Stage = 'idle' | 'loading' | 'shaking' | 'popping' | 'landed' | 'revealed';
+
+const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+
+export default function SiemseePage() {
+  const [stage, setStage] = useState<Stage>('idle');
+  const [picked, setPicked] = useState<Fortune | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
+
+  useEffect(() => clearTimers, []);
+
+  const overlayOpen = stage === 'revealed' && !showResult;
+
+  useEffect(() => {
+    if (overlayOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [overlayOpen]);
+
+  const stickVars = useMemo(
+    () =>
+      Array.from({ length: STICK_COUNT }).map(() => ({
+        '--rot': `${rand(-6, 6).toFixed(2)}deg`,
+        '--dx': `${rand(-30, 30).toFixed(1)}px`,
+        '--dy': `${rand(-4, 4).toFixed(1)}px`,
+        '--h': `${rand(160, 180).toFixed(0)}px`,
+        '--b': rand(0.88, 1.05).toFixed(2),
+        '--delay': `${rand(0, 0.12).toFixed(2)}s`,
+      })) as React.CSSProperties[],
+    []
+  );
+
+  const isBusy = stage === 'loading' || stage === 'shaking' || stage === 'popping';
+
+  const handleShake = async () => {
+    if (isBusy) return;
+    clearTimers();
+    setShowResult(false);
+    setError(null);
+    setStage('loading');
+
+    try {
+      // 🔗 เรียก backend จริง แทนการสุ่มจาก mock
+      const fortune = await drawFortune();
+      setPicked(fortune);
+      setStage('shaking');
+
+      timers.current.push(setTimeout(() => setStage('popping'), 900));
+      timers.current.push(setTimeout(() => setStage('landed'), 900 + 700));
+      timers.current.push(setTimeout(() => setStage('revealed'), 900 + 700 + 450));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+      setStage('idle');
+    }
+  };
+
+  const handleReset = () => {
+    clearTimers();
+    setStage('idle');
+    setPicked(null);
+    setShowResult(false);
+    setError(null);
+  };
+
+  return (
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h2 style={{ color: 'var(--primary-red)' }}>🥠 เขย่าเซียมซี</h2>
+      <p style={{ fontSize: '13px', color: 'var(--text-sub)', marginBottom: '8px' }}>
+        ตั้งจิตอธิษฐานแล้วกดปุ่มเพื่อเขย่ากระบอกเซียมซี
+      </p>
+
+      {error && (
+        <p style={{ color: 'var(--primary-red)', fontSize: '13px', marginBottom: '8px' }}>
+          ⚠️ {error}
+        </p>
+      )}
+
+      <div className="siemsee-stage">
+        <div className="shadow-layer" />
+        <div className={`cylinder-layer ${stage === 'shaking' ? 'shake' : ''}`}>
+          <img src={cylinderImg} alt="กระบอกเซียมซี" draggable={false} />
+        </div>
+
+        <div className="stick-bundle-wrap">
+          {stickVars.map((vars, i) => (
+            <div
+              key={i}
+              className={`stick-in-bundle ${stage === 'shaking' ? 'jitter' : ''}`}
+              style={vars}
+            >
+              <img src={stickImg} alt="" draggable={false} />
+            </div>
+          ))}
+        </div>
+
+        <div className={`smoke-layer ${stage === 'popping' ? 'puff' : ''}`}>
+          <img src={smokeImg} alt="" draggable={false} />
+        </div>
+
+        {stage !== 'idle' && stage !== 'loading' && (
+          <div className={`popped-stick ${stage}`}>
+            <img src={stickImg} alt="ไม้เซียมซี" draggable={false} />
+            <div className={`glow-layer ${stage === 'landed' || stage === 'revealed' ? 'show' : ''}`} />
+            <span className={`stick-number ${stage === 'revealed' ? 'show' : ''}`}>
+              {picked?.number}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {stage !== 'revealed' && (
+        <div style={{ marginTop: '20px' }}>
+          <button
+            className="btn-gold"
+            onClick={handleShake}
+            disabled={isBusy}
+            style={{ width: '80%', fontSize: '16px', cursor: isBusy ? 'not-allowed' : 'pointer' }}
+          >
+            {stage === 'idle' && 'กดเพื่อเขย่าเซียมซี'}
+            {stage === 'loading' && 'กำลังเชื่อมต่อ...'}
+            {(stage === 'shaking' || stage === 'popping') && 'กำลังเขย่า...'}
+          </button>
+        </div>
+      )}
+
+      {overlayOpen && (
+        <div className="reveal-overlay">
+          <div className="reveal-stick-stage">
+            <div className="reveal-glow">
+              <img src={lightImg} alt="" draggable={false} />
+            </div>
+            <div className="reveal-stick">
+              <img src={stickImg} alt="ไม้เซียมซี" draggable={false} />
+              <span className="reveal-number">{picked?.number}</span>
+            </div>
+          </div>
+
+          <p className="reveal-caption">เซียมซีใบที่ {picked?.number}</p>
+
+          <button
+            className="btn-gold reveal-btn"
+            onClick={() => setShowResult(true)}
+            style={{ fontSize: '16px' }}
+          >
+            ดูใบเซียมซี
+          </button>
+        </div>
+      )}
+
+      {showResult && picked && (
+        <div className="talisman-card" style={{ marginTop: '24px', textAlign: 'left' }}>
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: '16px',
+              borderBottom: '1px dashed var(--primary-gold)',
+              paddingBottom: '12px',
+            }}
+          >
+            <h3 style={{ fontSize: '20px', color: 'var(--primary-red)', margin: 0 }}>
+              ✨ {picked.title}
+            </h3>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text-main)' }}>
+            <p style={{ margin: 0 }}>💼 <strong>การงาน:</strong> {picked.workFortune}</p>
+            <p style={{ margin: 0 }}>❤️ <strong>ความรัก:</strong> {picked.loveFortune}</p>
+            <p style={{ margin: 0 }}>💰 <strong>การเงิน:</strong> {picked.moneyFortune}</p>
+            <p style={{ margin: 0 }}>🎓 <strong>การเรียน:</strong> {picked.studyFortune}</p>
+            <p style={{ margin: 0 }}>🏥 <strong>สุขภาพ:</strong> {picked.healthFortune}</p>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={handleReset}
+              style={{
+                background: 'none',
+                border: '1px solid var(--primary-gold)',
+                color: 'var(--primary-gold)',
+                borderRadius: '16px',
+                padding: '8px 20px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              เขย่าอีกครั้ง
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
