@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { dbClient as db } from '../db/client.js';
-import { fortunes } from '../db/schema.js';
+import { dbClient as db } from '../db/client.ts';
+import { fortunes } from '../db/schema.ts';
 import { eq } from 'drizzle-orm';
 
 const router = Router();

@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import siemseeRouter from './routes/siemsee.js';
+import siemseeRouter from './routes/siemseebackend.ts';
 dotenv.config();
 
 const app = express();
