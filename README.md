@@ -71,6 +71,10 @@
 ```bash
 docker compose up -d
 
+
+##เปิดตาราง Table 
+1.npx drizzle-kit studio  ที่BACKEND
+
 ### 2. รัน Backend (Terminal 1)
 
 cd BACKEND
