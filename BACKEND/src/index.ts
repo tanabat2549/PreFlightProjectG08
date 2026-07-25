@@ -1,11 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
-
+import siemseeRouter from './routes/siemsee.js';
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
-
+app.use(express.json());
+app.use('/api/siemsee', siemseeRouter);
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
 });
