@@ -7,7 +7,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 100 }).notNull(),
   email: varchar('email', { length: 100 }).unique(),
   phone: varchar('phone', { length: 20 }).unique(),
-  password: text('password'), // nullable เผื่อล็อกอินด้วย Google
+  password: text('password'), //  ใช้ text // nullable เผื่อล็อกอินด้วย Google
   birthDate: date('birth_date').notNull(), // ใช้คำนวณราศี/ดวง
   googleId: varchar('google_id', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
