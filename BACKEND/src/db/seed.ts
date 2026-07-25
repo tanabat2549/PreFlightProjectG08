@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { dbClient as db } from './client';
-import { fortunes } from './schema';
+import { dbClient as db } from './client.js';
+import { fortunes } from './schema.js';
 
 async function seed() {
   console.log('🌱 กำลังหยอดข้อมูลเซียมซี 17 ใบลง Database...');
