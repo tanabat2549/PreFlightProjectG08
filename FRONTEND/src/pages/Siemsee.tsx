@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { mockFortunes } from '../data/mockFortunes';
+import { drawFortune } from '../api/siemsee';  
 import { type Fortune } from '../types/fortune';
 import cylinderImg from '../assets/cylinder.png';
 import stickImg from '../assets/stick.png';
@@ -9,15 +9,15 @@ import './SiemseePage.css';
 
 const STICK_COUNT = 17;
 
-type Stage = 'idle' | 'shaking' | 'popping' | 'landed' | 'revealed';
+type Stage = 'idle' | 'loading' | 'shaking' | 'popping' | 'landed' | 'revealed';
 
-// สุ่มเลขในช่วง [min, max]
 const rand = (min: number, max: number) => Math.random() * (max - min) + min;
 
 export default function SiemseePage() {
   const [stage, setStage] = useState<Stage>('idle');
   const [picked, setPicked] = useState<Fortune | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearTimers = () => {
@@ -25,13 +25,10 @@ export default function SiemseePage() {
     timers.current = [];
   };
 
-  // เคลียร์ timer ถ้า component ถูก unmount กลางอนิเมชัน
   useEffect(() => clearTimers, []);
 
-  // ป๊อปอัพเต็มจอแสดงอยู่ระหว่างที่ไม้ถูกเปิดเผยแล้ว แต่ยังไม่ได้กด "ดูใบเซียมซี"
   const overlayOpen = stage === 'revealed' && !showResult;
 
-  // ล็อกการ scroll พื้นหลังตอนป๊อปอัพเต็มจอเปิดอยู่
   useEffect(() => {
     if (overlayOpen) {
       const prev = document.body.style.overflow;
@@ -55,23 +52,28 @@ export default function SiemseePage() {
     []
   );
 
-  const isBusy = stage === 'shaking' || stage === 'popping';
+  const isBusy = stage === 'loading' || stage === 'shaking' || stage === 'popping';
 
-  const handleShake = () => {
+  const handleShake = async () => {
     if (isBusy) return;
     clearTimers();
     setShowResult(false);
+    setError(null);
+    setStage('loading');
 
-    // สุ่มผลตั้งแต่ตอนกดปุ่มเลย แต่ "เลข" จะยังไม่ถูกเปิดเผยบนไม้
-    // จนกว่าไม้จะหล่นและหยุดนิ่ง (ดู stage 'revealed' ด้านล่าง)
-    const fortune = mockFortunes[Math.floor(Math.random() * mockFortunes.length)];
-    setPicked(fortune);
-    setStage('shaking');
+    try {
+      // 🔗 เรียก backend จริง แทนการสุ่มจาก mock
+      const fortune = await drawFortune();
+      setPicked(fortune);
+      setStage('shaking');
 
-    // Idle -> shaking -> popping -> landed -> revealed (เปิดป๊อปอัพเต็มจอ)
-    timers.current.push(setTimeout(() => setStage('popping'), 900));
-    timers.current.push(setTimeout(() => setStage('landed'), 900 + 700));
-    timers.current.push(setTimeout(() => setStage('revealed'), 900 + 700 + 450));
+      timers.current.push(setTimeout(() => setStage('popping'), 900));
+      timers.current.push(setTimeout(() => setStage('landed'), 900 + 700));
+      timers.current.push(setTimeout(() => setStage('revealed'), 900 + 700 + 450));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+      setStage('idle');
+    }
   };
 
   const handleReset = () => {
@@ -79,6 +81,7 @@ export default function SiemseePage() {
     setStage('idle');
     setPicked(null);
     setShowResult(false);
+    setError(null);
   };
 
   return (
@@ -88,16 +91,18 @@ export default function SiemseePage() {
         ตั้งจิตอธิษฐานแล้วกดปุ่มเพื่อเขย่ากระบอกเซียมซี
       </p>
 
-      <div className="siemsee-stage">
-        {/* เงา */}
-        <div className="shadow-layer" />
+      {error && (
+        <p style={{ color: 'var(--primary-red)', fontSize: '13px', marginBottom: '8px' }}>
+          ⚠️ {error}
+        </p>
+      )}
 
-        {/* กระบอก */}
+      <div className="siemsee-stage">
+        <div className="shadow-layer" />
         <div className={`cylinder-layer ${stage === 'shaking' ? 'shake' : ''}`}>
           <img src={cylinderImg} alt="กระบอกเซียมซี" draggable={false} />
         </div>
 
-        {/* มัดไม้ 17 แท่งที่โผล่พ้นปากกระบอก */}
         <div className="stick-bundle-wrap">
           {stickVars.map((vars, i) => (
             <div
@@ -110,18 +115,14 @@ export default function SiemseePage() {
           ))}
         </div>
 
-        {/* ควัน — โผล่ตอนไม้เด้งออกมา */}
         <div className={`smoke-layer ${stage === 'popping' ? 'puff' : ''}`}>
           <img src={smokeImg} alt="" draggable={false} />
         </div>
 
-        {/* ไม้ที่เด้งออกมา บนเวทีเล็ก — เด้งแล้วตกลงมา ก่อนสลับไปเวอร์ชันเต็มจอ */}
-        {stage !== 'idle' && (
+        {stage !== 'idle' && stage !== 'loading' && (
           <div className={`popped-stick ${stage}`}>
             <img src={stickImg} alt="ไม้เซียมซี" draggable={false} />
-            <div className={`glow-layer ${stage === 'landed' || stage === 'revealed' ? 'show' : ''}`}>
-      
-            </div>
+            <div className={`glow-layer ${stage === 'landed' || stage === 'revealed' ? 'show' : ''}`} />
             <span className={`stick-number ${stage === 'revealed' ? 'show' : ''}`}>
               {picked?.number}
             </span>
@@ -137,12 +138,13 @@ export default function SiemseePage() {
             disabled={isBusy}
             style={{ width: '80%', fontSize: '16px', cursor: isBusy ? 'not-allowed' : 'pointer' }}
           >
-            {stage === 'idle' ? 'กดเพื่อเขย่าเซียมซี' : 'กำลังเขย่า...'}
+            {stage === 'idle' && 'กดเพื่อเขย่าเซียมซี'}
+            {stage === 'loading' && 'กำลังเชื่อมต่อ...'}
+            {(stage === 'shaking' || stage === 'popping') && 'กำลังเขย่า...'}
           </button>
         </div>
       )}
 
-      {/* ===== ป๊อปอัพเต็มจอ — ไม้ขนาดใหญ่ + เลข + แสงหมุนวนไม่หยุด ===== */}
       {overlayOpen && (
         <div className="reveal-overlay">
           <div className="reveal-stick-stage">
