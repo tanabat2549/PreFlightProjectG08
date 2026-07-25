@@ -24,10 +24,55 @@ router.get('/draw', async (req: Request, res: Response) => {
 
     const fortune = fortuneList[0];
 
-    // 3. ส่งข้อมูลกลับ
+    // 3. ส่งข้อมูลกลับส่งข้อมูลกลับไปให้ Frontend
     return res.json({
       success: true,
       data: fortune
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+// GET /api/siemsee/fortunes
+router.get('/fortunes', async (req: Request, res: Response) => {
+  try {
+    const allFortunes = await db.select().from(fortunes);
+
+    return res.json({
+      success: true,
+      total: allFortunes.length,
+      data: allFortunes
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+// GET /api/siemsee/number/:number
+router.get('/:number', async (req: Request, res: Response) => {
+  try {
+    const fortuneNumber = Number(req.params.number);
+
+    if (isNaN(fortuneNumber)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุเลขใบเซียมซีเป็นตัวเลข' });
+    }
+
+    const fortuneList = await db
+      .select()
+      .from(fortunes)
+      .where(eq(fortunes.number, fortuneNumber));
+
+    if (fortuneList.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `ไม่พบข้อมูลใบเซียมซีหมายเลข ${fortuneNumber}`
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: fortuneList[0]
     });
   } catch (error) {
     console.error(error);
