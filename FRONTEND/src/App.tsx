@@ -7,6 +7,8 @@ import Siemsee from './pages/Siemsee';
 import Calendar from './pages/Calendar';
 import UserProfile from './pages/userProfile';
 import BottomNav from './components/BottomNav';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
             <Route path="/siemsee" element={<Siemsee />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/profile" element={<UserProfile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           </Routes>
         </main>
       </div>
