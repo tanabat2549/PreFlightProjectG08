@@ -1,16 +1,57 @@
+version: "3.8"
+
 services:
+  proxy:
+    image: nginx:alpine
+    container_name: khorsuanboon-proxy
+    restart: always
+    ports:
+      - "6008:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
   db:
     image: postgres:16-alpine
     container_name: khorsuanboon-db
     restart: always
     environment:
       POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: '5678'
+      POSTGRES_PASSWORD: "5678"
       POSTGRES_DB: khorsuanboon_db
     ports:
       - "5432:5432"
     volumes:
       - khorsuanboon_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d khorsuanboon_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./BACKEND
+    container_name: khorsuanboon-backend
+    restart: always
+    environment:
+      PORT: 3001
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_APP_USER: appuser
+      POSTGRES_APP_PASSWORD: "5678"
+      POSTGRES_DB: khorsuanboon_db
+      DATABASE_URL: "postgres://appuser:5678@db:5432/khorsuanboon_db"
+      JWT_SECRET: "khorsuanboon_super_secret_key_2026"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./FRONTEND
+    container_name: khorsuanboon-frontend
+    restart: always
 
 volumes:
   khorsuanboon_pgdata:

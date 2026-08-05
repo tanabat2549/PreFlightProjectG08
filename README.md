@@ -65,30 +65,6 @@
 
 ---
 
-## 🚀 ขั้นตอนการเปิดรันโปรเจกต์ (Quick Start)
-
-### 1. เปิด Database
-```bash
-docker compose up -d
-
-
-##เปิดตาราง Table 
-1.npx drizzle-kit studio  ที่BACKEND
-
-### 2. รัน Backend (Terminal 1)
-
-cd BACKEND
-npm install
-npm run db:push
-npm run dev
-
-
-###3. รัน Frontend (Terminal 2)
-
-cd FRONTEND
-npm install
-npm run dev
-
 
 🎨 สเปกโทนสีของแอป (Design Tokens)
 สีทองนวล (Primary Gold): #C9A03D

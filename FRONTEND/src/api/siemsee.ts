@@ -72,7 +72,7 @@ export async function drawFortune(): Promise<Fortune> {
   }
 
   try {
-    const response = await api.get<APIResponse<Fortune>>('/api/siemsee/draw');
+    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw');
     const { success, data, message } = response.data;
 
     if (!success || !data) {
