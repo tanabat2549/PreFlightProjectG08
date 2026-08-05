@@ -1,32 +1,32 @@
-// index.ts (backend)
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 
 import siemseeRouter from './routes/siemseebackend.js';
-import authRouter from './routes/LoginBackend.js'
+import authRouter from './routes/LoginBackend.js';
+// 🟢 1. Import Router ดวงและปฏิทินกลับเข้ามา
+import horoscopeRouter from './routes/horoscopebackend.js';
+import calendarRouter from './routes/calendarbackend.js';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// 🟢 รายการ URL ที่อนุญาตให้ยิงมาหา Backend
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://fsg08.cpecmu.com',
-  process.env.CORS_ORIGIN // ดึงจาก .env เพิ่มเติม (ถ้ามี)
+  process.env.CORS_ORIGIN
 ].filter(Boolean) as string[];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // อนุญาตหากยิงมาจาก allowedOrigins หรือกรณีไม่มี origin (เช่น Postman / Server-to-Server)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // หรือ callback(new Error('Not allowed by CORS'))
+        callback(null, true);
       }
     },
     credentials: true,
@@ -37,9 +37,11 @@ app.use(
 
 app.use(express.json());
 
-// Routes
+// 🟢 2. เรียกใช้งาน Routes ให้ครบ
 app.use('/api/siemsee', siemseeRouter);
-app.use('/api', authRouter)
+app.use('/api', authRouter);
+app.use('/api/horoscope', horoscopeRouter);
+app.use('/api/calendar', calendarRouter);
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
@@ -48,4 +50,3 @@ app.get('/health', (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });
-
