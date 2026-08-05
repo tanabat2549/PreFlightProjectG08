@@ -1,8 +1,10 @@
 // index.ts (backend)
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+
 import siemseeRouter from './routes/siemseebackend.js';
+import authRouter from './routes/LoginBackend.js'
 
 dotenv.config();
 
@@ -13,7 +15,7 @@ const port = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'http://fgs08.cpecmu.com',
+  'http://fsg08.cpecmu.com',
   process.env.CORS_ORIGIN // ดึงจาก .env เพิ่มเติม (ถ้ามี)
 ].filter(Boolean) as string[];
 
@@ -37,6 +39,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/siemsee', siemseeRouter);
+app.use('/api', authRouter)
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
@@ -45,3 +48,4 @@ app.get('/health', (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });
+

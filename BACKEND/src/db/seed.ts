@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { sql } from 'drizzle-orm';
 import { dbClient as db } from './client.js';
 import { fortunes } from './schema.js';
 
@@ -6,8 +7,9 @@ async function seed() {
   console.log('🌱 กำลังหยอดข้อมูลเซียมซี 17 ใบลง Database...');
 
   try {
-    // ล้างข้อมูลเก่าก่อน
-    await db.delete(fortunes);
+  // RESTART IDENTITY: สั่งให้รีเซ็ต ID กลับไปเริ่มที่ 1
+    // CASCADE: สั่งให้ลบข้อมูลในตารางอื่นที่เชื่อมกับใบเซียมซีพวกนี้ด้วย (เช่น ประวัติการเขย่าเก่าๆ) เพื่อป้องกัน Error
+    await db.execute(sql`TRUNCATE TABLE fortunes RESTART IDENTITY CASCADE`);
 
     // หยอดข้อมูลเซียมซี 17 ใบ (ฉบับกระชับ)
     await db.insert(fortunes).values([
