@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './BottomNav.css';
 
@@ -17,9 +18,44 @@ const navItems = [
 
 export default function BottomNav() {
   const location = useLocation();
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    // 1. ตรวจจับการ scroll (เลื่อนลง = ซ่อน, เลื่อนขึ้น = แสดง)
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        setHidden(true); // เลื่อนลง -> ซ่อน
+      } else {
+        setHidden(false); // เลื่อนขึ้น -> แสดง
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    // 2. ตรวจจับการแตะหน้าจอเพื่อ Toggle สลับ ซ่อน / แสดง
+    const handleTouchOrClick = (e: MouseEvent | TouchEvent) => {
+      // ถ้ากดที่ตัว Navbar เอง ไม่ต้องทำอะไร
+      const target = e.target as HTMLElement;
+      if (target.closest('.bottom-nav')) return;
+
+      // แตะ 1 ครั้ง = สลับสถานะ (ถ้าแสดงอยู่จะซ่อน / ถ้าซ่อนอยู่จะกลับขึ้นมา)
+      setHidden((prev) => !prev);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('click', handleTouchOrClick);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('click', handleTouchOrClick);
+    };
+  }, []);
 
   return (
-    <nav className="bottom-nav">
+    <nav className={`bottom-nav ${hidden ? 'nav-hidden' : ''}`}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
 

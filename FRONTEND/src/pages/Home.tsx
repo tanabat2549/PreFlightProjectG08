@@ -5,7 +5,7 @@ export default function Home() {
     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '20px', margin: 0, color: 'var(--primary-red)' }}>สวัสดีตอนเช้า ☀️</h2>
+          <h2 style={{ fontSize: '20px', margin: 0, color: 'var(--text-red)'}}>สวัสดีตอนเช้า ☀️</h2>
           <p style={{ color: 'var(--text-sub)', fontSize: '14px', margin: '4px 0 0' }}>ขอให้วันนี้เป็นวันที่ดีและมีบุญ</p>
         </div>
         <div className="temple-stamp" style={{ width: '48px', height: '48px', fontSize: '11px' }}>
