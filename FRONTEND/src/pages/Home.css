@@ -1,0 +1,251 @@
+/* ===================================================
+   1. สไตล์สำหรับหน้าจอมือถือ (Mobile / Default)
+   =================================================== */
+.home-container {
+  padding: 20px 16px 90px; /* เพิ่ม Padding ล่างเผื่อ Navbar */
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+  box-sizing: border-box;
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-text h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--sms-maroon-deep, #430E17);
+}
+
+.header-text p {
+  color: var(--sms-sub, #7A6B58);
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+.temple-stamp {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px dashed var(--sms-gold, #D4AF37);
+  background: rgba(212, 175, 55, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sms-maroon, #7A1C28);
+  box-sizing: border-box;
+}
+
+.home-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Daily Siemsee Card */
+.siemsee-banner {
+  position: relative;
+  background: #FFFDF5;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.banner-badge {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: var(--sms-gold, #D4AF37);
+  color: #FFF;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.banner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.banner-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.banner-content h3 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  color: var(--sms-maroon-deep, #430E17);
+}
+
+.banner-content p {
+  font-size: 13px;
+  color: var(--sms-sub, #7A6B58);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.btn-siemsee {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  background: var(--sms-gold, #D4AF37);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+/* Nearby Temples Section */
+.temples-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  color: var(--sms-maroon-deep, #430E17);
+  margin: 0;
+}
+
+.link-more {
+  font-size: 12px;
+  color: var(--sms-gold, #D4AF37);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.temple-card {
+  background: #FFFFFF;
+  border: 1px solid #EFECE6;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.temple-img-wrapper {
+  width: 56px;
+  height: 56px;
+  background: #EAE5D9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.temple-info h4 {
+  font-size: 14px;
+  color: var(--sms-ink, #231B15);
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.temple-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--sms-sub, #7A6B58);
+}
+
+.temple-meta small {
+  color: #A09080;
+}
+
+
+/* ===================================================
+   2. สไตล์สำหรับหน้าจอคอมพิวเตอร์ (Desktop >= 768px)
+   =================================================== */
+@media (min-width: 768px) {
+  .home-container {
+    /* จำกัดความกว้างให้อยู่ตรงกลางพอดีกับ BottomNav บนจอคอม */
+    max-width: 1200px;
+    padding: 32px 24px 100px;
+  }
+
+  .home-header {
+    margin-bottom: 8px;
+  }
+
+  .header-text h2 {
+    font-size: 24px;
+  }
+
+  .header-text p {
+    font-size: 15px;
+  }
+
+  /* ปรับการจัดวางเป็น 2 คอลัมน์คู่กันเมื่อดูบนจอคอม */
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .siemsee-banner {
+    padding: 32px 24px 24px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .banner-icon {
+    font-size: 40px;
+  }
+
+  .banner-content h3 {
+    font-size: 20px;
+  }
+
+  .banner-content p {
+    font-size: 14px;
+  }
+
+  .temple-card {
+    padding: 16px;
+  }
+
+  .temple-img-wrapper {
+    width: 68px;
+    height: 68px;
+    font-size: 30px;
+  }
+
+  .temple-info h4 {
+    font-size: 16px;
+  }
+
+  .temple-meta {
+    font-size: 13px;
+  }
+}
