@@ -9,6 +9,11 @@ const router = Router();
 // GET /api/siemsee/draw
 router.get('/draw', async (req: Request, res: Response) => {
   try {
+    // 🚫 ป้องกันไม่ให้ browser/proxy แคช response นี้ (ต้องสุ่มใหม่ทุกครั้ง)
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     // ให้ Database สุ่มรายการมา 1 รายการโดยตรง (ใช้ได้กับ Postgres, MySQL, SQLite)
     const fortuneList = await db
       .select()

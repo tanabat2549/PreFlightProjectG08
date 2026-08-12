@@ -1,7 +1,7 @@
 export default function Temple() {
   return (
     <div style={{ padding: '20px' }}>
-      <h2 style={{ color: 'var(--primary-red)', marginBottom: '16px' }}>🔍 ค้นหาวัดใกล้คุณ</h2>
+      <h2 style={{ color: 'var(--text-red)', marginBottom: '16px' }}>🔍 ค้นหาวัดใกล้คุณ</h2>
       <input
         type="text"
         placeholder="ค้นหาวัด, จังหวัด, ชื่อวัตถุมงคล..."

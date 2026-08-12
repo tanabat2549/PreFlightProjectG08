@@ -11,6 +11,7 @@ import calendarRouter from './routes/calendarbackend.js';
 dotenv.config();
 
 const app = express();
+app.disable('etag');
 const port = process.env.PORT || 3001;
 
 const allowedOrigins = [

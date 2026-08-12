@@ -1,7 +1,7 @@
 export default function Calendar() {
   return (
     <div style={{ padding: '20px' }}>
-      <h2 style={{ color: 'var(--primary-red)', marginBottom: '16px' }}>📅 ปฏิทินวันพระ / วันมงคล</h2>
+      <h2 style={{ color: 'var(--text-red)', marginBottom: '16px' }}>📅 ปฏิทินวันพระ / วันมงคล</h2>
       <div className="talisman-card">
         <h3 style={{ fontSize: '16px', margin: '0 0 8px', color: 'var(--primary-gold)' }}>🌕 วันพระถัดไป</h3>
         <p style={{ margin: '0 0 8px', color: 'var(--primary-red)', fontWeight: 'bold', fontSize: '18px' }}>วันขึ้น ๑๕ ค่ำ เดือน ๘</p>
