@@ -37,7 +37,7 @@ export default function Home() {
 
         <div className="temple-card">
           <div className="temple-img-wrapper">
-            🏛️
+            🔔
           </div>
           <div className="temple-info">
             <h4>วัดพระธาตุดอยสุเทพ</h4>

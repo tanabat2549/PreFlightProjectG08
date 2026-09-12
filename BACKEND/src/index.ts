@@ -5,6 +5,7 @@ import cors from 'cors';
 
 import siemseeRouter from './routes/siemseebackend.js';
 import authRouter from './routes/LoginBackend.js'
+import calendarRouter from './routes/calendarbackend.js';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3001;
 // 🟢 รายการ URL ที่อนุญาตให้ยิงมาหา Backend
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000',
   'http://fsg08.cpecmu.com',
   process.env.CORS_ORIGIN // ดึงจาก .env เพิ่มเติม (ถ้ามี)
@@ -41,6 +43,7 @@ app.use(express.json());
 // Routes
 app.use('/api/siemsee', siemseeRouter);
 app.use('/api', authRouter)
+app.use('/api/calendar', calendarRouter);
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
