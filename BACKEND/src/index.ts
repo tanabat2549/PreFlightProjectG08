@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 
 import siemseeRouter from './routes/siemseebackend.js';
 import authRouter from './routes/LoginBackend.js';
-// 🟢 1. Import Router ดวงและปฏิทินกลับเข้ามา
 import horoscopeRouter from './routes/horoscopebackend.js';
 import calendarRouter from './routes/calendarbackend.js';
+import templeRouter from './routes/templebackend.js';
 
-dotenv.config();
 
 const app = express();
 app.disable('etag');
@@ -37,12 +37,11 @@ app.use(
 );
 
 app.use(express.json());
-
-// 🟢 2. เรียกใช้งาน Routes ให้ครบ
 app.use('/api/siemsee', siemseeRouter);
 app.use('/api', authRouter);
 app.use('/api/horoscope', horoscopeRouter);
 app.use('/api/calendar', calendarRouter);
+app.use('/api/temples', templeRouter);
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
