@@ -10,16 +10,12 @@ export default function Home() {
           <h2>สวัสดีตอนเช้า ☀️</h2>
           <p>ขอให้วันนี้เป็นวันที่ดีและมีบุญ</p>
         </div>
-        <div className="temple-stamp">
-          <span>วัดไทย</span>
-        </div>
       </header>
 
       {/* Hero Daily Siemsee Card */}
       <section className="siemsee-banner">
         <div className="banner-badge">แนะนำประจำวัน</div>
         <div className="banner-content">
-          <div className="banner-icon">🥠</div>
           <h3>เซียมซีประจำวัน</h3>
           <p>เสี่ยงทายโชคชะตาประจำวันนี้เพื่อรับคำแนะนำและข้อคิดในการดำเนินชีวิต</p>
           <Link to="/siemsee" className="btn-siemsee">
