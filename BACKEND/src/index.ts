@@ -6,6 +6,7 @@ import cors from 'cors';
 import siemseeRouter from './routes/siemseebackend.js';
 import authRouter from './routes/LoginBackend.js'
 import calendarRouter from './routes/calendarbackend.js';
+import templeRouter from './routes/templebackend.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use(express.json());
 app.use('/api/siemsee', siemseeRouter);
 app.use('/api', authRouter)
 app.use('/api/calendar', calendarRouter);
+app.use('/api/temples', templeRouter);
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
