@@ -6,6 +6,64 @@ import { sql } from "drizzle-orm";
 
 const router = Router();
 
+// Helper สำหรับแปลง recommendedActivities จาก JSON String เป็น Array ป้องกัน Frontend พัง
+function formatDayItem(day: any) {
+  let activities = [];
+  if (typeof day.recommendedActivities === "string") {
+    try {
+      activities = JSON.parse(day.recommendedActivities);
+    } catch {
+      activities = [];
+    }
+  } else if (Array.isArray(day.recommendedActivities)) {
+    activities = day.recommendedActivities;
+  }
+
+  return {
+    ...day,
+    recommendedActivities: activities,
+  };
+}
+
+// GET /api/calendar/next
+router.get("/next", async (req, res) => {
+  try {
+    // รับวันที่ที่ส่งมาจาก Frontend ถ้าไม่มีให้ใช้เวลาไทยปัจจุบัน
+    const clientToday = req.query.today as string;
+    let today = clientToday;
+
+    if (!today) {
+      const now = new Date();
+      const thaiDateFormatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Bangkok",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      today = thaiDateFormatter.format(now);
+    }
+
+    const nextDay = await db
+      .select()
+      .from(auspiciousDays)
+      .where(sql`${auspiciousDays.date}::date >= ${today}::date`)
+      .orderBy(sql`${auspiciousDays.date} ASC`)
+      .limit(1);
+
+    if (!nextDay.length) {
+      return res.status(404).json({ success: false, message: "ไม่พบข้อมูลวันพระถัดไป" });
+    }
+
+    return res.json({
+      success: true,
+      data: formatDayItem(nextDay[0]),
+    });
+  } catch (error) {
+    console.error("Fetch Next Buddha Day Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // GET /api/calendar/auspicious-days?month=8&year=2026
 router.get("/auspicious-days", async (req, res) => {
   try {
