@@ -9,102 +9,158 @@
   --sms-sub: #7A6B58;
 }
 
+/* ================= CONTAINER หลัก จัดกึ่งกลางจอ 100% ================= */
 .container {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto !important;
+  margin-right: auto !important;
   min-height: 100vh;
-  background-color: var(--sms-paper);
   color: var(--sms-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Sarabun", "Segoe UI", sans-serif;
+  font-family: 'Kanit', 'Noto Sans Thai', -apple-system, sans-serif;
   box-sizing: border-box;
+  padding: 0 16px;
 }
 
 /* ================= LIST PAGE ================= */
 .listView {
-  padding: 24px 16px 100px;
+  width: 100%;
+  padding: 24px 0 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* จัดเนื้อหา header ให้อยู่กึ่งกลาง */
+  box-sizing: border-box;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.headerIconBadge {
+  width: 52px;
+  height: 52px;
+  background: #FFFDF5;
+  border: 1.5px solid var(--sms-gold);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.18);
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--sms-maroon);
+  color: var(--sms-maroon-deep);
   margin: 0 0 6px;
-  letter-spacing: 0.5px;
 }
 
 .subtitle {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: var(--sms-sub);
   margin: 0;
 }
 
+/* Search Bar Box */
 .searchWrapper {
-  margin-bottom: 12px;
+  width: 100%;
+  max-width: 580px;
+  margin-bottom: 14px;
 }
 
-.searchInput {
-  width: 100%;
-  padding: 13px 18px;
-  font-size: 0.95rem;
-  color: var(--sms-ink);
-  background-color: #FFFFFF;
-  border: 1px solid var(--sms-paper-deep);
-  border-radius: 25px;
-  outline: none;
-  box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(67, 14, 23, 0.04);
+.searchBarBox {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1.5px solid var(--sms-paper-deep);
+  border-radius: 30px;
+  padding: 5px 8px 5px 18px;
+  box-shadow: 0 3px 12px rgba(67, 14, 23, 0.05);
   transition: all 0.2s ease;
 }
 
-.searchInput:focus {
+.searchBarBox:focus-within {
   border-color: var(--sms-gold);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: var(--sms-ink);
+  background: transparent;
+  padding: 8px 0;
+}
+
+.searchBtn {
+  background: var(--sms-maroon);
+  color: #FFFFFF;
+  border: none;
+  outline: none;
+  padding: 9px 22px;
+  border-radius: 22px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.searchBtn:hover {
+  background: var(--sms-maroon-deep);
 }
 
 .filterBar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
 .primaryButton {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
+  padding: 8px 20px;
   border-radius: 20px;
-  border: none;
-  background-color: var(--sms-maroon);
-  color: #FFFFFF;
-  font-size: 0.86rem;
-  font-weight: 500;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--sms-gold);
+  color: var(--sms-maroon);
+  font-size: 0.88rem;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(67, 14, 23, 0.15);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
   transition: all 0.2s ease;
 }
 
 .primaryButton:hover {
-  background-color: var(--sms-maroon-deep);
+  background-color: #FFFDF5;
+  transform: translateY(-1px);
 }
 
 .statusMessage {
   text-align: center;
   padding: 30px 16px;
   color: var(--sms-sub);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
 }
 
 .errorMessage {
   text-align: center;
-  padding: 12px 16px;
+  padding: 12px 20px;
   background-color: rgba(122, 28, 40, 0.08);
   color: var(--sms-maroon);
   border-radius: 12px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   margin-bottom: 16px;
 }
 
@@ -114,33 +170,87 @@
   color: var(--sms-sub);
 }
 
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--sms-paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* ================= GRID รายการวัด ================= */
 .listContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  box-sizing: border-box;
 }
 
 .templeCard {
   background: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 16px;
   border: 1px solid var(--sms-paper-deep);
-  box-shadow: 0 2px 8px rgba(67, 14, 23, 0.04);
+  box-shadow: 0 3px 12px rgba(67, 14, 23, 0.04);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .templeCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(67, 14, 23, 0.08);
+  box-shadow: 0 8px 20px rgba(67, 14, 23, 0.09);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.templeCardContent {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.templeThumb {
+  width: 86px;
+  height: 86px;
+  min-width: 86px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid var(--sms-paper-deep);
+  background-color: #FAF7F2;
+}
+
+.templeThumbPlaceholder {
+  width: 86px;
+  height: 86px;
+  min-width: 86px;
+  border-radius: 14px;
+  background: #FAF7F2;
+  border: 1px dashed var(--sms-paper-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.templeCardInfo {
+  flex: 1;
+  min-width: 0; /* สำคัญมาก ป้องกันไม่ให้การ์ดยืดล้นขวา */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 4px;
+  align-items: center;
+  gap: 8px;
 }
 
 .templeName {
@@ -148,23 +258,39 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--sms-maroon-deep);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .distanceBadge {
-  background-color: var(--sms-paper-deep);
+  background-color: #FFF9ED;
+  border: 1px solid var(--sms-gold);
   color: var(--sms-maroon);
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 0.76rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .addressText {
-  margin: 0 0 10px;
-  font-size: 0.84rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--sms-sub);
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addressText span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardFooter {
@@ -172,19 +298,20 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 8px;
-  border-top: 1px solid var(--sms-paper);
+  margin-top: 4px;
+  border-top: 1px solid #F9F6F0;
 }
 
 .ratingRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 0.85rem;
 }
 
 .starScore {
-  color: var(--sms-gold);
-  font-weight: 600;
+  color: var(--sms-maroon);
+  font-weight: 700;
 }
 
 .reviewCount {
@@ -193,15 +320,20 @@
 }
 
 .viewDetailText {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--sms-maroon);
   font-size: 0.84rem;
   font-weight: 600;
 }
 
-/* ================= DETAIL PAGE (หน้าเต็มจอ) ================= */
+/* ================= DETAIL PAGE ================= */
 .detailView {
-  padding-bottom: 100px;
+  width: 100%;
+  padding: 24px 0 120px;
   animation: fadeIn 0.25s ease-in-out;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -209,12 +341,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Hero Section */
 .heroContainer {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 320px;
+  border-radius: 20px;
+  overflow: hidden;
   background-color: var(--sms-paper-deep);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
 .heroImage {
@@ -240,35 +374,43 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(4px);
-  border: none;
-  padding: 8px 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  padding: 8px 18px;
   border-radius: 20px;
   color: var(--sms-maroon);
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
   z-index: 10;
+  transition: all 0.2s;
 }
 
-/* Content Body */
+.backButton:hover {
+  background: #FFFFFF;
+  transform: translateX(-2px);
+}
+
 .detailBody {
-  padding: 20px 16px;
+  padding: 24px 4px;
 }
 
 .detailTitle {
-  margin: 0 0 6px;
-  font-size: 1.45rem;
+  margin: 0 0 8px;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--sms-maroon-deep);
 }
 
 .detailAddress {
-  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
   color: var(--sms-sub);
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   line-height: 1.45;
 }
 
@@ -278,10 +420,11 @@
   justify-content: space-between;
   gap: 12px;
   background: #FFFFFF;
-  padding: 12px 16px;
-  border-radius: 14px;
+  padding: 16px 20px;
+  border-radius: 16px;
   border: 1px solid var(--sms-paper-deep);
   margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(67, 14, 23, 0.03);
 }
 
 .navigateButton {
@@ -291,58 +434,74 @@
   background-color: #1A73E8;
   color: #FFFFFF;
   text-decoration: none;
-  padding: 8px 16px;
+  padding: 9px 18px;
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  transition: opacity 0.2s;
 }
 
-/* Reviews Feed */
+.navigateButton:hover {
+  opacity: 0.9;
+}
+
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: var(--sms-maroon);
+  color: var(--sms-maroon-deep);
 }
 
 .addReviewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background-color: var(--sms-maroon);
   color: #FFFFFF;
   border: none;
-  padding: 7px 14px;
-  border-radius: 16px;
-  font-size: 0.82rem;
+  padding: 8px 18px;
+  border-radius: 18px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* Review Form */
+.addReviewBtn:hover {
+  background-color: var(--sms-maroon-deep);
+}
+
 .reviewFormCard {
   background: #FFFFFF;
   border: 1px solid var(--sms-paper-deep);
   border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(67, 14, 23, 0.05);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(67, 14, 23, 0.05);
+}
+
+.formInput,
+.formTextarea,
+.selectBox {
+  border: 1px solid var(--sms-paper-deep);
+  background: #FAF7F2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--sms-ink);
+  outline: none;
+  box-sizing: border-box;
 }
 
 .formInput {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--sms-paper-deep);
-  background: var(--sms-paper);
-  font-size: 0.88rem;
-  color: var(--sms-ink);
-  outline: none;
-  box-sizing: border-box;
   margin-bottom: 10px;
 }
 
@@ -355,47 +514,29 @@
   color: var(--sms-sub);
 }
 
-.selectBox {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--sms-paper-deep);
-  background: var(--sms-paper);
-  font-size: 0.88rem;
-  color: var(--sms-ink);
-  outline: none;
-}
-
 .formTextarea {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--sms-paper-deep);
-  background: var(--sms-paper);
-  font-size: 0.88rem;
-  color: var(--sms-ink);
-  outline: none;
-  box-sizing: border-box;
   margin-bottom: 12px;
   resize: vertical;
 }
 
 .submitBtn {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background-color: var(--sms-maroon);
   color: #FFFFFF;
   border: none;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.submitBtn:disabled {
-  opacity: 0.6;
+.submitBtn:hover {
+  background-color: var(--sms-maroon-deep);
 }
 
-/* Reviews List */
 .reviewList {
   display: flex;
   flex-direction: column;
@@ -406,7 +547,8 @@
   background: #FFFFFF;
   border: 1px solid var(--sms-paper-deep);
   border-radius: 14px;
-  padding: 14px 16px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
 }
 
 .reviewHeader {
@@ -418,7 +560,7 @@
 
 .reviewerName {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--sms-ink);
 }
 
@@ -431,49 +573,50 @@
   color: var(--sms-maroon);
 }
 
+.starRow {
+  display: flex;
+  gap: 2px;
+}
+
 .reviewText {
   margin: 6px 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--sms-ink);
   line-height: 1.5;
 }
 
 .reviewDate {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--sms-sub);
 }
 
-/* การจัด Layout การ์ดวัดให้มีภาพ Thumbnail */
-.templeCardContent {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
+/* ================= DESKTOP RESPONSIVE (>= 768px) ================= */
+@media (min-width: 768px) {
+  .listContainer {
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์สมมาตร */
+    gap: 18px;
+  }
 
-.templeThumb {
-  width: 78px;
-  height: 78px;
-  min-width: 78px;
-  border-radius: 12px;
+  .templeName {
+    font-size: 1.1rem;
+  }
+
+  .addressText {
+    font-size: 0.88rem;
+  }
+
+  .heroContainer {
+    height: 380px;
+  }
+
+  .detailTitle {
+    font-size: 1.85rem;
+  }
+
+  .templeThumb {
+  width: 70px;
+  height: 70px;
   object-fit: cover;
-  border: 1px solid var(--sms-paper-deep);
-}
+  }
 
-.templeThumbPlaceholder {
-  width: 78px;
-  height: 78px;
-  min-width: 78px;
-  border-radius: 12px;
-  background-color: var(--sms-paper);
-  border: 1px dashed var(--sms-paper-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: var(--sms-sub);
-}
-
-.templeCardInfo {
-  flex: 1;
-  min-width: 0; /* ป้องกันข้อความล้น layout */
 }

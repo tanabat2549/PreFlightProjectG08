@@ -59,7 +59,7 @@ interface APIResponse<T> {
 
 // 🔧 สลับ true/false เพื่อใช้ mock data แทนของจริงตอนทำ UI
 // พร้อม integrate จริงเมื่อไหร่ ค่อยเปลี่ยนเป็น false
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

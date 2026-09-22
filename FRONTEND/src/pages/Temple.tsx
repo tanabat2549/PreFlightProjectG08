@@ -2,6 +2,64 @@ import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import styles from "./Temple.module.css";
 
+import iconTemple from '../assets/icon/iconTemple.png';
+
+// Minimal Clean SVG Icons (ไม่พึ่งพา third-party ลดปัญหา hook conflict)
+const Icons = {
+  Search: ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  ),
+  MapPin: ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  ),
+  Landmark: ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="2" x2="22" y1="22" y2="22" />
+      <line x1="12" x2="12" y1="2" y2="6" />
+      <path d="m2 6 10-4 10 4" />
+      <line x1="6" x2="6" y1="10" y2="18" />
+      <line x1="10" x2="10" y1="10" y2="18" />
+      <line x1="14" x2="14" y1="10" y2="18" />
+      <line x1="18" x2="18" y1="10" y2="18" />
+    </svg>
+  ),
+  Star: ({ size = 12, fill = "#D4AF37" }: { size?: number; fill?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={fill} strokeWidth="1">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  ),
+  ArrowLeft: ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" x2="5" y1="12" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+  ),
+  ArrowRight: ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" x2="19" y1="12" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  ),
+  Navigation: ({ size = 15, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="3 11 22 2 13 21 11 13 3 11" />
+    </svg>
+  ),
+  PenTool: ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 19l7-7 3 3-7 7-3-3z" />
+      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+      <circle cx="11" cy="11" r="2" />
+    </svg>
+  ),
+};
+
 interface TempleItem {
   id: string;
   name: string;
@@ -85,7 +143,7 @@ export default function Temple() {
     );
   };
 
-  // 2. ค้นหาวัดด้วยข้อความ (ค้นหาได้ทั่วไทย)
+  // 2. ค้นหาวัดด้วยข้อความ
   const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -182,8 +240,9 @@ export default function Temple() {
         /* DETAIL VIEW */
         <div className={styles.detailView}>
           <div className={styles.heroContainer}>
-            <button className={styles.backButton} onClick={() => setSelectedTemple(null)}>
-              ← ย้อนกลับ
+            <button type="button" className={styles.backButton} onClick={() => setSelectedTemple(null)}>
+              <Icons.ArrowLeft size={16} />
+              <span>ย้อนกลับ</span>
             </button>
             {selectedTemple.imageUrl ? (
               <img
@@ -193,19 +252,23 @@ export default function Temple() {
               />
             ) : (
               <div className={styles.heroPlaceholder}>
-                <span style={{ fontSize: "3rem", marginBottom: "6px" }}>🏛️</span>
-                <span>ไม่มีรูปภาพตัวอย่าง</span>
+                <Icons.Landmark size={46} color="var(--sms-sub)" />
+                <span style={{ marginTop: 8 }}>ไม่มีรูปภาพตัวอย่าง</span>
               </div>
             )}
           </div>
 
           <div className={styles.detailBody}>
             <h1 className={styles.detailTitle}>{selectedTemple.name}</h1>
-            <p className={styles.detailAddress}>📍 {selectedTemple.address}</p>
+            <p className={styles.detailAddress}>
+              <Icons.MapPin size={14} color="var(--sms-gold)" />
+              <span>{selectedTemple.address}</span>
+            </p>
 
             <div className={styles.navRow}>
               <div className={styles.ratingRow}>
-                <span className={styles.starScore}>★ {selectedTemple.rating || "-"}</span>
+                <Icons.Star size={16} fill="var(--sms-gold)" />
+                <span className={styles.starScore}>{selectedTemple.rating || "-"}</span>
                 <span className={styles.reviewCount}>({selectedTemple.userRatingCount} รีวิว)</span>
               </div>
               <a
@@ -214,7 +277,8 @@ export default function Temple() {
                 rel="noreferrer"
                 className={styles.navigateButton}
               >
-                นำทางด้วย Google Maps
+                <Icons.Navigation size={15} />
+                <span>นำทางด้วย Google Maps</span>
               </a>
             </div>
 
@@ -223,10 +287,12 @@ export default function Temple() {
                 รีวิวทั้งหมด ({selectedTemple.reviews?.length || 0})
               </h2>
               <button
+                type="button"
                 className={styles.addReviewBtn}
                 onClick={() => setShowReviewForm(!showReviewForm)}
               >
-                {showReviewForm ? "ปิดแบบฟอร์ม" : "เขียนรีวิว"}
+                <Icons.PenTool size={13} />
+                <span>{showReviewForm ? "ปิดแบบฟอร์ม" : "เขียนรีวิว"}</span>
               </button>
             </div>
 
@@ -250,11 +316,11 @@ export default function Temple() {
                     value={newRating}
                     onChange={(e) => setNewRating(Number(e.target.value))}
                   >
-                    <option value={5}>⭐⭐⭐⭐⭐ (5 ดาว)</option>
-                    <option value={4}>⭐⭐⭐⭐ (4 ดาว)</option>
-                    <option value={3}>⭐⭐⭐ (3 ดาว)</option>
-                    <option value={2}>⭐⭐ (2 ดาว)</option>
-                    <option value={1}>⭐ (1 ดาว)</option>
+                    <option value={5}>5 ดาว (ยอดเยี่ยม)</option>
+                    <option value={4}>4 ดาว (ดีมาก)</option>
+                    <option value={3}>3 ดาว (ปานกลาง)</option>
+                    <option value={2}>2 ดาว (พอใช้)</option>
+                    <option value={1}>1 ดาว (ควรปรับปรุง)</option>
                   </select>
                 </div>
 
@@ -282,7 +348,11 @@ export default function Temple() {
                         <span className={styles.reviewerName}>{rev.author}</span>
                         {rev.source && <span className={styles.sourceBadge}>{rev.source}</span>}
                       </div>
-                      <span className={styles.starScore}>{"★".repeat(rev.rating)}</span>
+                      <div className={styles.starRow}>
+                        {Array.from({ length: rev.rating || 5 }).map((_, i) => (
+                          <Icons.Star key={i} size={11} fill="var(--sms-gold)" />
+                        ))}
+                      </div>
                     </div>
                     <p className={styles.reviewText}>{rev.text || "ไม่มีข้อความรีวิว"}</p>
                     <span className={styles.reviewDate}>{rev.relativeTime}</span>
@@ -297,22 +367,26 @@ export default function Temple() {
       ) : (
         /* LIST VIEW */
         <div className={styles.listView}>
+  <img src={iconTemple} alt="วัด" className="templeThumb"/>
           <header className={styles.header}>
-            <h2 className={styles.title}>ค้นหาวัด</h2>
-            <p className={styles.subtitle}>ค้นหาวัดรอบตัวคุณ หรือพิมพ์ค้นหาวัดทั่วประเทศ</p>
-          </header>
+  <h2 className={styles.title}>ค้นหาวัด</h2>
+  <p className={styles.subtitle}>ค้นหาวัดรอบตัวคุณ หรือพิมพ์ค้นหาวัดทั่วประเทศ</p>
+</header>
 
           {/* Form ค้นหาด้วยคีย์เวิร์ด */}
           <form onSubmit={handleSearchSubmit} className={styles.searchWrapper}>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className={styles.searchBarBox}>
+              <span className={styles.searchIcon}>
+                <Icons.Search size={17} color="var(--sms-sub)" />
+              </span>
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="พิมพ์ชื่อวัด ..."
+                placeholder="พิมพ์ชื่อวัด หรือสถานที่..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button type="submit" className={styles.primaryButton} style={{ borderRadius: "25px", whiteSpace: "nowrap" }}>
+              <button type="submit" className={styles.searchBtn}>
                 ค้นหา
               </button>
             </div>
@@ -327,7 +401,8 @@ export default function Temple() {
                 fetchNearbyTemples();
               }}
             >
-              📍 ใกล้ฉัน
+              <Icons.MapPin size={14} />
+              <span>ค้นหาวัดใกล้ฉัน</span>
             </button>
           </div>
 
@@ -336,7 +411,9 @@ export default function Temple() {
 
           {!loading && temples.length === 0 && !errorMsg && (
             <div className={styles.emptyState}>
-              <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "8px" }}>🏛️</span>
+              <div className={styles.emptyIcon}>
+                <Icons.Landmark size={36} color="var(--sms-sub)" />
+              </div>
               <p>ไม่พบข้อมูลวัด ลองเปลี่ยนคำค้นหาใหม่</p>
             </div>
           )}
@@ -360,7 +437,9 @@ export default function Temple() {
                       }}
                     />
                   ) : (
-                    <div className={styles.templeThumbPlaceholder}>🏛️</div>
+                    <div className={styles.templeThumbPlaceholder}>
+                      <Icons.Landmark size={28} color="var(--sms-gold)" />
+                    </div>
                   )}
 
                   <div className={styles.templeCardInfo}>
@@ -372,15 +451,20 @@ export default function Temple() {
                     </div>
 
                     <p className={styles.addressText}>
-                      📍 {temple.address || "ไม่มีข้อมูลที่อยู่"}
+                      <Icons.MapPin size={12} color="var(--sms-sub)" />
+                      <span>{temple.address || "ไม่มีข้อมูลที่อยู่"}</span>
                     </p>
 
                     <div className={styles.cardFooter}>
                       <div className={styles.ratingRow}>
-                        <span className={styles.starScore}>★ {temple.rating || "-"}</span>
+                        <Icons.Star size={13} fill="var(--sms-gold)" />
+                        <span className={styles.starScore}>{temple.rating || "-"}</span>
                         <span className={styles.reviewCount}>({temple.userRatingCount} รีวิว)</span>
                       </div>
-                      <span className={styles.viewDetailText}>ดูรายละเอียด →</span>
+                      <span className={styles.viewDetailText}>
+                        <span>ดูรายละเอียด</span>
+                        <Icons.ArrowRight size={13} />
+                      </span>
                     </div>
                   </div>
                 </div>
