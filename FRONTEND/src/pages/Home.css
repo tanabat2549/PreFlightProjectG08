@@ -1,251 +1,736 @@
-/* ===================================================
-   1. สไตล์สำหรับหน้าจอมือถือ (Mobile / Default)
-   =================================================== */
+:root {
+  --sms-maroon-dark: #3A0C14;
+  --sms-maroon: #6B1724;
+  --sms-gold: #C99726;
+  --sms-gold-light: #FBF4E4;
+  --sms-gold-border: rgba(201, 151, 38, 0.35);
+  --sms-text-main: #261D1A;
+  --sms-text-sub: #75675E;
+  --sms-bg-soft: #F9F7F2;
+  --sms-card-bg: #FFFFFF;
+  --sms-shadow-soft: 0 4px 20px rgba(67, 14, 23, 0.05);
+  --sms-shadow-hover: 0 8px 24px rgba(67, 14, 23, 0.08);
+}
+
 .home-container {
-  padding: 20px 16px 90px; /* เพิ่ม Padding ล่างเผื่อ Navbar */
   width: 100%;
-  max-width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 16px 16px 110px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
   box-sizing: border-box;
+  font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+  color: var(--sms-text-main);
 }
 
+.text-gold-icon {
+  color: var(--sms-gold);
+}
+
+/* Header */
 .home-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 2px;
+}
+
+.header-greeting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-circle {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #FBF4E4, #EFE2BE);
+  border: 1.5px solid var(--sms-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(201, 151, 38, 0.2);
+  flex-shrink: 0;
 }
 
 .header-text h2 {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
-  color: var(--sms-maroon-deep, #430E17);
+  color: var(--sms-maroon-dark);
 }
 
-.header-text p {
-  color: var(--sms-sub, #7A6B58);
+.sub-greeting {
+  font-size: 13px;
+  color: var(--sms-text-sub);
+  margin: 2px 0 0;
+}
+
+.merit-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--sms-gold-border);
+  padding: 6px 14px;
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.merit-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.merit-label {
+  font-size: 10px;
+  color: var(--sms-text-sub);
+  font-weight: 500;
+}
+
+.merit-value {
   font-size: 14px;
-  margin: 4px 0 0;
+  font-weight: 700;
+  color: var(--sms-maroon);
 }
 
-.temple-stamp {
-  width: 48px;
-  height: 48px;
+/* Digital Sanctuary Hero */
+.sanctuary-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4A121B 0%, #2A090F 100%);
+  border-radius: 20px;
+  padding: 24px 20px;
+  color: #FFFFFF;
+  box-shadow: 0 10px 24px rgba(58, 12, 20, 0.18);
+}
+
+.hero-glow-bg {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0) 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.daily-quote-tag {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  padding: 3px 10px;
+  border-radius: 12px;
+  color: #F8E7BE;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hero-quote {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 4px 0 0;
+  color: #FFFFFF;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: #E2D3CC;
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.btn-altar-action {
+  background: linear-gradient(90deg, #D4AF37 0%, #F3D279 100%);
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #380C13;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
+  transition: all 0.25s ease;
+}
+
+.btn-altar-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.45);
+}
+
+.btn-altar-action.offered {
+  background: rgba(255, 255, 255, 0.16);
+  color: #F8E7BE;
+  box-shadow: none;
+}
+
+/* Lucky Bento Grid */
+.section-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title-wrap h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--sms-maroon-dark);
+  margin: 0;
+}
+
+.link-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sms-text-sub);
+  text-decoration: none;
+  background: var(--sms-bg-soft);
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #ECE7DF;
+  transition: all 0.2s;
+}
+
+.link-settings:hover {
+  color: var(--sms-maroon);
+}
+
+.lucky-bento-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.bento-card {
+  background: var(--sms-card-bg);
+  border: 1px solid #ECE7DF;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--sms-shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-top-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sms-text-sub);
+}
+
+.card-top-label span {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sms-bg-soft);
+  border: 1px solid #ECE7DF;
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+
+.color-pill.unlucky-pill {
+  background: #FFF5F5;
+  border-color: #FED7D7;
+}
+
+.color-indicator {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 1px dashed var(--sms-gold, #D4AF37);
-  background: rgba(212, 175, 55, 0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.color-desc {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.color-desc strong {
+  font-size: 12px;
+  color: var(--sms-text-main);
+}
+
+.color-desc small {
+  font-size: 10px;
+  color: var(--sms-text-sub);
+}
+
+.unlucky-pill strong {
+  color: #C53030;
+}
+
+.lucky-number-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lucky-gold-coin {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #FFFDF5, #F5E8C7);
+  border: 1.5px solid var(--sms-gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--sms-maroon, #7A1C28);
-  box-sizing: border-box;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sms-maroon);
+  box-shadow: 0 2px 6px rgba(201, 151, 38, 0.15);
 }
 
-.home-grid {
+.number-note {
+  font-size: 11px;
+  color: var(--sms-text-sub);
+  margin: 0;
+}
+
+.friend-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 4px;
 }
 
-/* Daily Siemsee Card */
-.siemsee-banner {
+.friend-badge {
+  display: inline-block;
+  background: #EBF8FF;
+  border: 1px solid #BEE3F8;
+  color: #2B6CB0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.friend-perk {
+  font-size: 13px;
+  color: var(--sms-text-main);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bento-card.bento-tip {
+  background: #FFFDF8;
+  border: 1px dashed var(--sms-gold-border);
+  gap: 12px;
+}
+
+.tip-left {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tip-icon-wrap {
+  width: 32px;
+  height: 32px;
+  background: rgba(201, 151, 38, 0.15);
+  color: var(--sms-gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tip-text {
+  font-size: 13px;
+  color: var(--sms-text-main);
+  margin: 4px 0 0;
+  line-height: 1.45;
+}
+
+.btn-find-temple {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sms-maroon);
+  background: rgba(201, 151, 38, 0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-find-temple:hover {
+  background: rgba(201, 151, 38, 0.25);
+}
+
+/* Dual Feature Cards */
+.dual-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.interactive-siemsee-card {
   position: relative;
-  background: #FFFDF5;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 16px;
-  padding: 24px 20px 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  background: linear-gradient(135deg, #FFFDF8 0%, #FAF4E6 100%);
+  border: 1px solid var(--sms-gold-border);
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: var(--sms-shadow-soft);
+  overflow: hidden;
 }
 
-.banner-badge {
+.siemsee-decor {
   position: absolute;
   top: 12px;
-  right: 16px;
-  background: var(--sms-gold, #D4AF37);
-  color: #FFF;
-  font-size: 11px;
-  font-weight: 500;
+  right: 14px;
+  color: var(--sms-gold);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.tag-popular {
+  display: inline-block;
+  background: var(--sms-maroon);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 600;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
 }
 
-.banner-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.banner-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
-}
-
-.banner-content h3 {
+.siemsee-body h3 {
   font-size: 18px;
+  font-weight: 700;
+  color: var(--sms-maroon-dark);
   margin: 0 0 6px;
-  color: var(--sms-maroon-deep, #430E17);
 }
 
-.banner-content p {
+.siemsee-body p {
   font-size: 13px;
-  color: var(--sms-sub, #7A6B58);
+  color: var(--sms-text-sub);
   margin: 0 0 16px;
-  line-height: 1.5;
+  line-height: 1.45;
+  max-width: 85%;
 }
 
-.btn-siemsee {
-  display: block;
-  width: 100%;
-  padding: 12px 0;
-  background: var(--sms-gold, #D4AF37);
+.btn-primary-glow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #D4AF37 0%, #C39222 100%);
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 600;
-  text-align: center;
-  text-decoration: none;
+  padding: 10px 20px;
   border-radius: 10px;
-  box-sizing: border-box;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
+  transition: all 0.2s;
 }
 
-/* Nearby Temples Section */
-.temples-section {
+.btn-primary-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.45);
+}
+
+.buddhist-calendar-card {
+  background: #FFFFFF;
+  border: 1px solid #ECE7DF;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: var(--sms-shadow-soft);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.section-header {
+.calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.section-header h3 {
-  font-size: 16px;
-  color: var(--sms-maroon-deep, #430E17);
-  margin: 0;
-}
-
-.link-more {
+.cal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
-  color: var(--sms-gold, #D4AF37);
-  text-decoration: none;
   font-weight: 600;
+  color: var(--sms-text-sub);
 }
 
-.temple-card {
-  background: #FFFFFF;
-  border: 1px solid #EFECE6;
-  border-radius: 12px;
-  padding: 12px;
+.cal-link, .link-more {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sms-gold);
+  text-decoration: none;
+}
+
+.calendar-content {
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  gap: 14px;
 }
 
-.temple-img-wrapper {
+.countdown-box {
   width: 56px;
   height: 56px;
-  background: #EAE5D9;
-  border-radius: 8px;
+  background: #FFF9ED;
+  border: 1.5px solid var(--sms-gold);
+  border-radius: 12px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   flex-shrink: 0;
 }
 
-.temple-info h4 {
-  font-size: 14px;
-  color: var(--sms-ink, #231B15);
-  margin: 0 0 4px;
-  font-weight: 600;
+.countdown-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sms-maroon);
+  line-height: 1;
 }
 
-.temple-meta {
+.countdown-unit {
+  font-size: 10px;
+  color: var(--sms-text-sub);
+}
+
+.upcoming-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sms-maroon-dark);
+  margin: 0 0 4px;
+}
+
+.upcoming-info p {
+  font-size: 12px;
+  color: var(--sms-text-sub);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Modern Temple Card */
+.temple-card-modern {
+  background: #FFFFFF;
+  border: 1px solid #ECE7DF;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--sms-shadow-soft);
+  transition: all 0.2s;
+}
+
+.temple-card-modern:hover {
+  box-shadow: var(--sms-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.temple-cover-avatar {
+  width: 54px;
+  height: 54px;
+  background: #F8F5EE;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #ECE7DF;
+}
+
+.temple-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.temple-title-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.temple-title-row h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sms-maroon-dark);
+  margin: 0;
+}
+
+.badge-highlight {
+  font-size: 10px;
+  background: rgba(201, 151, 38, 0.15);
+  color: var(--sms-maroon);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.temple-location {
   font-size: 12px;
-  color: var(--sms-sub, #7A6B58);
+  color: var(--sms-text-sub);
+  margin: 0;
 }
 
-.temple-meta small {
-  color: #A09080;
+.temple-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
 }
 
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  color: var(--sms-text-sub);
+  background: var(--sms-bg-soft);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
 
-/* ===================================================
-   2. สไตล์สำหรับหน้าจอคอมพิวเตอร์ (Desktop >= 768px)
-   =================================================== */
+.meta-tag.rating {
+  color: #B7791F;
+  font-weight: 600;
+}
+
+.meta-tag.highlight {
+  color: var(--sms-maroon);
+  background: #FFF5F5;
+  font-weight: 500;
+}
+
+.btn-direct-nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sms-bg-soft);
+  border: 1px solid #ECE7DF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sms-maroon);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-direct-nav:hover {
+  background: var(--sms-maroon);
+  color: #FFFFFF;
+}
+
+/* Desktop Breakpoints (>= 768px) */
 @media (min-width: 768px) {
   .home-container {
-    /* จำกัดความกว้างให้อยู่ตรงกลางพอดีกับ BottomNav บนจอคอม */
-    max-width: 1200px;
-    padding: 32px 24px 100px;
-  }
-
-  .home-header {
-    margin-bottom: 8px;
+    padding: 32px 24px 110px;
+    gap: 28px;
   }
 
   .header-text h2 {
     font-size: 24px;
   }
 
-  .header-text p {
-    font-size: 15px;
-  }
-
-  /* ปรับการจัดวางเป็น 2 คอลัมน์คู่กันเมื่อดูบนจอคอม */
-  .home-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  .siemsee-banner {
-    padding: 32px 24px 24px;
-    height: 100%;
-    box-sizing: border-box;
-  }
-
-  .banner-icon {
-    font-size: 40px;
-  }
-
-  .banner-content h3 {
-    font-size: 20px;
-  }
-
-  .banner-content p {
+  .sub-greeting {
     font-size: 14px;
   }
 
-  .temple-card {
-    padding: 16px;
+  .sanctuary-hero {
+    padding: 32px 28px;
   }
 
-  .temple-img-wrapper {
-    width: 68px;
-    height: 68px;
-    font-size: 30px;
+  .hero-quote {
+    font-size: 26px;
   }
 
-  .temple-info h4 {
-    font-size: 16px;
+  .lucky-bento-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
   }
 
-  .temple-meta {
-    font-size: 13px;
+  .bento-card.bento-colors {
+    grid-column: span 2;
+  }
+
+  .bento-card.bento-numbers {
+    grid-column: span 1;
+  }
+
+  .bento-card.bento-friend {
+    grid-column: span 1;
+  }
+
+  .bento-card.bento-tip {
+    grid-column: span 2;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn-find-temple {
+    align-self: center;
+  }
+
+  .dual-feature-grid {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+  }
+
+  .temple-card-modern {
+    padding: 18px 20px;
+  }
+
+  .templeThumb {
+  width: 50px;
+  height: 50px;
+  min-width: 10px;
+  
   }
 }

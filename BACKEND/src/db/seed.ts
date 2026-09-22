@@ -1,17 +1,596 @@
 import 'dotenv/config';
 import { sql } from 'drizzle-orm';
 import { dbClient as db } from './client.js';
-import { fortunes } from './schema.js';
+import { fortunes, auspiciousDays } from './schema.js';
+
+// ข้อมูลปฏิทินวันพระและวันมงคลตลอดปี 2569 (2026) ครบทั้ง 12 เดือน
+const auspiciousDaysData = [
+  // --- มกราคม 2569 ---
+  {
+    date: '2026-01-03',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๑',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕ / สมาธิ', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดมนต์ ฟังธรรม', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถวายสังฆทาน', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-01-11',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๒',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์บูชาพระ', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-01-18',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๒ (วันธงชัย)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-01-26',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๒',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'เจริญจิตตภาวนา', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดพระปริตร', category: 'chant', icon: '📜' },
+    ],
+  },
+
+  // --- กุมภาพันธ์ 2569 ---
+  {
+    date: '2026-02-02',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๒',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ถวายน้ำดื่ม/ผ้าไตร', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-02-10',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๓',
+    recommendedActivities: [
+      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์เช้า-เย็น', category: 'chant', icon: '📜' },
+      { id: '3', title: 'บำเพ็ญสาธารณประโยชน์', category: 'precept', icon: '✨' },
+    ],
+  },
+  {
+    date: '2026-02-17',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๓ (วันมาฆบูชา)',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาอุโบสถศีล', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ฟังเทศน์โอวาทปาติโมกข์', category: 'chant', icon: '📜' },
+      { id: '4', title: 'เวียนเทียนรอบอุโบสถ', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-02-25',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๓',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดพระพุทธคุณ', category: 'chant', icon: '📜' },
+    ],
+  },
+
+  // --- มีนาคม 2569 ---
+  {
+    date: '2026-03-04',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๓',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทานอุทิศ', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-03-12',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๔',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์บทกรณียเมตตสูตร', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ปล่อยนกปล่อยปลา', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-03-19',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๔',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถือศีล ๘ ตลอดวัน', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-03-27',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๔',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ไหว้พระประจำวันเกิด', category: 'chant', icon: '🙏' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+
+  // --- เมษายน 2569 ---
+  {
+    date: '2026-04-02',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๔ ค่ำ เดือน ๔',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายน้ำดื่มแด่พระสงฆ์', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'สวดมนต์บูชาคุณพระรัตนตรัย', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-04-10',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๕',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สรงน้ำพระพุทธรูป', category: 'offering', icon: '✨' },
+      { id: '3', title: 'เจริญสติตลอดวัน', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-04-17',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๕ (วันเถลิงศก/วันสงกรานต์)',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญปีใหม่ไทย ตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'บังสุกุลอุทิศบรรพบุรุษ', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ถวายผ้าไตรจีวร', category: 'offering', icon: '🪷' },
+      { id: '4', title: 'รดน้ำขอพรบุพการี', category: 'precept', icon: '🙏' },
+    ],
+  },
+  {
+    date: '2026-04-25',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๕',
+    recommendedActivities: [
+      { id: '1', title: 'ใส่บาตรพระ', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์พระชินบัญชร', category: 'chant', icon: '📜' },
+      { id: '3', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+    ],
+  },
+
+  // --- พฤษภาคม 2569 ---
+  {
+    date: '2026-05-02',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๕',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายหลอดไฟ/ค่าน้ำค่าไฟ', category: 'offering', icon: '💡' },
+      { id: '3', title: 'สวดมนต์แผ่เมตตา', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-05-10',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๖',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'งดเว้นเนื้อสัตว์/ทานมังสวิรัติ', category: 'precept', icon: '🥗' },
+      { id: '3', title: 'ฟังธรรมเทศนา', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-05-17',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๖ (วันวิสาขบูชา)',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๘ เจริญสมาธิ', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ฟังเทศน์มหาชาติ', category: 'chant', icon: '📜' },
+      { id: '4', title: 'เวียนเทียนรอบอุโบสถช่วงค่ำ', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-05-25',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันแรม ๘ ค่ำ เดือน ๖ (วันอัฏฐมีบูชา)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รำลึกพระธรรมสังเวช', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดพระพุทธคุณ ๑๐๘ จบ', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-05-31',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๔ ค่ำ เดือน ๖',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายดอกไม้ธูปเทียน', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'เจริญจิตตภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+
+  // --- มิถุนายน 2569 ---
+  {
+    date: '2026-06-08',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๗',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดมนต์บทมงคลสูตร', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-06-15',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๗',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถือศีล ๘', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-06-23',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๗',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ไหว้พระประธาน', category: 'chant', icon: '🙏' },
+      { id: '3', title: 'ปล่อยปลาปล่อยเต่า', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-06-30',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๗',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทานยา', category: 'offering', icon: '💊' },
+      { id: '3', title: 'นั่งสมาธิระลึกความตายอย่างมีสติ', category: 'precept', icon: '🧘' },
+    ],
+  },
+
+  // --- กรกฎาคม 2569 ---
+  {
+    date: '2026-07-08',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๘',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์บทธัมมจักกัปปวัตตนสูตร', category: 'chant', icon: '📜' },
+      { id: '3', title: 'เจริญเมตตาภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-07-29',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๘ (วันอาสาฬหบูชา)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ฟังเทศน์ปฐมเทศนา', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ถวายเทียนพรรษา/หลอดไฟ', category: 'offering', icon: '🕯️' },
+      { id: '4', title: 'เวียนเทียนรำลึกพระธรรม', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-07-30',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันแรม ๑ ค่ำ เดือน ๘ (วันเข้าพรรษา)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรดอกไม้/อาหารสด', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ตั้งสัจจะงดเว้นอบายมุขตลอดพรรษา', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ถวายผ้าอาบน้ำฝน', category: 'offering', icon: '🪷' },
+    ],
+  },
+
+  // --- สิงหาคม 2569 ---
+  {
+    date: '2026-08-07',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๘',
+    recommendedActivities: [
+      { id: '1', title: 'ใส่บาตรพระ', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดมนต์บทพาหุงมหากา', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-08-14',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๘',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทาน', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-08-22',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๙',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์บูชาพระแก้วมรกต', category: 'chant', icon: '🙏' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-08-29',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๙',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถืออุโบสถศีล ๘', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+    ],
+  },
+
+  // --- กันยายน 2569 ---
+  {
+    date: '2026-09-06',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๙',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'สวดมนต์บทโพชฌังคปริตร', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-09-12',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๔ ค่ำ เดือน ๙',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทานอุทิศส่วนกุศล', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-09-20',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๑๐',
+    recommendedActivities: [
+      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์ทำวัตร', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ปล่อยสัตว์น้ำทำบุญ', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-09-27',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๐ (วันสารทไทย)',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตรกระยาสารท', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'อุทิศบุญกุศลให้บรรพชน', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ถือศีล ๘ เจริญสมาธิ', category: 'precept', icon: '🧘' },
+      { id: '4', title: 'ถวายสังฆทานใหญ่', category: 'offering', icon: '🪷' },
+    ],
+  },
+
+  // --- ตุลาคม 2569 ---
+  {
+    date: '2026-10-05',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๑๐',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดพระปริตร', category: 'chant', icon: '📜' },
+      { id: '3', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-10-12',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๑๐',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายผ้าไตรจีวร', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-10-20',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๑๑',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ร่วมบุญทอดกฐิน', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-10-25',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๑ (วันออกพรรษา)',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตรวันออกพรรษา', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ฟังเทศน์มหาชาติคาถาพัน', category: 'chant', icon: '📜' },
+      { id: '3', title: 'รักษาอุโบสถศีล', category: 'precept', icon: '🧘' },
+      { id: '4', title: 'ร่วมงานประเพณีทอดกฐิน', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-10-26',
+    isBuddhaDay: false,
+    isAuspiciousDay: true,
+    title: 'วันแรม ๑ ค่ำ เดือน ๑๑ (วันตักบาตรเทโว)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเทโวโรหณะ', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'เจริญพระพุทธมนต์', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ร่วมขบวนแห่พระพุทธรูป', category: 'offering', icon: '✨' },
+    ],
+  },
+
+  // --- พฤศจิกายน 2569 ---
+  {
+    date: '2026-11-03',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๑๑',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ร่วมทอดกฐินสามัคคี', category: 'offering', icon: '🪷' },
+    ],
+  },
+  {
+    date: '2026-11-10',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๑๑',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทานบริวารกฐิน', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-11-18',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๑๒',
+    recommendedActivities: [
+      { id: '1', title: 'ใส่บาตรอาหารแห้ง', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดมนต์บทมหาจักรพรรดิ', category: 'chant', icon: '📜' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+    ],
+  },
+  {
+    date: '2026-11-24',
+    isBuddhaDay: true,
+    isAuspiciousDay: true,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๒ (วันลอยกระทง)',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ขอขมาพระแม่คงคา', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'ฟังธรรมเทศนาอานิสงส์กฐิน', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถือศีล ๘ สวดมนต์', category: 'precept', icon: '🧘' },
+    ],
+  },
+
+  // --- ธันวาคม 2569 ---
+  {
+    date: '2026-12-02',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๘ ค่ำ เดือน ๑๒',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+    ],
+  },
+  {
+    date: '2026-12-09',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันแรม ๑๕ ค่ำ เดือน ๑๒',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถวายสังฆทานส่งท้ายเดือน', category: 'offering', icon: '🪷' },
+      { id: '3', title: 'สวดมนต์ทำวัตรเช้า-เย็น', category: 'chant', icon: '📜' },
+    ],
+  },
+  {
+    date: '2026-12-17',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๘ ค่ำ เดือน ๑',
+    recommendedActivities: [
+      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'สวดพระพุทธคุณ', category: 'chant', icon: '📜' },
+      { id: '3', title: 'บำเพ็ญประโยชน์ต่อส่วนรวม', category: 'precept', icon: '✨' },
+    ],
+  },
+  {
+    date: '2026-12-24',
+    isBuddhaDay: true,
+    isAuspiciousDay: false,
+    title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑',
+    recommendedActivities: [
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
+      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept', icon: '🧘' },
+      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+    ],
+  },
+];
 
 async function seed() {
-  console.log('🌱 กำลังหยอดข้อมูลเซียมซี 17 ใบลง Database...');
+  console.log('🌱 กำลังเริ่มต้นกระบวนการ Seed ข้อมูล...');
 
   try {
-  // RESTART IDENTITY: สั่งให้รีเซ็ต ID กลับไปเริ่มที่ 1
-    // CASCADE: สั่งให้ลบข้อมูลในตารางอื่นที่เชื่อมกับใบเซียมซีพวกนี้ด้วย (เช่น ประวัติการเขย่าเก่าๆ) เพื่อป้องกัน Error
+    // ล้างข้อมูลเก่าและ Reset Primary Key ให้เริ่มที่ 1 ใหม่
     await db.execute(sql`TRUNCATE TABLE fortunes RESTART IDENTITY CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE auspicious_days RESTART IDENTITY CASCADE`);
 
-    // หยอดข้อมูลเซียมซี 17 ใบ (ฉบับกระชับ)
+    // 1. หยอดข้อมูลเซียมซี 17 ใบ
+    console.log('🔮 กำลังบันทึกข้อมูลใบเซียมซี 17 ใบ...');
     await db.insert(fortunes).values([
       {
         number: 1,
@@ -168,7 +747,18 @@ async function seed() {
       },
     ]);
 
-    console.log('✅ หยอดข้อมูลใบเซียมซี 17 ใบเรียบร้อยแล้ว!');
+    // 2. หยอดข้อมูลวันพระและวันมงคลตลอดทั้งปี 2569
+    console.log('📅 กำลังบันทึกข้อมูลวันพระ/วันมงคลตลอดปี 2569 (2026)...');
+    const formattedAuspiciousDays = auspiciousDaysData.map((item) => ({
+      ...item,
+      // แปลง object array เป็น string เพื่อความเข้ากันได้กับคอลัมน์ text
+      recommendedActivities: typeof item.recommendedActivities === 'object'
+        ? JSON.stringify(item.recommendedActivities)
+        : item.recommendedActivities,
+    }));
+    await db.insert(auspiciousDays).values(formattedAuspiciousDays as any);
+
+    console.log(`✅ Seed ข้อมูลสำเร็จ! (เซียมซี 17 ใบ และ วันพระ ${formattedAuspiciousDays.length} วัน)`);
     process.exit(0);
   } catch (error) {
     console.error('❌ เกิดข้อผิดพลาดในการ seed ข้อมูล:', error);
