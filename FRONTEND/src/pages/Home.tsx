@@ -174,43 +174,16 @@ export default function Home() {
             <p className="sub-greeting">ขอให้วันนี้เป็นวันที่ราบรื่นและเปี่ยมด้วยกุศลจิต</p>
           </div>
         </div>
-        <div className="merit-badge">
-          <Icons.Sparkles size={16} color="var(--sms-gold)" />
-          <div className="merit-info">
-            <span className="merit-label">แต้มบารมี</span>
-            <span className="merit-value">{meritCount.toLocaleString()}</span>
-          </div>
-        </div>
       </header>
 
-      {/* 2. Interactive Digital Sanctuary Hero */}
-      <section className="sanctuary-hero">
-        <div className="hero-glow-bg" />
-        <div className="hero-content">
-          <span className="daily-quote-tag">คติธรรมเตือนใจวันนี้</span>
-          <h3 className="hero-quote">"จิตที่ฝึกดีแล้ว นำสุขมาให้"</h3>
-          <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
-          <button
-            type="button"
-            className={`btn-altar-action ${hasOffered ? 'offered' : ''}`}
-            onClick={handleDailyMerit}
-          >
-            {hasOffered ? <Icons.CheckCircle size={16} /> : <Icons.Flame size={16} />}
-            <span>{offerText}</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 3. Daily Auspicious Guide (มงคลประจำวันเกิด) */}
-      <section className="lucky-section">
-        <div className="section-title-wrap">
-          <div className="title-with-icon">
-            <Icons.Sparkles size={18} color="var(--sms-gold)" />
-            <h3>มงคลประจำวัน • {auspicious.dayName}</h3>
-          </div>
-          <Link to="/profile" className="link-settings" title="เปลี่ยนวันเกิด">
-            <Icons.Settings size={14} />
-            <span>เปลี่ยนวันเกิด</span>
+      {/* Hero Daily Siemsee Card */}
+      <section className="siemsee-banner">
+        <div className="banner-badge">แนะนำประจำวัน</div>
+        <div className="banner-content">
+          <h3>เซียมซีประจำวัน</h3>
+          <p>เสี่ยงทายโชคชะตาประจำวันนี้เพื่อรับคำแนะนำและข้อคิดในการดำเนินชีวิต</p>
+          <Link to="/siemsee" className="btn-siemsee">
+            เสี่ยงทายเลย
           </Link>
         </div>
 

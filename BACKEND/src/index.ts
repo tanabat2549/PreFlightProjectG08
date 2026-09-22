@@ -1,36 +1,34 @@
-// index.ts (backend)
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 
 import siemseeRouter from './routes/siemseebackend.js';
-import authRouter from './routes/LoginBackend.js'
+import authRouter from './routes/LoginBackend.js';
+import horoscopeRouter from './routes/horoscopebackend.js';
 import calendarRouter from './routes/calendarbackend.js';
 import templeRouter from './routes/templebackend.js';
 
-dotenv.config();
 
 const app = express();
 app.disable('etag');
 const port = process.env.PORT || 3001;
 
-// 🟢 รายการ URL ที่อนุญาตให้ยิงมาหา Backend
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
   'http://fsg08.cpecmu.com',
-  process.env.CORS_ORIGIN // ดึงจาก .env เพิ่มเติม (ถ้ามี)
+  process.env.CORS_ORIGIN
 ].filter(Boolean) as string[];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // อนุญาตหากยิงมาจาก allowedOrigins หรือกรณีไม่มี origin (เช่น Postman / Server-to-Server)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // หรือ callback(new Error('Not allowed by CORS'))
+        callback(null, true);
       }
     },
     credentials: true,
@@ -40,10 +38,9 @@ app.use(
 );
 
 app.use(express.json());
-
-// Routes
 app.use('/api/siemsee', siemseeRouter);
-app.use('/api', authRouter)
+app.use('/api', authRouter);
+app.use('/api/horoscope', horoscopeRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/temples', templeRouter);
 
@@ -54,4 +51,3 @@ app.get('/health', (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });
-
