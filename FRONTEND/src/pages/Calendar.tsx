@@ -1,5 +1,66 @@
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { getActivityGuide } from '../constants/activityGuides';
+import styles from './Calendar.module.css';
+
+// Clean SVG Icons
+const Icons = {
+  Calendar: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+      <line x1="16" x2="16" y1="2" y2="6" />
+      <line x1="8" x2="8" y1="2" y2="6" />
+      <line x1="3" x2="21" y1="10" y2="10" />
+    </svg>
+  ),
+  Lotus: ({ size = 18, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-2 4-5 7-5 11a5 5 0 0 0 10 0c0-4-3-7-5-11z" />
+      <path d="M7 14c-3-1-5-3-5-6 3 0 6 2 7 6" />
+      <path d="M17 14c3-1 5-3 5-6-3 0-6 2-7 6" />
+    </svg>
+  ),
+  Note: ({ size = 15, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      <line x1="9" y1="11" x2="15" y2="11" />
+      <line x1="9" y1="15" x2="13" y2="15" />
+    </svg>
+  ),
+  Sparkle: ({ size = 15, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+    </svg>
+  ),
+  ChevronDown: ({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  ),
+  ChevronLeft: ({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  ),
+  ChevronRight: ({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  ),
+  Info: ({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  ),
+  Close: ({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+};
 
 interface ActivityItem {
   id: string;
@@ -19,7 +80,7 @@ interface AuspiciousDay {
 
 const THAI_MONTHS = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
 ];
 
 const WEEKDAYS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
@@ -40,7 +101,6 @@ function formatThaiDate(dateString?: string) {
   return `${thaiDays[dateObj.getDay()]}ที่ ${day} ${THAI_MONTHS[dateObj.getMonth()]} ${year + 543}`;
 }
 
-// Component สำหรับบล็อกกิจกรรมที่คลิกเพื่อกางดู How-to และ Benefits ได้
 function ExpandableActivityCard({
   act,
   theme,
@@ -54,93 +114,53 @@ function ExpandableActivityCard({
   return (
     <div
       onClick={() => setIsExpanded(!isExpanded)}
+      className={`${styles.activityCard} ${isExpanded ? styles.activityExpanded : ''}`}
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: '16px',
         backgroundColor: theme.bg,
-        border: `1.5px solid ${isExpanded ? theme.text : theme.border}`,
-        boxShadow: isExpanded ? '0 6px 16px rgba(0,0,0,0.05)' : '0 1px 3px rgba(0,0,0,0.02)',
-        cursor: 'pointer',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        overflow: 'hidden',
+        borderColor: isExpanded ? theme.text : theme.border,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 18px',
-          color: theme.text,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '12px',
-              backgroundColor: theme.iconBg,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              flexShrink: 0,
-            }}
-          >
-            {act.icon}
+      <div className={styles.activityHeader} style={{ color: theme.text }}>
+        <div className={styles.activityMain}>
+          <div className={styles.activityIconBox} style={{ backgroundColor: theme.iconBg }}>
+            <span className={styles.activityIconCustom}>{act.icon}</span>
           </div>
           <div>
-            <span style={{ fontSize: '15px', fontWeight: 700, display: 'block' }}>{act.title}</span>
-            <span style={{ fontSize: '11px', opacity: 0.75, fontWeight: 500 }}>
+            <span className={styles.activityTitle}>{act.title}</span>
+            <span className={styles.activityHint}>
               {isExpanded ? 'คลิกเพื่อย่อ' : 'คลิกเพื่อดูแนวทาง & อานิสงส์'}
             </span>
           </div>
         </div>
 
-        <div
-          style={{
-            fontSize: '12px',
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-            opacity: 0.7,
-          }}
-        >
-          ▼
+        <div className={`${styles.chevronWrapper} ${isExpanded ? styles.rotated : ''}`}>
+          <Icons.ChevronDown size={14} color={theme.text} />
         </div>
       </div>
 
       {isExpanded && (
-        <div
-          style={{
-            padding: '0 18px 16px 18px',
-            borderTop: `1px dashed ${theme.border}`,
-            marginTop: '-2px',
-            paddingTop: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            fontSize: '13.5px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-            <span style={{ fontSize: '15px', flexShrink: 0 }}>📝</span>
+        <div className={styles.activityDetails} style={{ borderTopColor: theme.border }}>
+          <div className={styles.detailRow}>
+            <span className={styles.detailIconWrapper}>
+              <Icons.Note size={15} color={theme.text} />
+            </span>
             <div>
-              <strong style={{ color: theme.text, display: 'block', marginBottom: '2px' }}>
+              <strong className={styles.detailLabel} style={{ color: theme.text }}>
                 แนวทางการปฏิบัติ:
               </strong>
-              <span style={{ lineHeight: '1.5', color: '#4B5563' }}>{guide.howTo}</span>
+              <span className={styles.detailContent}>{guide.howTo}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-            <span style={{ fontSize: '15px', flexShrink: 0 }}>✨</span>
+          <div className={styles.detailRow}>
+            <span className={styles.detailIconWrapper}>
+              <Icons.Sparkle size={15} color={theme.text} />
+            </span>
             <div>
-              <strong style={{ color: theme.text, display: 'block', marginBottom: '2px' }}>
+              <strong className={styles.detailLabel} style={{ color: theme.text }}>
                 อานิสงส์ / ผลบุญที่ได้รับ:
               </strong>
-              <span style={{ lineHeight: '1.5', color: '#4B5563' }}>{guide.benefits}</span>
+              <span className={styles.detailContent}>{guide.benefits}</span>
             </div>
           </div>
         </div>
@@ -163,7 +183,7 @@ export default function Calendar() {
   const [activeQuarter, setActiveQuarter] = useState<'all' | 1 | 2 | 3 | 4>('all');
   const [yearModalDay, setYearModalDay] = useState<AuspiciousDay | null>(null);
 
-  // 1. ดึงวันพระถัดไป
+  // 1. วันพระถัดไป
   useEffect(() => {
     if (viewMode === 'next') {
       setLoading(true);
@@ -190,7 +210,7 @@ export default function Calendar() {
     }
   }, [viewMode]);
 
-  // 2. ดึงวันพระรายเดือน
+  // 2. วันพระรายเดือน
   useEffect(() => {
     if (viewMode === 'month') {
       setLoading(true);
@@ -211,7 +231,7 @@ export default function Calendar() {
     }
   }, [viewMode, selectedMonth, selectedYear]);
 
-  // 3. ดึงรายปี
+  // 3. วันพระรายปี
   useEffect(() => {
     if (viewMode === 'year') {
       setLoading(true);
@@ -271,20 +291,20 @@ export default function Calendar() {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '840px', margin: '0 auto', padding: '24px 16px 120px', boxSizing: 'border-box', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      
+    <div className={styles.container}>
       {/* Header & Tabs */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+      <div className={styles.headerRow}>
         <div>
-          <h2 style={{ color: '#991B1B', margin: 0, fontSize: '24px', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>📅</span> ปฏิทินวันพระ & วันมงคล
+          <h2 className={styles.mainTitle}>
+            <span className={styles.titleIconBadge}>
+              <Icons.Calendar size={22} color="var(--sms-gold)" />
+            </span>
+            <span>ปฏิทินวันพระ & วันมงคล</span>
           </h2>
-          <p style={{ margin: '4px 0 0', color: '#6B7280', fontSize: '13px' }}>
-            พุทธศักราช {selectedYear + 543}
-          </p>
+          <p className={styles.yearSubtitle}>พุทธศักราช {selectedYear + 543}</p>
         </div>
 
-        <div style={{ display: 'inline-flex', backgroundColor: '#F3F4F6', borderRadius: '14px', padding: '4px', border: '1px solid #E5E7EB' }}>
+        <div className={styles.tabContainer}>
           {[
             { id: 'next', label: 'วันพระถัดไป' },
             { id: 'month', label: 'ปฏิทินเดือน' },
@@ -292,19 +312,9 @@ export default function Calendar() {
           ].map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setViewMode(tab.id as any)}
-              style={{
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: viewMode === tab.id ? 700 : 500,
-                cursor: 'pointer',
-                backgroundColor: viewMode === tab.id ? '#FFFFFF' : 'transparent',
-                color: viewMode === tab.id ? '#B91C1C' : '#4B5563',
-                boxShadow: viewMode === tab.id ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+              className={`${styles.tabButton} ${viewMode === tab.id ? styles.activeTab : ''}`}
             >
               {tab.label}
             </button>
@@ -313,31 +323,34 @@ export default function Calendar() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#9CA3AF', fontSize: '15px' }}>
-          กำลังเตรียมข้อมูลมงคลประจำปี...
-        </div>
+        <div className={styles.loadingBox}>กำลังเตรียมข้อมูลมงคลประจำปี...</div>
       ) : (
         <>
           {/* ================= VIEW 1: วันพระถัดไป ================= */}
           {viewMode === 'next' && (
-            <div style={{ border: '1px solid #F1F3F5', borderRadius: '24px', padding: '28px', backgroundColor: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 10px 30px rgba(0,0,0,0.04)' }}>
-              <div style={{ border: '1.5px solid #FDE68A', borderRadius: '18px', padding: '22px', background: 'linear-gradient(135deg, #FFFDF7 0%, #FEF9C3 100%)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span>🪷</span>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#D97706' }}>วันพระถัดไป</span>
+            <div className={styles.nextViewWrapper}>
+              <div className={styles.nextHeroBanner}>
+                <div className={styles.bannerTagRow}>
+                  <Icons.Lotus size={16} color="#D97706" />
+                  <span className={styles.bannerTagText}>วันพระถัดไป</span>
                 </div>
-                <div style={{ color: '#991B1B', fontWeight: 800, fontSize: '24px', letterSpacing: '-0.02em' }}>
+                <div className={styles.bannerDateText}>
                   {formatThaiDate(nextDayData?.date) || 'ไม่มีข้อมูลวันพระ'}
                 </div>
-                {nextDayData?.title && <div style={{ fontSize: '15px', color: '#B45309', fontWeight: 600, marginTop: '4px' }}>{nextDayData.title}</div>}
+                {nextDayData?.title && (
+                  <div className={styles.bannerTitleText}>{nextDayData.title}</div>
+                )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '20px', fontWeight: 700, color: '#374151' }}>กิจกรรมแนะนำประจำวัน</span>
-                <span style={{ fontSize: '12px', color: '#9CA3AF' }}>💡 คลิกที่แถบเพื่อดูกิจกรรม & อานิสงส์</span>
+              <div className={styles.activitiesHeaderRow}>
+                <span className={styles.sectionSubtitle}>กิจกรรมแนะนำประจำวัน</span>
+                <span className={styles.tipNotice}>
+                  <Icons.Info size={13} />
+                  <span>คลิกที่แถบเพื่อดูกิจกรรม & อานิสงส์</span>
+                </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className={styles.activityList}>
                 {nextDayData?.recommendedActivities?.map((act) => {
                   const theme = activityColorMap[act.category] || activityColorMap.general;
                   return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
@@ -348,55 +361,55 @@ export default function Calendar() {
 
           {/* ================= VIEW 2: ตารางปฏิทินรายเดือน ================= */}
           {viewMode === 'month' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', padding: '14px 20px', borderRadius: '18px', border: '1px solid #E5E7EB' }}>
-                <button onClick={prevMonth} style={{ border: 'none', background: '#F3F4F6', borderRadius: '10px', padding: '8px 14px', cursor: 'pointer', fontWeight: 'bold' }}>‹</button>
-                <div style={{ fontSize: '17px', fontWeight: 700, color: '#1F2937' }}>
+            <div className={styles.monthViewWrapper}>
+              <div className={styles.monthNavRow}>
+                <button type="button" onClick={prevMonth} className={styles.arrowButton}>
+                  <Icons.ChevronLeft size={16} />
+                </button>
+                <div className={styles.monthTitleText}>
                   {THAI_MONTHS[selectedMonth - 1]} {selectedYear + 543}
                 </div>
-                <button onClick={nextMonth} style={{ border: 'none', background: '#F3F4F6', borderRadius: '10px', padding: '8px 14px', cursor: 'pointer', fontWeight: 'bold' }}>›</button>
+                <button type="button" onClick={nextMonth} className={styles.arrowButton}>
+                  <Icons.ChevronRight size={16} />
+                </button>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '18px', boxShadow: '0 6px 20px rgba(0,0,0,0.03)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '12px' }}>
+              <div className={styles.calendarCard}>
+                <div className={styles.weekdaysHeader}>
                   {WEEKDAYS.map((w, idx) => (
-                    <div key={w} style={{ fontSize: '13px', fontWeight: 700, color: idx === 0 ? '#DC2626' : '#6B7280' }}>
+                    <div key={w} className={`${styles.weekdayCell} ${idx === 0 ? styles.sunday : ''}`}>
                       {w}
                     </div>
                   ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+                <div className={styles.daysGrid}>
                   {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-                    <div key={`empty-${i}`} style={{ minHeight: '52px' }} />
+                    <div key={`empty-${i}`} className={styles.emptyDayCell} />
                   ))}
 
                   {Array.from({ length: totalDaysInMonth }).map((_, i) => {
                     const day = i + 1;
                     const buddhaDay = monthDaysMap[day];
-                    const isSelected = selectedDayDetail && Number(selectedDayDetail.date.split('-')[2]) === day;
+                    const isSelected =
+                      selectedDayDetail && Number(selectedDayDetail.date.split('-')[2]) === day;
 
                     return (
                       <div
                         key={day}
                         onClick={() => buddhaDay && setSelectedDayDetail(buddhaDay)}
-                        style={{
-                          minHeight: '58px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '14px',
-                          cursor: buddhaDay ? 'pointer' : 'default',
-                          backgroundColor: isSelected ? '#FEF2F2' : buddhaDay ? '#FFFDF5' : 'transparent',
-                          border: isSelected ? '2px solid #DC2626' : buddhaDay ? '1.5px solid #FDE68A' : '1px solid transparent',
-                          transition: 'all 0.15s ease',
-                        }}
+                        className={`
+                          ${styles.dayCell}
+                          ${buddhaDay ? styles.isBuddhaDayCell : ''}
+                          ${isSelected ? styles.selectedDayCell : ''}
+                        `}
                       >
-                        <span style={{ fontSize: '14px', fontWeight: buddhaDay ? 700 : 500, color: buddhaDay ? '#B91C1C' : '#374151' }}>
-                          {day}
-                        </span>
-                        {buddhaDay && <span style={{ fontSize: '12px', marginTop: '2px' }}>🪷</span>}
+                        <span className={styles.dayNumber}>{day}</span>
+                        {buddhaDay && (
+                          <span className={styles.lotusIconMarker}>
+                            <Icons.Lotus size={12} color="var(--sms-maroon)" />
+                          </span>
+                        )}
                       </div>
                     );
                   })}
@@ -404,28 +417,27 @@ export default function Calendar() {
               </div>
 
               {selectedDayDetail && (
-                <div style={{ border: '1px solid #E5E7EB', borderRadius: '20px', padding: '20px', backgroundColor: '#FFFFFF' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#D97706' }}>🪷 รายละเอียดวันพระ</span>
+                <div className={styles.dayDetailCard}>
+                  <div className={styles.dayDetailHeader}>
+                    <span className={styles.dayDetailLabel}>
+                      <Icons.Lotus size={14} color="#D97706" />
+                      <span>รายละเอียดวันพระ</span>
+                    </span>
                     {selectedDayDetail.isAuspiciousDay && (
-                      <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '12px', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                        วันมงคล
-                      </span>
+                      <span className={styles.auspiciousBadge}>วันมงคล</span>
                     )}
                   </div>
-                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#B91C1C' }}>
+                  <div className={styles.dayDetailDate}>
                     {formatThaiDate(selectedDayDetail.date)}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6B7280', marginTop: '2px', marginBottom: '16px' }}>
-                    {selectedDayDetail.title}
-                  </div>
+                  <div className={styles.dayDetailTitle}>{selectedDayDetail.title}</div>
 
                   {selectedDayDetail.recommendedActivities?.length > 0 && (
                     <div>
-                      <div style={{ fontSize: '32px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>
+                      <div className={styles.recommendLabel}>
                         กิจกรรมแนะนำประจำวัน (คลิกเพื่อดูกิจกรรม & อานิสงส์):
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div className={styles.activityList}>
                         {selectedDayDetail.recommendedActivities.map((act) => {
                           const theme = activityColorMap[act.category] || activityColorMap.general;
                           return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
@@ -438,56 +450,41 @@ export default function Calendar() {
             </div>
           )}
 
-          {/* ================= VIEW 3: รายปี ================= */}
+          {/* ================= VIEW 3: ภาพรวมรายปี ================= */}
           {viewMode === 'year' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div
-                style={{
-                  borderRadius: '24px',
-                  background: 'linear-gradient(135deg, #7F1D1D 0%, #991B1B 50%, #B45309 100%)',
-                  padding: '24px 28px',
-                  color: '#FFFFFF',
-                  boxShadow: '0 12px 28px -6px rgba(153, 27, 27, 0.35)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '18px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                  <div>
-                    <h3 style={{ fontSize: '30px', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.85, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                      วันพระและวันมงคลตลอดปี
-                    </h3>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '30px', fontSize: '18px', fontWeight: 600 }}>
-                    ร่มเย็นเป็นสุขตลอดปี
-                  </div>
+            <div className={styles.yearViewWrapper}>
+              {/* Year Summary Hero */}
+              <div className={styles.yearHeroCard}>
+                <div className={styles.yearHeroTop}>
+                  <h3 className={styles.yearHeroTitle}>วันพระและวันมงคลตลอดปี</h3>
+                  <div className={styles.peaceBadge}>ร่มเย็นเป็นสุขตลอดปี</div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.18)', paddingTop: '16px' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', opacity: 0.85 }}>วันพระทั้งหมด</div>
-                    <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '2px' }}>
-                      {yearlyStats.totalBuddha} <span style={{ fontSize: '14px', fontWeight: 500 }}>วัน</span>
+                <div className={styles.yearStatsGrid}>
+                  <div className={styles.statCol}>
+                    <div className={styles.statLabel}>วันพระทั้งหมด</div>
+                    <div className={styles.statNumber}>
+                      {yearlyStats.totalBuddha} <span className={styles.statUnit}>วัน</span>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '13px', opacity: 0.85 }}>วันพระใหญ่</div>
-                    <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '2px' }}>
-                      {yearlyStats.majorHolidays} <span style={{ fontSize: '14px', fontWeight: 500 }}>วัน</span>
+                  <div className={styles.statCol}>
+                    <div className={styles.statLabel}>วันพระใหญ่</div>
+                    <div className={styles.statNumber}>
+                      {yearlyStats.majorHolidays} <span className={styles.statUnit}>วัน</span>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '13px', opacity: 0.85 }}>วันมงคลฤกษ์ดี</div>
-                    <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '2px' }}>
-                      {yearlyStats.totalAuspicious} <span style={{ fontSize: '14px', fontWeight: 500 }}>วัน</span>
+                  <div className={styles.statCol}>
+                    <div className={styles.statLabel}>วันมงคลฤกษ์ดี</div>
+                    <div className={styles.statNumber}>
+                      {yearlyStats.totalAuspicious} <span className={styles.statUnit}>วัน</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Filters */}
+              <div className={styles.yearFilterRow}>
+                <div className={styles.quarterFilters}>
                   {[
                     { id: 'all', label: 'ทั้งหมด (12 เดือน)' },
                     { id: 1, label: 'ไตรมาส 1 (ม.ค. - มี.ค.)' },
@@ -497,150 +494,96 @@ export default function Calendar() {
                   ].map((filter) => (
                     <button
                       key={filter.id}
+                      type="button"
                       onClick={() => setActiveQuarter(filter.id as any)}
-                      style={{
-                        border: activeQuarter === filter.id ? '1.5px solid #991B1B' : '1px solid #E5E7EB',
-                        backgroundColor: activeQuarter === filter.id ? '#FEF2F2' : '#FFFFFF',
-                        color: activeQuarter === filter.id ? '#991B1B' : '#4B5563',
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        fontSize: '12.5px',
-                        fontWeight: activeQuarter === filter.id ? 700 : 500,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
+                      className={`
+                        ${styles.quarterBtn}
+                        ${activeQuarter === filter.id ? styles.activeQuarterBtn : ''}
+                      `}
                     >
                       {filter.label}
                     </button>
                   ))}
                 </div>
 
-                <div style={{ fontSize: '13px', color: '#9CA3AF' }}>
-                  💡 คลิกที่การ์ดเพื่อดูกิจกรรมแนะนำ
+                <div className={styles.yearTipNotice}>
+                  <Icons.Info size={13} />
+                  <span>คลิกที่การ์ดเพื่อดูกิจกรรมแนะนำ</span>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
+              {/* Months Grid */}
+              <div className={styles.monthsGrid}>
                 {displayedMonths.map((monthNum) => {
                   const monthName = THAI_MONTHS[monthNum - 1];
                   const daysInMonth = yearGroupedData[monthNum] || [];
 
                   return (
-                    <div
-                      key={monthNum}
-                      style={{
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: '22px',
-                        border: '1px solid #EAEAEA',
-                        padding: '18px 20px',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.02)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '14px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F3F4F6', paddingBottom: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div
-                            style={{
-                              width: '34px',
-                              height: '34px',
-                              borderRadius: '10px',
-                              background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-                              color: '#92400E',
-                              fontWeight: 800,
-                              fontSize: '14px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {monthNum}
-                          </div>
-                          <span style={{ fontSize: '17px', fontWeight: 800, color: '#1F2937' }}>
-                            {monthName}
-                          </span>
+                    <div key={monthNum} className={styles.monthMiniCard}>
+                      <div className={styles.monthMiniHeader}>
+                        <div className={styles.monthBadgeGroup}>
+                          <div className={styles.monthNumberBadge}>{monthNum}</div>
+                          <span className={styles.monthCardTitle}>{monthName}</span>
                         </div>
-
                         <span
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            color: daysInMonth.length > 0 ? '#047857' : '#9CA3AF',
-                            backgroundColor: daysInMonth.length > 0 ? '#ECFDF5' : '#F3F4F6',
-                            padding: '4px 10px',
-                            borderRadius: '12px',
-                          }}
+                          className={`
+                            ${styles.buddhaDayCounter}
+                            ${daysInMonth.length > 0 ? styles.counterActive : styles.counterEmpty}
+                          `}
                         >
                           {daysInMonth.length} วันพระ
                         </span>
                       </div>
 
                       {daysInMonth.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '24px 0', color: '#D1D5DB', fontSize: '13px' }}>
-                          ไม่มีวันพระในเดือนนี้
-                        </div>
+                        <div className={styles.emptyMonthNotice}>ไม่มีวันพระในเดือนนี้</div>
                       ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                        <div className={styles.monthDaysList}>
                           {daysInMonth.map((dayItem) => {
                             const dayNum = Number(dayItem.date.split('-')[2]);
-                            const isMajor = dayItem.title.includes('บูชา') || dayItem.title.includes('พรรษา') || dayItem.isAuspiciousDay;
+                            const isMajor =
+                              dayItem.title.includes('บูชา') ||
+                              dayItem.title.includes('พรรษา') ||
+                              dayItem.isAuspiciousDay;
 
                             return (
                               <div
                                 key={dayItem.id}
                                 onClick={() => setYearModalDay(dayItem)}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  padding: '10px 14px',
-                                  borderRadius: '14px',
-                                  backgroundColor: isMajor ? '#FFFBEB' : '#F9FAFB',
-                                  border: isMajor ? '1.5px solid #FCD34D' : '1px solid #F3F4F6',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease',
-                                }}
+                                className={`
+                                  ${styles.yearDayItem}
+                                  ${isMajor ? styles.majorDayItem : ''}
+                                `}
                               >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div className={styles.yearDayItemLeft}>
                                   <div
-                                    style={{
-                                      width: '32px',
-                                      height: '32px',
-                                      borderRadius: '8px',
-                                      backgroundColor: isMajor ? '#FEE2E2' : '#FFFFFF',
-                                      border: isMajor ? '1px solid #FECACA' : '1px solid #E5E7EB',
-                                      color: isMajor ? '#991B1B' : '#374151',
-                                      fontWeight: 800,
-                                      fontSize: '14px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      flexShrink: 0,
-                                    }}
+                                    className={`
+                                      ${styles.yearDayNumBox}
+                                      ${isMajor ? styles.majorNumBox : ''}
+                                    `}
                                   >
                                     {dayNum}
                                   </div>
-
-                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontSize: '13.5px', fontWeight: 700, color: isMajor ? '#9A3412' : '#1F2937' }}>
+                                  <div className={styles.yearDayTextWrap}>
+                                    <span
+                                      className={`
+                                        ${styles.yearDayTitle}
+                                        ${isMajor ? styles.majorDayTitle : ''}
+                                      `}
+                                    >
                                       {dayItem.title}
                                     </span>
                                     {dayItem.recommendedActivities?.length > 0 && (
-                                      <span style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '1px' }}>
+                                      <span className={styles.yearDayActivitiesCount}>
                                         {dayItem.recommendedActivities.length} กิจกรรมแนะนำ
                                       </span>
                                     )}
                                   </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  {isMajor && (
-                                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#B45309', backgroundColor: '#FEF3C7', padding: '2px 8px', borderRadius: '6px' }}>
-                                      วันมงคล
-                                    </span>
-                                  )}
-                                  <span style={{ fontSize: '15px' }}>🪷</span>
+                                <div className={styles.yearDayItemRight}>
+                                  {isMajor && <span className={styles.miniAuspiciousBadge}>วันมงคล</span>}
+                                  <Icons.Lotus size={14} color={isMajor ? '#B45309' : '#D4AF37'} />
                                 </div>
                               </div>
                             );
@@ -654,97 +597,50 @@ export default function Calendar() {
             </div>
           )}
 
-          {/* ================= MODAL SLIDE-UP: รายละเอียดวันพระที่คลิกจากหน้ารายปี ================= */}
+          {/* ================= MODAL SLIDE-UP ================= */}
           {yearModalDay && (
-            <div
-              onClick={() => setYearModalDay(null)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.45)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '20px',
-                zIndex: 9999,
-              }}
-            >
-              <div
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  width: '100%',
-                  maxWidth: '500px',
-                  maxHeight: '90vh',
-                  overflowY: 'auto',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '24px',
-                  padding: '24px',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div className={styles.modalOverlay} onClick={() => setYearModalDay(null)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
                   <div>
-                    <span style={{ fontSize: '12.5px', color: '#D97706', fontWeight: 700 }}>🪷 รายละเอียดวันพระ</span>
-                    <h3 style={{ margin: '4px 0 0', fontSize: '20px', fontWeight: 800, color: '#991B1B' }}>
-                      {formatThaiDate(yearModalDay.date)}
-                    </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#4B5563', fontWeight: 500 }}>
-                      {yearModalDay.title}
-                    </p>
+                    <span className={styles.modalTopLabel}>
+                      <Icons.Lotus size={14} color="#D97706" />
+                      <span>รายละเอียดวันพระ</span>
+                    </span>
+                    <h3 className={styles.modalTitle}>{formatThaiDate(yearModalDay.date)}</h3>
+                    <p className={styles.modalSubtitle}>{yearModalDay.title}</p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setYearModalDay(null)}
-                    style={{
-                      border: 'none',
-                      backgroundColor: '#F3F4F6',
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      cursor: 'pointer',
-                      fontSize: '16px',
-                      color: '#6B7280',
-                    }}
+                    className={styles.modalCloseBtn}
                   >
-                    ✕
+                    <Icons.Close size={16} />
                   </button>
                 </div>
 
-                <div style={{ height: '1px', backgroundColor: '#F3F4F6' }} />
+                <div className={styles.modalDivider} />
 
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>
+                  <div className={styles.recommendLabel}>
                     กิจกรรมแนะนำประจำวัน (คลิกเพื่อดูกิจกรรม & อานิสงส์):
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className={styles.activityList}>
                     {yearModalDay.recommendedActivities?.length > 0 ? (
                       yearModalDay.recommendedActivities.map((act) => {
                         const theme = activityColorMap[act.category] || activityColorMap.general;
                         return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
                       })
                     ) : (
-                      <div style={{ fontSize: '13px', color: '#9CA3AF' }}>ไม่มีกิจกรรมแนะนำพิเศษ</div>
+                      <div className={styles.emptyActivityNotice}>ไม่มีกิจกรรมแนะนำพิเศษ</div>
                     )}
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setYearModalDay(null)}
-                  style={{
-                    marginTop: '8px',
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    backgroundColor: '#991B1B',
-                    color: '#FFFFFF',
-                    fontWeight: 700,
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                  }}
+                  className={styles.modalBottomBtn}
                 >
                   ปิดหน้าต่าง
                 </button>

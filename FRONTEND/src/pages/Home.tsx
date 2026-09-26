@@ -4,7 +4,7 @@ import './Home.css';
 
 import iconTemple from '../assets/icon/iconTemple.png';
 
-// SVG Icons แบบ Minimal (ใช้ SVG ตรง ไม่พึ่งพา external library ลดปัญหา hook conflict)
+// SVG Icons แบบ Minimal
 const Icons = {
   Sparkles: ({ size = 18, color = 'currentColor' }: { size?: number; color?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -69,17 +69,6 @@ const Icons = {
       <line x1="16" x2="16" y1="2" y2="6" />
       <line x1="8" x2="8" y1="2" y2="6" />
       <line x1="3" x2="21" y1="10" y2="10" />
-    </svg>
-  ),
-  Landmark: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="2" x2="22" y1="22" y2="22" />
-      <line x1="12" x2="12" y1="2" y2="6" />
-      <path d="m2 6 10-4 10 4" />
-      <line x1="6" x2="6" y1="10" y2="18" />
-      <line x1="10" x2="10" y1="10" y2="18" />
-      <line x1="14" x2="14" y1="10" y2="18" />
-      <line x1="18" x2="18" y1="10" y2="18" />
     </svg>
   ),
   MapPin: ({ size = 12, color = 'currentColor' }: { size?: number; color?: string }) => (
@@ -174,179 +163,220 @@ export default function Home() {
             <p className="sub-greeting">ขอให้วันนี้เป็นวันที่ราบรื่นและเปี่ยมด้วยกุศลจิต</p>
           </div>
         </div>
+        <div className="merit-badge">
+          <Icons.Sparkles size={16} color="var(--sms-gold)" />
+          <div className="merit-info">
+            <span className="merit-label">แต้มบารมี</span>
+            <span className="merit-value">{meritCount.toLocaleString()}</span>
+          </div>
+        </div>
       </header>
 
-      {/* Hero Daily Siemsee Card */}
-      <section className="siemsee-banner">
-        <div className="banner-badge">แนะนำประจำวัน</div>
-        <div className="banner-content">
-          <h3>เซียมซีประจำวัน</h3>
-          <p>เสี่ยงทายโชคชะตาประจำวันนี้เพื่อรับคำแนะนำและข้อคิดในการดำเนินชีวิต</p>
-          <Link to="/siemsee" className="btn-siemsee">
-            เสี่ยงทายเลย
-          </Link>
-        </div>
-
-        <div className="lucky-bento-grid">
-          {/* Card: สีมงคล */}
-          <div className="bento-card bento-colors">
-            <div className="card-top-label">
-              <Icons.Palette size={13} />
-              <span>สีมงคลเปิดดวง</span>
+      {/* 🌟 Dashboard Layout แบบ 2 คอลัมน์บน Desktop */}
+      <div className="home-dashboard-layout">
+        
+        {/* คอลัมน์หลักฝั่งซ้าย: Hero Banner + Master Card มงคลประจำวัน */}
+        <div className="dashboard-main-col">
+          {/* 2. Interactive Digital Sanctuary Hero */}
+          <section className="sanctuary-hero">
+            <div className="hero-glow-bg" />
+            <div className="hero-content">
+              <span className="daily-quote-tag">คติธรรมเตือนใจวันนี้</span>
+              <h3 className="hero-quote">"จิตที่ฝึกดีแล้ว นำสุขมาให้"</h3>
+              <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
+              <button
+                type="button"
+                className={`btn-altar-action ${hasOffered ? 'offered' : ''}`}
+                onClick={handleDailyMerit}
+              >
+                {hasOffered ? <Icons.CheckCircle size={16} /> : <Icons.Flame size={16} />}
+                <span>{offerText}</span>
+              </button>
             </div>
-            <div className="color-list">
-              {auspicious.luckyColors.map((color, idx) => (
-                <div key={idx} className="color-pill">
-                  <span className="color-indicator" style={{ backgroundColor: color.hex }} />
-                  <div className="color-desc">
-                    <strong>{color.name}</strong>
-                    <small>{color.role}</small>
+          </section>
+
+          {/* 3. Daily Auspicious Guide (กล่องใหญ่ครอบข้อมูลดวงวันเกิดทั้งหมด) */}
+          <section className="auspicious-master-card">
+            {/* ส่วนหัวในกล่องใหญ่ */}
+            <div className="master-card-header">
+              <div className="title-with-icon">
+               
+                <div className="title-text-group">
+                  <span className="auspicious-sup-tag">คำทำนายและฤกษ์มงคล</span>
+                  <h3 className="auspicious-heading">
+                    มงคลประจำวัน <span className="highlight-day-chip">{auspicious.dayName}</span>
+                  </h3>
+                </div>
+              </div>
+
+              <Link to="/profile" className="btn-change-birthday" title="เปลี่ยนวันเกิด">
+                <span className="btn-icon-bubble">
+                  <Icons.Settings size={14} />
+                </span>
+                <span>เปลี่ยนวันเกิด</span>
+              </Link>
+            </div>
+
+            {/* กล่อง Bento ภายในกล่องใหญ่ */}
+            <div className="lucky-bento-grid">
+              {/* Card: สีมงคล */}
+              <div className="bento-card bento-colors">
+                <div className="card-top-label">
+                  <Icons.Palette size={13} />
+                  <span>สีมงคลเปิดดวง</span>
+                </div>
+                <div className="color-list">
+                  {auspicious.luckyColors.map((color, idx) => (
+                    <div key={idx} className="color-pill">
+                      <span className="color-indicator" style={{ backgroundColor: color.hex }} />
+                      <div className="color-desc">
+                        <strong>{color.name}</strong>
+                        <small>{color.role}</small>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="color-pill unlucky-pill">
+                    <span className="color-indicator" style={{ backgroundColor: auspicious.unluckyColor.hex }} />
+                    <div className="color-desc">
+                      <strong>เลี่ยง {auspicious.unluckyColor.name}</strong>
+                      <small>กาลกิณีประจำวัน</small>
+                    </div>
                   </div>
                 </div>
-              ))}
-              <div className="color-pill unlucky-pill">
-                <span className="color-indicator" style={{ backgroundColor: auspicious.unluckyColor.hex }} />
-                <div className="color-desc">
-                  <strong>เลี่ยง {auspicious.unluckyColor.name}</strong>
-                  <small>กาลกิณีประจำวัน</small>
-                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Card: เลขมงคล */}
-          <div className="bento-card bento-numbers">
-            <div className="card-top-label">
-              <Icons.Hash size={13} />
-              <span>เลขเด่นนำโชค</span>
-            </div>
-            <div className="lucky-number-row">
-              {auspicious.luckyNumbers.map((num, idx) => (
-                <div key={idx} className="lucky-gold-coin">
-                  <span>{num}</span>
-                </div>
-              ))}
-            </div>
-            <p className="number-note">เหมาะสำหรับเจรจาหรือเลือกเวลามงคล</p>
-          </div>
-
-          {/* Card: คนวันเกิดถูกชะตา */}
-          <div className="bento-card bento-friend">
-            <div className="card-top-label">
-              <Icons.Users size={13} />
-              <span>กัลยาณมิตรเกื้อหนุน</span>
-            </div>
-            <div className="friend-content">
-              <div className="friend-badge">{auspicious.compatibleDay.day}</div>
-              <p className="friend-perk">{auspicious.compatibleDay.perk}</p>
-            </div>
-          </div>
-
-          {/* Card: เคล็ดลับเสริมดวงประจำวัน */}
-          <div className="bento-card bento-tip">
-            <div className="tip-left">
-              <div className="tip-icon-wrap">
-                <Icons.Lightbulb size={18} color="var(--sms-gold)" />
-              </div>
-              <div>
+              {/* Card: เลขมงคล */}
+              <div className="bento-card bento-numbers">
                 <div className="card-top-label">
-                  <span>เคล็ดลับเสริมดวงวันนี้</span>
+                  <Icons.Hash size={13} />
+                  <span>เลขเด่นนำโชค</span>
                 </div>
-                <p className="tip-text">{auspicious.tip}</p>
+                <div className="lucky-number-row">
+                  {auspicious.luckyNumbers.map((num, idx) => (
+                    <div key={idx} className="lucky-gold-coin">
+                      <span>{num}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="number-note">เหมาะสำหรับเจรจาหรือเลือกเวลามงคล</p>
+              </div>
+
+              {/* Card: คนวันเกิดถูกชะตา */}
+              <div className="bento-card bento-friend">
+                <div className="card-top-label">
+                  <Icons.Users size={13} />
+                  <span>กัลยาณมิตรเกื้อหนุน</span>
+                </div>
+                <div className="friend-content">
+                  <div className="friend-badge">{auspicious.compatibleDay.day}</div>
+                  <p className="friend-perk">{auspicious.compatibleDay.perk}</p>
+                </div>
+              </div>
+
+              {/* Card: เคล็ดลับเสริมดวงประจำวัน */}
+              <div className="bento-card bento-tip">
+                <div className="tip-left">
+                  <div className="tip-icon-wrap">
+                    <Icons.Lightbulb size={18} color="var(--sms-gold)" />
+                  </div>
+                  <div>
+                    <div className="card-top-label">
+                      <span>เคล็ดลับเสริมดวงวันนี้</span>
+                    </div>
+                    <p className="tip-text">{auspicious.tip}</p>
+                  </div>
+                </div>
+                <Link to="/temples" className="btn-find-temple">
+                  <span>ค้นหาวัดเสริมดวง</span>
+                  <Icons.ArrowRight size={14} />
+                </Link>
               </div>
             </div>
-            <Link to="/temples" className="btn-find-temple">
-              <span>ค้นหาวัดเสริมดวง</span>
-              <Icons.ArrowRight size={14} />
-            </Link>
-          </div>
+          </section>
         </div>
-      </section>
 
-      {/* 4. Dual Feature Cards: เซียมซี & ปฏิทินวันพระ */}
-      <div className="dual-feature-grid">
-        {/* เซียมซีการ์ด */}
-        <section className="interactive-siemsee-card">
-          <div className="siemsee-decor">
-            <Icons.ScrollText size={72} strokeWidth={1} color="var(--sms-gold)" />
-          </div>
-          <div className="siemsee-body">
-            <div className="tag-popular">เสี่ยงทายประจำวัน</div>
-            <h3>เซียมซีส่องทางชีวิต</h3>
-            <p>ตั้งจิตอธิษฐานถามถึงการงาน การเงิน หรือความรัก เพื่อรับคำกลอนเตือนสติ</p>
-            <Link to="/siemsee" className="btn-primary-glow">
-              <Icons.ScrollText size={16} />
-              <span>เขย่าเซียมซีวันนี้</span>
-            </Link>
-          </div>
-        </section>
+        {/* คอลัมน์ขวา: ฟีเจอร์เสริม (เซียมซี, ปฏิทินวันพระ, วัดใกล้คุณ) */}
+        <aside className="dashboard-side-col">
+          {/* เซียมซีการ์ด */}
+          <section className="interactive-siemsee-card">
+            <div className="siemsee-decor">
+              <Icons.ScrollText size={72} strokeWidth={1} color="var(--sms-gold)" />
+            </div>
+            <div className="siemsee-body">
+              <div className="tag-popular">เสี่ยงทายประจำวัน</div>
+              <h3>เซียมซีส่องทางชีวิต</h3>
+              <p>ตั้งจิตอธิษฐานถามถึงการงาน การเงิน หรือความรัก เพื่อรับคำกลอนเตือนสติ</p>
+              <Link to="/siemsee" className="btn-primary-glow">
+                <Icons.ScrollText size={16} />
+                <span>เขย่าเซียมซีวันนี้</span>
+              </Link>
+            </div>
+          </section>
 
-        {/* ปฏิทินวันพระ Widget */}
-        <section className="buddhist-calendar-card">
-          <div className="calendar-header">
-            <span className="cal-tag">
-              <Icons.Calendar size={14} />
-              <span>ปฏิทินธรรมะ</span>
-            </span>
-            <Link to="/calendar" className="cal-link">
-              ดูทั้งหมด &gt;
-            </Link>
-          </div>
-          <div className="calendar-content">
-            <div className="countdown-box">
-              <span className="countdown-number">2</span>
-              <span className="countdown-unit">วัน</span>
+          {/* ปฏิทินวันพระ Widget */}
+          <section className="buddhist-calendar-card">
+            <div className="calendar-header">
+              <span className="cal-tag">
+                <Icons.Calendar size={14} />
+                <span>ปฏิทินธรรมะ</span>
+              </span>
+              <Link to="/calendar" className="cal-link">
+                ดูทั้งหมด &gt;
+              </Link>
             </div>
-            <div className="upcoming-info">
-              <h4>วันพระที่จะถึง (แรม ๑๕ ค่ำ)</h4>
-              <p>วันศุกร์นี้ • แนะนำรักษาศีล สวดมนต์ หรือถวายสังฆทาน</p>
+            <div className="calendar-content">
+              <div className="countdown-box">
+                <span className="countdown-number">2</span>
+                <span className="countdown-unit">วัน</span>
+              </div>
+              <div className="upcoming-info">
+                <h4>วันพระที่จะถึง (แรม ๑๕ ค่ำ)</h4>
+                <p>วันศุกร์นี้ • แนะนำรักษาศีล สวดมนต์ หรือถวายสังฆทาน</p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* วัดใกล้ฉัน Section */}
+          <section className="temples-showcase-section">
+            <div className="section-title-wrap">
+              <div className="title-with-icon">
+                <img src={iconTemple} alt="วัด" className="templeThumb" />
+                <h3>วัดใกล้คุณในเชียงใหม่</h3>
+              </div>
+              <Link to="/temples" className="link-more">
+                ดูทั้งหมด &gt;
+              </Link>
+            </div>
+
+            <div className="temple-card-modern">
+              <div className="temple-cover-avatar">
+                <img src={iconTemple} alt="วัด" className="templeThumb" />
+              </div>
+              <div className="temple-details">
+                <div className="temple-title-row">
+                  <h4>วัดพระธาตุดอยสุเทพฯ</h4>
+                  <span className="badge-highlight">วัดคู่บ้านคู่เมือง</span>
+                </div>
+                <p className="temple-location">ต.สุเทพ อ.เมือง เชียงใหม่</p>
+                <div className="temple-meta-tags">
+                  <span className="meta-tag">
+                    <Icons.MapPin size={11} />
+                    2.4 กม.
+                  </span>
+                  <span className="meta-tag rating">
+                    <Icons.Star size={11} />
+                    4.9
+                  </span>
+                </div>
+              </div>
+              <Link to="/temples" className="btn-direct-nav" title="ดูเส้นทาง">
+                <Icons.ArrowUpRight size={16} />
+              </Link>
+            </div>
+          </section>
+        </aside>
+
       </div>
-
-      {/* 5. วัดใกล้ฉัน Section */}
-      <section className="temples-showcase-section">
-        <div className="section-title-wrap">
-          <div className="title-with-icon">
-            <img src={iconTemple} alt="วัด" className="templeThumb"/> 
-            <h3>วัดใกล้คุณในเชียงใหม่</h3>
-          </div>
-          <Link to="/temples" className="link-more">
-            ดูทั้งหมด &gt;
-          </Link>
-        </div>
-
-        <div className="temple-card-modern">
-          <div className="temple-cover-avatar">
-           <img src={iconTemple} alt="วัด" className="templeThumb"/>
-          </div>
-          <div className="temple-details">
-            <div className="temple-title-row">
-              <h4>วัดพระธาตุดอยสุเทพราชวรวิหาร</h4>
-              <span className="badge-highlight">วัดคู่บ้านคู่เมือง</span>
-            </div>
-            <p className="temple-location">ต.สุเทพ อ.เมือง จ.เชียงใหม่</p>
-            <div className="temple-meta-tags">
-              <span className="meta-tag">
-                <Icons.MapPin size={11} />
-                2.4 กม.
-              </span>
-              <span className="meta-tag rating">
-                <Icons.Star size={11} />
-                4.9 (1,420 รีวิว)
-              </span>
-              <span className="meta-tag highlight">
-                <Icons.Sparkles size={11} color="var(--sms-maroon)" />
-                ขอพรบารมี
-              </span>
-            </div>
-          </div>
-          <Link to="/temples" className="btn-direct-nav" title="ดูเส้นทาง">
-            <Icons.ArrowUpRight size={16} />
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

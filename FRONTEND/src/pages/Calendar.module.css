@@ -1,0 +1,834 @@
+:root {
+  --sms-maroon: #7A1C28;
+  --sms-maroon-deep: #430E17;
+  --sms-gold: #D4AF37;
+  --sms-gold-light: #F3E5AB;
+  --sms-paper: #FAF6ED;
+  --sms-paper-deep: #EFE3CE;
+  --sms-ink: #231B15;
+  --sms-sub: #7A6B58;
+}
+
+/* ================= Container หลัก ================= */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 120px;
+  box-sizing: border-box;
+  font-family: 'Kanit', 'Noto Sans Thai', -apple-system, sans-serif;
+  color: var(--sms-ink);
+}
+
+/* Header & Tabs */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.mainTitle {
+  color: var(--sms-maroon-deep);
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleIconBadge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #FFFDF5;
+  border: 1.5px solid var(--sms-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+.yearSubtitle {
+  margin: 4px 0 0;
+  color: var(--sms-sub);
+  font-size: 13.5px;
+}
+
+.tabContainer {
+  display: inline-flex;
+  background-color: #F3F4F6;
+  border-radius: 14px;
+  padding: 4px;
+  border: 1px solid #E5E7EB;
+}
+
+.tabButton {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: transparent;
+  color: #4B5563;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.tabButton.activeTab {
+  background-color: #FFFFFF;
+  color: var(--sms-maroon);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.loadingBox {
+  text-align: center;
+  padding: 60px 0;
+  color: #9CA3AF;
+  font-size: 15px;
+}
+
+/* ================= VIEW 1: วันพระถัดไป ================= */
+.nextViewWrapper {
+  border: 1px solid #EFECE6;
+  border-radius: 24px;
+  padding: 24px;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(67, 14, 23, 0.04);
+}
+
+.nextHeroBanner {
+  border: 1.5px solid #FDE68A;
+  border-radius: 18px;
+  padding: 22px;
+  background: linear-gradient(135deg, #FFFDF7 0%, #FEF9C3 100%);
+}
+
+.bannerTagRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.bannerTagText {
+  font-size: 14px;
+  font-weight: 700;
+  color: #D97706;
+}
+
+.bannerDateText {
+  color: var(--sms-maroon-deep);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.bannerTitleText {
+  font-size: 15px;
+  color: #B45309;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.activitiesHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sectionSubtitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sms-ink);
+}
+
+.tipNotice {
+  font-size: 12px;
+  color: #9CA3AF;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Expandable Activity Card */
+.activityCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border-width: 1.5px;
+  border-style: solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.activityCard.activityExpanded {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.activityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.activityMain {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.activityIconBox {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activityIconCustom {
+  font-size: 20px;
+}
+
+.activityTitle {
+  font-size: 15px;
+  font-weight: 700;
+  display: block;
+}
+
+.activityHint {
+  font-size: 11px;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.chevronWrapper {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.chevronWrapper.rotated {
+  transform: rotate(180deg);
+}
+
+.activityDetails {
+  padding: 0 18px 16px;
+  border-top-width: 1px;
+  border-top-style: dashed;
+  margin-top: -2px;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13.5px;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.detailIconWrapper {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.detailLabel {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.detailContent {
+  line-height: 1.5;
+  color: #4B5563;
+}
+
+/* ================= VIEW 2: ตารางปฏิทินรายเดือน ================= */
+.monthViewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.monthNavRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFFFFF;
+  padding: 14px 20px;
+  border-radius: 18px;
+  border: 1px solid #E5E7EB;
+}
+
+.arrowButton {
+  border: none;
+  background: #F3F4F6;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.arrowButton:hover {
+  background: #E5E7EB;
+}
+
+.monthTitleText {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.calendarCard {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  border: 1px solid #E5E7EB;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+}
+
+.weekdaysHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.weekdayCell {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6B7280;
+}
+
+.weekdayCell.sunday {
+  color: #DC2626;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.emptyDayCell {
+  min-height: 52px;
+}
+
+.dayCell {
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  cursor: default;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.dayCell.isBuddhaDayCell {
+  cursor: pointer;
+  background-color: #FFFDF5;
+  border: 1.5px solid #FDE68A;
+}
+
+.dayCell.selectedDayCell {
+  background-color: #FEF2F2 !important;
+  border: 2px solid #DC2626 !important;
+}
+
+.dayNumber {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.isBuddhaDayCell .dayNumber {
+  font-weight: 700;
+  color: var(--sms-maroon);
+}
+
+.lotusIconMarker {
+  margin-top: 2px;
+  display: flex;
+}
+
+/* Day Detail Card */
+.dayDetailCard {
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  padding: 20px;
+  background-color: #FFFFFF;
+}
+
+.dayDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dayDetailLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #D97706;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auspiciousBadge {
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.dayDetailDate {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sms-maroon);
+}
+
+.dayDetailTitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: 2px;
+  margin-bottom: 16px;
+}
+
+.recommendLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+/* ================= VIEW 3: รายปี ================= */
+.yearViewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.yearHeroCard {
+  border-radius: 24px;
+  background: linear-gradient(135deg, #7A1C28 0%, #430E17 50%, #B45309 100%);
+  padding: 24px 28px;
+  color: #FFFFFF;
+  box-shadow: 0 12px 28px -6px rgba(122, 28, 40, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.yearHeroTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.yearHeroTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.peaceBadge {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.yearStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding-top: 16px;
+}
+
+.statCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.statNumber {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.statUnit {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.yearFilterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.quarterFilters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quarterBtn {
+  border: 1px solid #E5E7EB;
+  background-color: #FFFFFF;
+  color: #4B5563;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.quarterBtn.activeQuarterBtn {
+  border: 1.5px solid var(--sms-maroon);
+  background-color: #FEF2F2;
+  color: var(--sms-maroon);
+  font-weight: 700;
+}
+
+.yearTipNotice {
+  font-size: 12px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.monthMiniCard {
+  background-color: #FFFFFF;
+  border-radius: 22px;
+  border: 1px solid #EAEAEA;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.monthMiniHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #F3F4F6;
+  padding-bottom: 12px;
+}
+
+.monthBadgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.monthNumberBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  color: #92400E;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monthCardTitle {
+  font-size: 17px;
+  font-weight: 800;
+  color: #1F2937;
+}
+
+.buddhaDayCounter {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.counterActive {
+  color: #047857;
+  background-color: #ECFDF5;
+}
+
+.counterEmpty {
+  color: #9CA3AF;
+  background-color: #F3F4F6;
+}
+
+.emptyMonthNotice {
+  text-align: center;
+  padding: 24px 0;
+  color: #D1D5DB;
+  font-size: 13px;
+}
+
+.monthDaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.yearDayItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background-color: #F9FAFB;
+  border: 1px solid #F3F4F6;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.yearDayItem.majorDayItem {
+  background-color: #FFFBEB;
+  border: 1.5px solid #FCD34D;
+}
+
+.yearDayItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.yearDayNumBox {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  color: #374151;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.majorNumBox {
+  background-color: #FEE2E2;
+  border: 1px solid #FECACA;
+  color: var(--sms-maroon);
+}
+
+.yearDayTextWrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.yearDayTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.majorDayTitle {
+  color: #9A3412;
+}
+
+.yearDayActivitiesCount {
+  font-size: 11.5px;
+  color: #6B7280;
+  margin-top: 1px;
+}
+
+.yearDayItemRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.miniAuspiciousBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #B45309;
+  background-color: #FEF3C7;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ================= Modal ================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.modalTopLabel {
+  font-size: 12.5px;
+  color: #D97706;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modalTitle {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sms-maroon);
+}
+
+.modalSubtitle {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: #4B5563;
+  font-weight: 500;
+}
+
+.modalCloseBtn {
+  border: none;
+  background-color: #F3F4F6;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  transition: background 0.15s;
+}
+
+.modalCloseBtn:hover {
+  background-color: #E5E7EB;
+}
+
+.modalDivider {
+  height: 1px;
+  background-color: #F3F4F6;
+}
+
+.emptyActivityNotice {
+  font-size: 13px;
+  color: #9CA3AF;
+}
+
+.modalBottomBtn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background-color: var(--sms-maroon);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.modalBottomBtn:hover {
+  background-color: var(--sms-maroon-deep);
+}
+
+/* ================= Responsive (>= 768px) ================= */
+@media (min-width: 768px) {
+  .container {
+    padding: 32px 24px 120px;
+  }
+
+  .mainTitle {
+    font-size: 26px;
+  }
+
+  .nextViewWrapper {
+    padding: 28px;
+  }
+
+  .bannerDateText {
+    font-size: 28px;
+  }
+
+  .yearHeroTitle {
+    font-size: 24px;
+  }
+}

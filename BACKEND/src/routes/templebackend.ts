@@ -23,6 +23,12 @@ function calculateDistance(
   return Math.round(R * c * 100) / 100;
 }
 
+function getPhotoUrl(photos: GooglePlaceItem["photos"], apiKey: string): string | undefined {
+  const photoName = photos?.[0]?.name;
+  if (!photoName) return undefined;
+  return `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=400&key=${apiKey}`;
+}
+
 interface NearbyQueryParams {
   lat?: string;
   lng?: string;
@@ -54,6 +60,7 @@ interface GooglePlaceItem {
   userRatingCount?: number;
   location?: { latitude: number; longitude: number };
   reviews?: GoogleReview[];
+  photos?: { name: string; widthPx?: number; heightPx?: number }[];
 }
 
 interface GoogleSearchResponse {
@@ -89,7 +96,7 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
           "X-Goog-FieldMask":
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount",
+            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos",
         },
         body: JSON.stringify({
           includedTypes: ["buddhist_temple"],
@@ -127,6 +134,7 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
         distanceKm: distanceKm,
         location: { lat: placeLat, lng: placeLng },
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${placeLat},${placeLng}&query_place_id=${place.id}`,
+        imageUrl: getPhotoUrl(place.photos, apiKey),
       };
     });
 
@@ -157,7 +165,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
           "X-Goog-FieldMask":
-            "id,displayName,formattedAddress,location,rating,userRatingCount,reviews",
+            "id,displayName,formattedAddress,location,rating,userRatingCount,reviews,photos",
         },
       }
     );
@@ -175,6 +183,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
       rating: place.rating || 0,
       userRatingCount: place.userRatingCount || 0,
       location: { lat: place.location?.latitude, lng: place.location?.longitude },
+      imageUrl: getPhotoUrl(place.photos, apiKey),
       reviews: (place.reviews || []).map((rev: GoogleReview) => ({
         author: rev.authorAttribution?.displayName || "ผู้ใช้งาน",
         rating: rev.rating || 0,
