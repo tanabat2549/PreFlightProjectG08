@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { getActivityGuide } from '../constants/activityGuides';
 import styles from './Calendar.module.css';
+import buddhaIcon from '../assets/icon/buddha.png';
+import LotusIcon from '../assets/icon/lotus.png';
 
 // Clean SVG Icons
 const Icons = {
@@ -12,13 +14,19 @@ const Icons = {
       <line x1="3" x2="21" y1="10" y2="10" />
     </svg>
   ),
-  Lotus: ({ size = 18, color = 'currentColor' }: { size?: number; color?: string }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3c-2 4-5 7-5 11a5 5 0 0 0 10 0c0-4-3-7-5-11z" />
-      <path d="M7 14c-3-1-5-3-5-6 3 0 6 2 7 6" />
-      <path d="M17 14c3-1 5-3 5-6-3 0-6 2-7 6" />
-    </svg>
-  ),
+  Lotus: ({ size = 18 }: { size?: number; color?: string }) => (
+  <img
+    src={LotusIcon}
+    alt="Lotus"
+    style={{
+      width: size,
+      height: 'auto',
+      objectFit: 'contain',
+      display: 'inline-block',
+      verticalAlign: 'middle',
+    }}
+  />
+),
   Note: ({ size = 15, color = 'currentColor' }: { size?: number; color?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -211,7 +219,7 @@ export default function Calendar() {
   }, [viewMode]);
 
   // 2. วันพระรายเดือน
-  useEffect(() => {
+   useEffect(() => {
     if (viewMode === 'month') {
       setLoading(true);
       fetch(`/api/calendar/auspicious-days?month=${selectedMonth}&year=${selectedYear}`)
@@ -230,6 +238,7 @@ export default function Calendar() {
         .finally(() => setLoading(false));
     }
   }, [viewMode, selectedMonth, selectedYear]);
+
 
   // 3. วันพระรายปี
   useEffect(() => {
@@ -351,11 +360,12 @@ export default function Calendar() {
               </div>
 
               <div className={styles.activityList}>
-                {nextDayData?.recommendedActivities?.map((act) => {
-                  const theme = activityColorMap[act.category] || activityColorMap.general;
-                  return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
-                })}
-              </div>
+  {Array.isArray(nextDayData?.recommendedActivities) &&
+    nextDayData.recommendedActivities.map((act) => {
+      const theme = activityColorMap[act.category] || activityColorMap.general;
+      return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
+    })}
+</div>
             </div>
           )}
 
@@ -404,11 +414,15 @@ export default function Calendar() {
                           ${isSelected ? styles.selectedDayCell : ''}
                         `}
                       >
-                        <span className={styles.dayNumber}>{day}</span>
+                      <span className={styles.dayNumber}>{day}</span>
                         {buddhaDay && (
-                          <span className={styles.lotusIconMarker}>
-                            <Icons.Lotus size={12} color="var(--sms-maroon)" />
-                          </span>
+                          <span className={styles.buddhaIconMarker}>
+                        <img 
+                            src= {buddhaIcon}
+                            alt="วันพระ" 
+                            className={styles.buddhaImg} 
+                        />
+                            </span>
                         )}
                       </div>
                     );
@@ -432,19 +446,20 @@ export default function Calendar() {
                   </div>
                   <div className={styles.dayDetailTitle}>{selectedDayDetail.title}</div>
 
-                  {selectedDayDetail.recommendedActivities?.length > 0 && (
-                    <div>
-                      <div className={styles.recommendLabel}>
-                        กิจกรรมแนะนำประจำวัน (คลิกเพื่อดูกิจกรรม & อานิสงส์):
-                      </div>
-                      <div className={styles.activityList}>
-                        {selectedDayDetail.recommendedActivities.map((act) => {
-                          const theme = activityColorMap[act.category] || activityColorMap.general;
-                          return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
-                        })}
-                      </div>
-                    </div>
-                  )}
+                  {Array.isArray(selectedDayDetail.recommendedActivities) &&
+  selectedDayDetail.recommendedActivities.length > 0 && (
+    <div>
+      <div className={styles.recommendLabel}>
+        กิจกรรมแนะนำประจำวัน (คลิกเพื่อดูกิจกรรม & อานิสงส์):
+      </div>
+      <div className={styles.activityList}>
+        {selectedDayDetail.recommendedActivities.map((act) => {
+          const theme = activityColorMap[act.category] || activityColorMap.general;
+          return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
+        })}
+      </div>
+    </div>
+)}
                 </div>
               )}
             </div>
@@ -626,15 +641,16 @@ export default function Calendar() {
                     กิจกรรมแนะนำประจำวัน (คลิกเพื่อดูกิจกรรม & อานิสงส์):
                   </div>
                   <div className={styles.activityList}>
-                    {yearModalDay.recommendedActivities?.length > 0 ? (
-                      yearModalDay.recommendedActivities.map((act) => {
-                        const theme = activityColorMap[act.category] || activityColorMap.general;
-                        return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
-                      })
-                    ) : (
-                      <div className={styles.emptyActivityNotice}>ไม่มีกิจกรรมแนะนำพิเศษ</div>
-                    )}
-                  </div>
+  {Array.isArray(yearModalDay.recommendedActivities) &&
+  yearModalDay.recommendedActivities.length > 0 ? (
+    yearModalDay.recommendedActivities.map((act) => {
+      const theme = activityColorMap[act.category] || activityColorMap.general;
+      return <ExpandableActivityCard key={act.id} act={act} theme={theme} />;
+    })
+  ) : (
+    <div className={styles.emptyActivityNotice}>ไม่มีกิจกรรมแนะนำพิเศษ</div>
+  )}
+</div>
                 </div>
 
                 <button

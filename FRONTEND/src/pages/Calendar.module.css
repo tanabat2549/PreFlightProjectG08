@@ -44,13 +44,9 @@
 .titleIconBadge {
   width: 38px;
   height: 38px;
-  border-radius: 10px;
-  background: #FFFDF5;
-  border: 1.5px solid var(--sms-gold);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
 }
 
 .yearSubtitle {
@@ -198,19 +194,7 @@
   gap: 14px;
 }
 
-.activityIconBox {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
 
-.activityIconCustom {
-  font-size: 20px;
-}
 
 .activityTitle {
   font-size: 15px;
@@ -378,6 +362,19 @@
 .lotusIconMarker {
   margin-top: 2px;
   display: flex;
+}
+.buddhaIconMarker {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buddhaImg {
+  width: 16px;       /* ปรับขนาดความกว้างตามความเหมาะสมของช่อง */
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
 
 /* Day Detail Card */
