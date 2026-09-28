@@ -1,51 +1,3 @@
-// import { api } from '../services/api';
-// import type { Fortune } from '../types/fortune';
-// import axios from 'axios';
-
-// interface APIResponse<T> {
-//   success: boolean;
-//   data?: T;
-//   message?: string;
-// }
-
-// // เขย่าเซียมซี (สุ่ม)
-// export async function drawFortune(): Promise<Fortune> {
-//   try {
-//     const response = await api.get<APIResponse<Fortune>>('/siemsee/draw');
-//     const { success, data, message } = response.data;
-
-//     if (!success || !data) {
-//       throw new Error(message || 'ไม่สามารถเขย่าเซียมซีได้');
-//     }
-
-//     return data;
-//   } catch (error) {
-//     if (axios.isAxiosError(error) && error.response?.data?.message) {
-//       throw new Error(error.response.data.message);
-//     }
-//     throw error;
-//   }
-// }
-
-// // ดึงตามหมายเลข
-// export async function getFortuneByNumber(num: number): Promise<Fortune> {
-//   try {
-//     const response = await api.get<APIResponse<Fortune>>(`/siemsee/${num}`);
-//     const { success, data, message } = response.data;
-
-//     if (!success || !data) {
-//       throw new Error(message || 'ไม่พบข้อมูลใบเซียมซี');
-//     }
-
-//     return data;
-//   } catch (error) {
-//     if (axios.isAxiosError(error) && error.response?.data?.message) {
-//       throw new Error(error.response.data.message);
-//     }
-//     throw error;
-//   }
-// }
-
 import { api } from '../services/api';
 import type { Fortune } from '../types/fortune';
 import { mockFortunes } from '../data/mockFortunes';
@@ -66,13 +18,16 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // เขย่าเซียมซี (สุ่ม)
 export async function drawFortune(): Promise<Fortune> {
   if (USE_MOCK) {
-    await wait(400); // จำลอง network delay เล็กน้อยให้ animation ดูสมจริง
+    await wait(400); // delay for ux
     const randomIndex = Math.floor(Math.random() * mockFortunes.length);
     return mockFortunes[randomIndex];
   }
 
   try {
-    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw');
+    const token = localStorage.getItem('token');
+    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw', {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
     const { success, data, message } = response.data;
 
     if (!success || !data) {
@@ -82,7 +37,7 @@ export async function drawFortune(): Promise<Fortune> {
     return data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+      throw new Error(error.response.data.message, { cause: error });
     }
     throw error;
   }
@@ -98,7 +53,7 @@ export async function getFortuneByNumber(num: number): Promise<Fortune> {
   }
 
   try {
-    const response = await api.get<APIResponse<Fortune>>(`/api/siemsee/${num}`);
+    const response = await api.get<APIResponse<Fortune>>(`/siemsee/${num}`);
     const { success, data, message } = response.data;
 
     if (!success || !data) {
@@ -108,7 +63,7 @@ export async function getFortuneByNumber(num: number): Promise<Fortune> {
     return data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+      throw new Error(error.response.data.message, { cause: error });
     }
     throw error;
   }

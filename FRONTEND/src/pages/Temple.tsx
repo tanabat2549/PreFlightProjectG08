@@ -87,7 +87,7 @@ interface TempleDetail extends TempleItem {
 const getFullImageUrl = (url?: string) => {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  return `http://localhost:3001${url.startsWith("/") ? "" : "/"}${url}`;
+  return url.startsWith("/") ? url : `/${url}`;
 };
 
 export default function Temple() {
@@ -195,17 +195,29 @@ export default function Temple() {
     e.preventDefault();
     if (!selectedTemple) return;
 
+    // 🟢 ดึง Token จากที่ระบบ Login เก็บไว้
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("กรุณาเข้าสู่ระบบก่อนเขียนรีวิวครับ");
+      return;
+    }
+
     setSubmittingReview(true);
     try {
-      const res = await api.post(`/temples/${selectedTemple.id}/reviews`, {
-        rating: newRating,
-        text: newComment,
-        authorName: authorName || "ผู้ใช้งานทั่วไป",
-        templeName: selectedTemple.name,
-        address: selectedTemple.address,
-        lat: selectedTemple.location?.lat,
-        lng: selectedTemple.location?.lng,
-      });
+      // 🟢 ส่งไปแค่ rating กับ text เพราะ Backend จัดการเรื่องข้อมูลวัด (upsert) ให้เองแล้ว
+      const res = await api.post(
+        `/temples/${selectedTemple.id}/reviews`,
+        {
+          rating: newRating,
+          text: newComment,
+        },
+        {
+          // 🟢 แนบ Token ไปใน Headers เพื่อผ่านด่าน requireAuth
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.data.success) {
         alert("เพิ่มรีวิวเรียบร้อยแล้ว!");
@@ -249,11 +261,15 @@ export default function Temple() {
                 src={getFullImageUrl(selectedTemple.imageUrl)}
                 alt={selectedTemple.name}
                 className={styles.heroImage}
+                onError={(e) => {
+                  e.currentTarget.src = iconTemple;
+                  e.currentTarget.style.objectFit = "contain";
+                }}
               />
             ) : (
-              <div className={styles.heroPlaceholder}>
-                <Icons.Landmark size={46} color="var(--sms-sub)" />
-                <span style={{ marginTop: 8 }}>ไม่มีรูปภาพตัวอย่าง</span>
+              <div className={styles.heroPlaceholder} style={{ backgroundImage: `url(${iconTemple})`, backgroundSize: '50%', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
+                {/* ปรับให้แสดงรูป iconTemple จางๆ หรือกึ่งกลางแทนข้อความเปล่าๆ */}
+                <span style={{ marginTop: 80, backgroundColor: 'rgba(255,255,255,0.7)', padding: '2px 8px', borderRadius: '4px' }}>ไม่มีรูปภาพตัวอย่าง</span>
               </div>
             )}
           </div>
@@ -433,13 +449,20 @@ export default function Temple() {
                       className={styles.templeThumb}
                       loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLElement).style.display = "none";
+                        // ถ้ารูปจาก URL โหลดไม่ขึ้น (ลิงก์เสีย) ให้เอารูป iconTemple มาแสดงแทน
+                        e.currentTarget.src = iconTemple;
+                        e.currentTarget.style.objectFit = "contain";
                       }}
                     />
                   ) : (
-                    <div className={styles.templeThumbPlaceholder}>
-                      <Icons.Landmark size={28} color="var(--sms-gold)" />
-                    </div>
+                    // ถ้า API ไม่ได้ส่ง imageUrl มาเลย ให้แสดงรูป iconTemple แทนไอคอนตึก
+                    <img
+                      src={iconTemple}
+                      alt={temple.name}
+                      className={styles.templeThumb}
+                      loading="lazy"
+                      style={{ objectFit: "contain", padding: "8px", backgroundColor: "#fdf5e6" }} // ปรับแต่ง CSS อินไลน์นิดหน่อยให้ดูสวยเข้ากับธีม
+                    />
                   )}
 
                   <div className={styles.templeCardInfo}>
