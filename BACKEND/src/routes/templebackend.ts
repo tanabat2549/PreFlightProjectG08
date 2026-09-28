@@ -404,7 +404,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
 // 🟢 3. POST /api/temples/:id/reviews — ให้ดาว (1-5) และเพิ่มข้อความรีวิว
 router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
-    const templeId = req.params.id;
+    const templeId = String(req.params.id);
     const { rating, text } = req.body as ReviewBody;
     const userId = req.userId!;
 

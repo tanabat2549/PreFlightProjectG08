@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getActivityGuide } from '../constants/activityGuides';
 import styles from './Calendar.module.css';
 import buddhaIcon from '../assets/icon/buddha.png';
