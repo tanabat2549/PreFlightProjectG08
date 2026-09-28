@@ -1,23 +1,37 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { dbClient as db } from '../db/client.js';
-import { fortunes } from '../db/schema.js';
+import { fortunes, siemseeHistories } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
+import { optionalAuth, type AuthRequest} from '../middlewares/optionalAuth.js'
 
 const router = Router();
 
 // GET /api/siemsee/draw
-router.get('/draw', async (req: Request, res: Response) => {
+router.get('/draw', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
-    // ให้ Database สุ่มรายการมา 1 รายการโดยตรง (ใช้ได้กับ Postgres, MySQL, SQLite)
+    // ให้ Database สุ่มรายการมา 1 รายการโดยตรง
     const fortuneList = await db
       .select()
-      .from(fortunes)
-      .orderBy(sql`RANDOM()`) // หรือ RAND() หากใช้ MySQL
+      .from(fortunes) // src from database
+      .orderBy(sql`RANDOM()`) // สุ่ม
       .limit(1);
 
     if (fortuneList.length === 0) {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
+    }
+
+    const picked = fortuneList[0];
+
+    if (req.userId) {
+      try {
+        await db.insert(siemseeHistories).values({
+          userId: req.userId,
+          fortuneId: picked.id,
+        });
+      } catch (err) {
+        console.error('Save siemsee history error:', err);
+      }
     }
 
     return res.json({

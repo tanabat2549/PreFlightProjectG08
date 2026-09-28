@@ -41,7 +41,7 @@ export default function Register() {
       // const res = await register({ name, phone, password });
       await new Promise((r) => setTimeout(r, 600)); // จำลอง delay
       navigate('/login');
-    } catch (err) {
+    } catch {
       setError('สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setLoading(false);

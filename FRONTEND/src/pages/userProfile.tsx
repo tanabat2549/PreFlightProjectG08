@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { api } from '../services/api';
 import './userProfile.css';
+
+
 
 interface UserData {
   name: string;
@@ -18,9 +20,12 @@ interface SiamsiHistoryItem {
   id: string;
   date: string;
   stickNumber: number;
-  prediction: string;
-  tag?: string;
-  
+  title: string;
+  workFortune: string;
+  loveFortune: string;
+  moneyFortune: string;
+  studyFortune: string;
+  healthFortune: string;
 }
 
 interface TempleReview {
@@ -33,52 +38,9 @@ interface TempleReview {
 
 type TabKey = 'info' | 'history' | 'reviews';
 
-// ---------- Mock Data ----------
-const MOCK_HISTORY: SiamsiHistoryItem[] = [
-  {
-    id: 'h1',
-    date: '2569-04-12',
-    stickNumber: 7,
-    prediction: 'สิ่งที่หวังไว้จะสำเร็จได้ด้วยความอดทน อย่าเพิ่งท้อถอยในช่วงนี้ โชคลาภจะมาในเดือนหน้า',
-    tag: 'การงาน/โชคลาภ'
-    
-  },
-  {
-    id: 'h2',
-    date: '2569-03-02',
-    stickNumber: 5,
-    prediction: 'การงานมีอุปสรรคเล็กน้อย แต่ผลลัพธ์สุดท้ายจะออกมาดี ให้ระมัดระวังเรื่องคำพูด',
-    tag: 'การงาน'
-  },
-  {
-    id: 'h3',
-    date: '2569-01-18',
-    stickNumber: 17,
-    prediction: 'สุขภาพเป็นเรื่องที่ควรใส่ใจ พักผ่อนให้เพียงพอ เรื่องเงินทองมั่นคงดี',
-    tag: 'สุขภาพ/การเงิน'
-  
-  },
-];
-
-const MOCK_REVIEWS: TempleReview[] = [
-  {
-    id: 'r1',
-    temple: 'วัดพระธาตุดอยสุเทพ',
-    rating: 5,
-    comment: 'บรรยากาศดีมาก วิวสวย พระธาตุงดงาม เดินทางสะดวก',
-    date: '2569-04-12',
-  },
-  {
-    id: 'r2',
-    temple: 'วัดเจดีย์หลวง',
-    rating: 4,
-    comment: 'เงียบสงบ เหมาะแก่การไหว้พระทำสมาธิ ที่จอดรถค่อนข้างจำกัด',
-    date: '2569-03-02',
-  },
-];
-
 const GENDER_OPTIONS = ['ชาย', 'หญิง', 'ไม่ระบุ'];
 const DAY_OPTIONS = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+
 
 function getFaithTier(historyCount: number): { title: string;} {
   if (historyCount >= 20) return { title: 'ผู้เชี่ยวชาญสายบุญ' };
@@ -103,6 +65,14 @@ export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<UserData | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // รีวิววัดจริงของ user ที่ดึงมาจาก backend
+  const [templeReviews, setTempleReviews] = useState<TempleReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
+  // 🆕 ประวัติเซียมซีจริงของ user ที่ดึงมาจาก backend
+  const [siemseeHistory, setSiemseeHistory] = useState<SiamsiHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -133,6 +103,8 @@ export default function UserProfile() {
     } finally {
       googleLogout();
       setUser(null);
+      setTempleReviews([]); // เคลียร์รีวิวตอน logout
+      setSiemseeHistory([]); // 🆕 เคลียร์ประวัติเซียมซีตอน logout ด้วย
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
@@ -171,7 +143,76 @@ export default function UserProfile() {
     }
   };
 
-  const faithTier = getFaithTier(MOCK_HISTORY.length);
+  // 🔧 อิงจากข้อมูลจริงทั้งรีวิว + เซียมซี แทนตัวเลข mock เดิม
+  const faithTier = getFaithTier(siemseeHistory.length + templeReviews.length);
+
+
+  // เพิ่ม useEffect สำหรับดึงข้อมูลล่าสุดจาก Backend เมื่อเปิดหน้าจอ
+  useEffect(() => {
+    const fetchLatestProfile = async () => {
+      if (user?.email) {
+        try {
+          const res = await api.get(`/user/profile/${user.email}`);
+          if (res.data.success && res.data.user) {
+            setUser(res.data.user);
+            localStorage.setItem('userData', JSON.stringify(res.data.user));
+          }
+        } catch (error) {
+          console.error('Failed to fetch latest profile:', error);
+        }
+      }
+    };
+
+    fetchLatestProfile();
+  }, []);
+
+  // ดึงรีวิววัดจริงของ user จาก backend (ต้อง login แล้วเท่านั้น)
+  useEffect(() => {
+    const fetchUserReviews = async () => {
+      const token = localStorage.getItem('token');
+      if (!user?.email || !token) return;
+
+      setReviewsLoading(true);
+      try {
+        const res = await api.get('/user/reviews', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setTempleReviews(res.data.reviews);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user reviews:', error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchUserReviews();
+  }, [user?.email]);
+
+  // 🆕 ดึงประวัติเซียมซีจริงของ user จาก backend (ต้อง login แล้วเท่านั้น)
+  useEffect(() => {
+    const fetchSiemseeHistory = async () => {
+      const token = localStorage.getItem('token');
+      if (!user?.email || !token) return;
+
+      setHistoryLoading(true);
+      try {
+        const res = await api.get('/user/siemsee-history', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setSiemseeHistory(res.data.history);
+        }
+      } catch (error) {
+        console.error('Failed to fetch siemsee history:', error);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchSiemseeHistory();
+  }, [user?.email]);
 
   return (
     <div className="sms-root">
@@ -253,8 +294,10 @@ export default function UserProfile() {
         {user && (
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
             {[
-              { label: 'เขย่าเซียมซี', value: MOCK_HISTORY.length, unit: 'ครั้ง'},
-              { label: 'รีวิวสถานที่มงคล', value: MOCK_REVIEWS.length, unit: 'แห่ง' },
+              // 🔧 นับจากประวัติเซียมซีจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
+              { label: 'เขย่าเซียมซี', value: siemseeHistory.length, unit: 'รอบ'},
+              // นับจากรีวิวจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
+              { label: 'รีวิวสถานที่มงคล', value: templeReviews.length, unit: 'ครั้ง' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -323,13 +366,15 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 2: History */}
+            {/* Tab 2: History — 🆕 ใช้ siemseeHistory จริงจาก backend แทน MOCK_HISTORY */}
             {activeTab === 'history' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {MOCK_HISTORY.length === 0 ? (
+                {historyLoading ? (
+                  <EmptyState text="กำลังโหลดประวัติ..." />
+                ) : siemseeHistory.length === 0 ? (
                   <EmptyState text="ยังไม่มีประวัติการเสี่ยงทายเซียมซี" />
                 ) : (
-                  MOCK_HISTORY.map((item) => (
+                  siemseeHistory.map((item) => (
                     <div
                       key={item.id}
                       className="sms-card-hover"
@@ -373,10 +418,10 @@ export default function UserProfile() {
 
                       <div style={{ paddingRight: '52px', marginBottom: '8px' }}>
                         <div className="sms-font-header" style={{ fontSize: '15px', fontWeight: 600, color: 'var(--sms-maroon-deep)' }}>
-                          {'เซียมซีเสี่ยงทาย'}
+                          {item.title}
                         </div>
                         <div style={{ fontSize: '12px', color: 'var(--sms-sub)', marginTop: '2px' }}>
-                           {item.date} {item.tag && `• ${item.tag}`}
+                           {item.date}
                         </div>
                       </div>
 
@@ -393,7 +438,7 @@ export default function UserProfile() {
                           border: '1px dashed var(--sms-paper-deep)',
                         }}
                       >
-                        "{item.prediction}"
+                        💼 {item.workFortune}
                       </p>
                     </div>
                   ))
@@ -401,13 +446,15 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 3: Reviews */}
+            {/* Tab 3: Reviews — ใช้ templeReviews จริงจาก backend แทน MOCK_REVIEWS */}
             {activeTab === 'reviews' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {MOCK_REVIEWS.length === 0 ? (
+                {reviewsLoading ? (
+                  <EmptyState text="กำลังโหลดรีวิว..." />
+                ) : templeReviews.length === 0 ? (
                   <EmptyState text="ยังไม่มีประวัติการรีวิววัด" />
                 ) : (
-                  MOCK_REVIEWS.map((review) => (
+                  templeReviews.map((review) => (
                     <div
                       key={review.id}
                       className="sms-card-hover"
