@@ -71,22 +71,41 @@ PreFlightProjectG08/
  
 ```env
 PORT=3001
-DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/DB_NAME
-JWT_SECRET=your_jwt_secret
-GOOGLE_CLIENT_ID=your_google_client_id
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+POSTGRES_APP_USER=appuser
+POSTGRES_APP_PASSWORD=5678
+POSTGRES_DB=khorsuanboon_db
+JWT_SECRET=khorsuanboon_super_secret_key_2026
+#CORS Configuration
+# CORS_ORIGIN=http://localhost:5173/
+CORS_ORIGIN=http://localhost:5173
+#Connection String สำหรับ Drizzle
+DATABASE_URL=postgres://appuser:5678@127.0.0.1:5432/khorsuanboon_db
+
+#Google OAuth Credentials (Google Login)
+GOOGLE_CLIENT_ID=543250279776-9oeg10jlpk9q82uhc80vi3b44dso1gg0.apps.googleusercontent.com
+GOOGLE_PLACES_API_KEY=AIzaSyDmWS7crgY78n8vKqQ6E3QPO8UUSIRpUQg
 ```
  
 **`FRONTEND/.env`**
  
 ```env
 VITE_API_URL=http://localhost:3001
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_GOOGLE_CLIENT_ID=543250279776-9oeg10jlpk9q82uhc80vi3b44dso1gg0.apps.googleusercontent.com
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+VITE_API_BASE_URL=/api
+GOOGLE_PLACES_API_KEY=AIzaSyDmWS7crgY78n8vKqQ6E3QPO8UUSIRpUQg
 ```
  
 > ⚠️ **ห้าม commit ไฟล์ `.env` ขึ้น Git** ให้เพิ่มไว้ใน `.gitignore`
 > 💡 ขอ Google Client ID ได้ที่ [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
  
 ---
+
+## Docker Compose (สำหรับรันทั้งโปรเจกต์)
+
+docker compose up --build -d
  
 ## 💻 วิธีที่ 1: รันแบบ Local (Manual)
  
