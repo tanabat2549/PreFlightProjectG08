@@ -28,6 +28,12 @@ function calculateDistance(
   return Math.round(R * c * 100) / 100;
 }
 
+function getPhotoUrl(photos: GooglePlaceItem["photos"], apiKey: string): string | undefined {
+  const photoName = photos?.[0]?.name;
+  if (!photoName) return undefined;
+  return `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=400&key=${apiKey}`;
+}
+
 function getPhotoUrl(photos: GooglePlaceItem["photos"]): string | undefined {
   const photoName = photos?.[0]?.name;
   if (!photoName) return undefined;
@@ -270,6 +276,7 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
         distanceKm: distanceKm,
         location: { lat: placeLat, lng: placeLng },
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${placeLat},${placeLng}&query_place_id=${place.id}`,
+        imageUrl: getPhotoUrl(place.photos, apiKey),
         imageUrl: getPhotoUrl(place.photos),
       };
     });
@@ -321,6 +328,7 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
       rating: place.rating || 0,
       userRatingCount: place.userRatingCount || 0,
       location: { lat: place.location?.latitude, lng: place.location?.longitude },
+      imageUrl: getPhotoUrl(place.photos, apiKey),
       imageUrl: getPhotoUrl(place.photos),
       reviews: (place.reviews || []).map((rev: GoogleReview) => ({
         author: rev.authorAttribution?.displayName || "ผู้ใช้งาน",

@@ -14,9 +14,9 @@
 
 .home-container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 16px 16px 110px;
+  padding: 16px 16px 120px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -29,7 +29,9 @@
   color: var(--sms-gold);
 }
 
-/* Header */
+/* ===================================================
+   Header
+   =================================================== */
 .home-header {
   display: flex;
   justify-content: space-between;
@@ -98,12 +100,14 @@
   color: var(--sms-maroon);
 }
 
-/* Digital Sanctuary Hero */
+/* ===================================================
+   Hero Sanctuary Banner
+   =================================================== */
 .sanctuary-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #4A121B 0%, #2A090F 100%);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 24px 20px;
   color: #FFFFFF;
   box-shadow: 0 10px 24px rgba(58, 12, 20, 0.18);
@@ -182,46 +186,144 @@
   box-shadow: none;
 }
 
-/* Lucky Bento Grid */
-.section-title-wrap {
+/* ===================================================
+   🏛️ Auspicious Master Card (กล่องใหญ่ครอบข้อมูลดวง)
+   =================================================== */
+.auspicious-master-card {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(201, 151, 38, 0.35);
+  border-radius: 26px;
+  padding: 20px;
+  box-shadow: 
+    0 12px 32px -4px rgba(67, 14, 23, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-sizing: border-box;
+}
+
+.master-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed rgba(201, 151, 38, 0.25);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .title-with-icon {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
 }
 
-.section-title-wrap h3 {
-  font-size: 17px;
-  font-weight: 700;
+.auspicious-icon-halo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FFFDF5 0%, #FDF4DE 100%);
+  border: 1.5px solid rgba(201, 151, 38, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(201, 151, 38, 0.15);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.auspicious-master-card:hover .auspicious-icon-halo {
+  transform: rotate(12deg) scale(1.05);
+}
+
+.title-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.auspicious-sup-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sms-gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.auspicious-heading {
+  font-size: 18px;
+  font-weight: 800;
   color: var(--sms-maroon-dark);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.link-settings {
+.highlight-day-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--sms-text-sub);
-  text-decoration: none;
-  background: var(--sms-bg-soft);
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 1px solid #ECE7DF;
-  transition: all 0.2s;
+  background: linear-gradient(135deg, #7A1C28 0%, #4A0E17 100%);
+  color: #FFFDF5;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 2px 8px rgba(122, 28, 40, 0.25);
+  letter-spacing: 0.2px;
 }
 
-.link-settings:hover {
+.btn-change-birthday {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 8px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(201, 151, 38, 0.4);
+  border-radius: 30px;
   color: var(--sms-maroon);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(67, 14, 23, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
 }
 
+.btn-icon-bubble {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(201, 151, 38, 0.15);
+  color: var(--sms-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.btn-change-birthday:hover {
+  background: linear-gradient(135deg, #FFFDF8 0%, #FDF6E2 100%);
+  border-color: var(--sms-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(201, 151, 38, 0.25);
+  color: var(--sms-maroon-dark);
+}
+
+.btn-change-birthday:hover .btn-icon-bubble {
+  transform: rotate(90deg);
+  background: var(--sms-gold);
+  color: #FFFFFF;
+}
+
+/* ===================================================
+   Lucky Bento Grid ภายในการ์ดใหญ่
+   =================================================== */
 .lucky-bento-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -229,11 +331,11 @@
 }
 
 .bento-card {
-  background: var(--sms-card-bg);
+  background: #FFFFFF;
   border: 1px solid #ECE7DF;
   border-radius: 16px;
   padding: 14px 16px;
-  box-shadow: var(--sms-shadow-soft);
+  box-shadow: 0 2px 6px rgba(67, 14, 23, 0.03);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -402,18 +504,14 @@
   background: rgba(201, 151, 38, 0.25);
 }
 
-/* Dual Feature Cards */
-.dual-feature-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
+/* ===================================================
+   Sidebar Feature Cards (เซียมซี, ปฏิทิน, วัด)
+   ================================================== */
 .interactive-siemsee-card {
   position: relative;
   background: linear-gradient(135deg, #FFFDF8 0%, #FAF4E6 100%);
   border: 1px solid var(--sms-gold-border);
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 22px 20px;
   box-shadow: var(--sms-shadow-soft);
   overflow: hidden;
@@ -477,7 +575,7 @@
 .buddhist-calendar-card {
   background: #FFFFFF;
   border: 1px solid #ECE7DF;
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 18px 20px;
   box-shadow: var(--sms-shadow-soft);
   display: flex;
@@ -552,11 +650,24 @@
   line-height: 1.4;
 }
 
-/* Modern Temple Card */
+.section-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title-wrap h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--sms-maroon-dark);
+  margin: 0;
+}
+
 .temple-card-modern {
   background: #FFFFFF;
   border: 1px solid #ECE7DF;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -587,6 +698,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .temple-title-row {
@@ -601,6 +713,9 @@
   font-weight: 600;
   color: var(--sms-maroon-dark);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge-highlight {
@@ -641,12 +756,6 @@
   font-weight: 600;
 }
 
-.meta-tag.highlight {
-  color: var(--sms-maroon);
-  background: #FFF5F5;
-  font-weight: 500;
-}
-
 .btn-direct-nav {
   width: 36px;
   height: 36px;
@@ -667,32 +776,112 @@
   color: #FFFFFF;
 }
 
-/* Desktop Breakpoints (>= 768px) */
-@media (min-width: 768px) {
+.templeThumb {
+  width: 44px;
+  height: 44px;
+  min-width: 10px;
+  padding: 4px;
+}
+
+/* ===================================================
+   💻 Desktop Breakpoint (>= 1024px)
+   =================================================== */
+@media (min-width: 1024px) {
   .home-container {
-    padding: 32px 24px 110px;
+    padding: 28px 40px 120px;
     gap: 28px;
   }
 
+  .home-header {
+    padding: 6px 4px;
+  }
+
+  .avatar-circle {
+    width: 52px;
+    height: 52px;
+  }
+
   .header-text h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .sub-greeting {
     font-size: 14px;
   }
 
+  .merit-badge {
+    padding: 8px 18px;
+  }
+
+  /* แยกเป็น 2 คอลัมน์แบบ Dashboard */
+  .home-dashboard-layout {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .dashboard-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  .dashboard-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    
+  }
+
   .sanctuary-hero {
-    padding: 32px 28px;
+    padding: 32px 36px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-content {
+    max-width: 560px;
   }
 
   .hero-quote {
     font-size: 26px;
   }
 
+  .hero-sub {
+    font-size: 14px;
+  }
+
+  /* การ์ดใหญ่ Auspicious บน Desktop */
+  .auspicious-master-card {
+    padding: 24px 26px;
+    border-radius: 32px;
+  }
+
+  .auspicious-heading {
+    font-size: 20px;
+  }
+
+  .highlight-day-chip {
+    font-size: 14px;
+    padding: 4px 14px;
+  }
+
+  .btn-change-birthday {
+    font-size: 13.5px;
+    padding: 8px 16px 8px 10px;
+  }
+
   .lucky-bento-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+  }
+
+  .bento-card {
+    padding: 16px 18px;
   }
 
   .bento-card.bento-colors {
@@ -714,23 +903,42 @@
     align-items: center;
   }
 
-  .btn-find-temple {
-    align-self: center;
+  .interactive-siemsee-card {
+    padding: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
   }
 
-  .dual-feature-grid {
-    grid-template-columns: 1.2fr 1fr;
-    gap: 20px;
+  .interactive-siemsee-card:hover,
+  .buddhist-calendar-card:hover {
+    box-shadow: var(--sms-shadow-hover);
+    transform: translateY(-2px);
   }
 
-  .temple-card-modern {
-    padding: 18px 20px;
+  .buddhist-calendar-card {
+    transition: box-shadow 0.2s, transform 0.2s;
   }
 
-  .templeThumb {
-  width: 50px;
-  height: 50px;
-  min-width: 10px;
-  
+  .interactive-siemsee-card .siemsee-decor {
+    right: 10px;
+    top: 10px;
+  }
+}
+
+/* ===================================================
+   🖥️ Wide Desktop (>= 1280px)
+   =================================================== */
+@media (min-width: 1280px) {
+  .home-container {
+    padding: 30px 48px 120px;
+  }
+
+  .home-dashboard-layout {
+    grid-template-columns: 1.65fr 1fr;
+    gap: 32px;
+  }
+
+  .dashboard-side-col {
+    max-width: 440px;
+    justify-self: end;
   }
 }

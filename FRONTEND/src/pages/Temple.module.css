@@ -591,7 +591,7 @@
 }
 
 /* ================= DESKTOP RESPONSIVE (>= 768px) ================= */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .listContainer {
     grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์สมมาตร */
     gap: 18px;
@@ -616,7 +616,6 @@
   .templeThumb {
   width: 70px;
   height: 70px;
-  object-fit: cover;
   }
 
 }
