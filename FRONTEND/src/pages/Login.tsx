@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoImg from '../assets/logo.png'; // 👉 เซฟรูปโลโก้ที่ส่งมาไว้ที่ path นี้
+import logoImg from '../assets/logo.png'; 
 import './Login.css';
 
 export default function Login() {

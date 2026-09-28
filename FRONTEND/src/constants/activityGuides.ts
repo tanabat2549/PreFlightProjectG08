@@ -1,5 +1,3 @@
-// src/constants/activityGuides.ts
-
 export interface ActivityDetail {
   howTo: string;
   benefits: string;

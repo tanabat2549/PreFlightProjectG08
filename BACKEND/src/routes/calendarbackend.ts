@@ -71,20 +71,21 @@ router.get("/auspicious-days", async (req, res) => {
     const month = req.query.month ? Number(req.query.month) : today.getMonth() + 1;
     const year = req.query.year ? Number(req.query.year) : today.getFullYear();
 
-    // กรองดึงเฉพาะวันในเดือนและปีที่ระบุ
+    // กรองดึงเฉพาะวันในเดือนและปีที่ระบุ พร้อมเรียงวันที่จากต้นเดือนไปท้ายเดือน
     const days = await db
       .select()
       .from(auspiciousDays)
       .where(
         sql`EXTRACT(MONTH FROM ${auspiciousDays.date}::date) = ${month} 
             AND EXTRACT(YEAR FROM ${auspiciousDays.date}::date) = ${year}`
-      );
+      )
+      .orderBy(sql`${auspiciousDays.date} ASC`);
 
     return res.json({
       month,
       year,
       count: days.length,
-      data: days,
+      data: days.map(formatDayItem), // นำ formatDayItem ไปครอบตรงนี้
     });
   } catch (error) {
     console.error("Calendar Fetch Error:", error);
@@ -100,21 +101,20 @@ router.get("/year-grouped", async (req, res) => {
     const days = await db
       .select()
       .from(auspiciousDays)
-      .where(sql`EXTRACT(YEAR FROM ${auspiciousDays.date}::date) = ${year}`);
+      .where(sql`EXTRACT(YEAR FROM ${auspiciousDays.date}::date) = ${year}`)
+      .orderBy(sql`${auspiciousDays.date} ASC`);
 
     // 2. จัดกลุ่มข้อมูลตามเดือน (Month 1 - 12)
-    const groupedByMonth: Record<number, typeof days> = {};
-    
-    // สร้าง Array มารองรับทั้ง 12 เดือน (1-12)
+    const groupedByMonth: Record<number, any[]> = {};
     for (let i = 1; i <= 12; i++) {
       groupedByMonth[i] = [];
     }
 
-    // เอาข้อมูลแต่ละวันใส่ลงตามเดือนของมัน
+    // สกัดเดือนจากสตริง YYYY-MM-DD เพื่อป้องกันปัญหา Timezone เพี้ยน และแปลงกิจกรรมเป็น Array
     days.forEach((day) => {
-      const monthNum = new Date(day.date).getMonth() + 1;
+      const monthNum = Number(String(day.date).split("-")[1]);
       if (groupedByMonth[monthNum]) {
-        groupedByMonth[monthNum].push(day);
+        groupedByMonth[monthNum].push(formatDayItem(day));
       }
     });
 
@@ -138,13 +138,14 @@ router.get("/year", async (req, res) => {
       .from(auspiciousDays)
       .where(
         sql`EXTRACT(YEAR FROM ${auspiciousDays.date}::date) = ${year}`
-      );
+      )
+      .orderBy(sql`${auspiciousDays.date} ASC`);
 
     return res.json({
       success: true,
       year,
       totalDays: days.length,
-      data: days,
+      data: days.map(formatDayItem), // นำ formatDayItem ไปครอบตรงนี้
     });
   } catch (error) {
     console.error("Yearly Calendar Fetch Error:", error);

@@ -8,6 +8,7 @@ import authRouter from './routes/LoginBackend.js';
 import horoscopeRouter from './routes/horoscopebackend.js';
 import calendarRouter from './routes/calendarbackend.js';
 import templeRouter from './routes/templebackend.js';
+import profileRouter from './routes/profilebackend.js'
 
 
 const app = express();
@@ -39,10 +40,11 @@ app.use(
 
 app.use(express.json());
 app.use('/api/siemsee', siemseeRouter);
-app.use('/api', authRouter);
 app.use('/api/horoscope', horoscopeRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/temples', templeRouter);
+app.use('/api/user', profileRouter)
+app.use('/api', authRouter);
 
 app.get('/health', (req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
