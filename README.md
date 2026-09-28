@@ -1,78 +1,170 @@
-# PreFlightProjectG08
-
-# 🔮 แอป "ขอส่วนบุญ" (Khorsuanboon Project)
-
-> แอปพลิเคชันสำหรับการไหว้พระ ทำบุญ เสริมดวง เขย่าเซียมซี และค้นหาวัดใกล้เคียง
-
+# 🔮 ขอส่วนบุญ (Khorsuanboon)
+ 
+### PreFlightProjectG08
+ 
 ---
-
-## 📋 Checklist สิ่งที่ต้องทำ (Tasks & To-Do List)
-
-### 🗄️ 1. งานฝั่ง Backend & Database (`/BACKEND`)
-
-- [ ] **Database Setup & Migration**
-  - [ ] เปิด PostgreSQL บน Docker (`docker compose up -d`)
-  - [ ] ตรวจสอบความถูกต้องของ Schema ใน `src/db/schema.ts` (7 ตารางหลัก)
-  - [ ] รันคำสั่ง Sync Schema เข้า Database (`npm run db:push`)
-  - [ ] สร้างไฟล์ Seed Data เพื่อใส่ข้อมูลเริ่มต้น (ใบเซียมซี 28 ใบ, วัดตัวอย่าง, วันพระ)
-
-- [ ] **ระบบสมาชิก & Auth (`/api/auth`)**
-  - [ ] `POST /api/auth/register` — สมัครสมาชิก + คำนวณราศีจากวันเกิด
-  - [ ] `POST /api/auth/login` — เข้าสู่ระบบด้วย Email/Password + ส่งกลับ JWT Token
-  - [ ] `POST /api/auth/google` — รองรับ Google OAuth Login
-
-- [ ] **ระบบเซียมซี (`/api/siemsee`)**
-  - [ ] `GET /api/siemsee/draw` — สุ่มเซียมซี (พร้อม Validation ห้ามสุ่มเกิน 1 ครั้ง/วัน)
-  - [ ] `GET /api/siemsee/history` — ดึงประวัติการเขย่าเซียมซีย้อนหลังตาม User ID
-
-- [ ] **ระบบค้นหาวัด & รีวิว (`/api/temples`)**
-  - [ ] `GET /api/temples` — ค้นหาวัด + คำนวณระยะทางจากพิกัด Lat/Lng ผู้ใช้ (Haversine Formula)
-  - [ ] `GET /api/temples/:id` — ดึงรายละเอียดวัด + รีวิวทั้งหมด
-  - [ ] `POST /api/temples/:id/reviews` — ให้ดาว (1-5) และเพิ่มข้อความรีวิว
-
-- [ ] **ระบบดวง & ปฏิทิน (`/api/horoscope`, `/api/calendar`)**
-  - [ ] `GET /api/horoscope/daily` — ดึงดวงประจำวันตามราศีของผู้ใช้
-  - [ ] `GET /api/calendar/auspicious-days` — ดึงวันพระและวันมงคลประจำเดือน
-
+ 
+## 📑 สารบัญ
+ 
+- [ ฟีเจอร์หลัก](#-ฟีเจอร์หลัก)
+- [ Tech Stack](#️-tech-stack)
+- [ โครงสร้างโปรเจกต์](#-โครงสร้างโปรเจกต์)
+- [ สิ่งที่ต้องเตรียม](#-สิ่งที่ต้องเตรียม)
+- [ ตั้งค่า Environment](#-ตั้งค่า-environment)
+- [ วิธีที่ 1: รันแบบ Local (Manual)](#-วิธีที่-2-รันแบบ-local-manual)
+- [ คำสั่งฐานข้อมูล](#️-คำสั่งฐานข้อมูล)
+- [ พอร์ตที่ใช้งาน](#-พอร์ตที่ใช้งาน)
+- [ แก้ปัญหาที่พบบ่อย](#-แก้ปัญหาที่พบบ่อย)
 ---
-
-### 🎨 2. งานฝั่ง Frontend (`/FRONTEND`)
-
-- [ ] **โครงสร้างโปรเจกต์ & API Connection**
-  - [ ] แยกโค้ดจาก `App.tsx` ไปไว้ตามโฟลเดอร์ใน `src/pages/`
-  - [ ] สร้าง API Client Service ด้วย Axios ใน `src/services/api.ts`
-  - [ ] เชื่อมต่อ `.env` เข้ากับ Axios Base URL (`VITE_API_BASE_URL`)
-
-- [ ] **พัฒนาหน้า UI ตาม Mockup**
-  - [ ] **หน้าแรก (`HomePage.tsx`):** แสดงสรุปดวงประจำวัน + ดึงวัดใกล้ฉันจาก API
-  - [ ] **หน้าค้นหาวัด (`TemplePage.tsx`):**
-    - [ ] รวมคอมโพเนนต์ Google Maps (ใช้ `VITE_GOOGLE_MAPS_API_KEY`)
-    - [ ] ทำระบบกักตัวกรอง (ใกล้ฉัน / ยอดนิยม / เปิดตอนนี้)
-  - [ ] **หน้าเซียมซี (`SiemseePage.tsx`):**
-    - [ ] เพิ่มแอนิเมชันตอนเขย่ากระบอกเซียมซี
-    - [ ] ดึงผลทำนาย 5 หมวดจาก Backend มาแสดงผล
-  - [ ] **หน้าปฏิทิน (`CalendarPage.tsx`):** ทำการ์ดแสดงวันพระถัดไป และปฏิทินรายเดือน
-  - [ ] **หน้าโปรไฟล์ & สถิติ (`ProfilePage.tsx`):** แสดงสถิติการเขย่าเซียมซี / รีวิว และปุ่ม Logout
-  - [ ] **หน้าเข้าสู่ระบบ / สมัครสมาชิก (`LoginPage.tsx`):** ทำ Form Validation + Google Login
-
+ 
+## ✨ ฟีเจอร์หลัก
+ 
+| ฟีเจอร์ | รายละเอียด |
+|---|---|
+| 🎋 เขย่าเซียมซี | ดูคำทำนายเซียมซี |
+| 🛕 ค้นหาวัดใกล้เคียง | ค้นหาวัดใกล้ตัวคุณ |
+| 🔑 เข้าสู่ระบบ | สมัคร/เข้าสู่ระบบด้วยอีเมลหรือ Google |
+ 
 ---
-
-### 🛠️ 3. งาน Configuration & Environment
-
-- [ ] ตรวจสอบว่ามีไฟล์ `.env` และ `.env.example` ทั้งใน `BACKEND` และ `FRONTEND`
-- [ ] ตั้งค่า CORS ใน Backend เพื่อยอมรับ Request จาก `http://localhost:5173`
-- [ ] ทดสอบการทำงานเชื่อมกันระหว่าง Frontend และ Backend (Integration Test)
-
+ 
+## 🛠️ Tech Stack
+ 
+| ส่วน | เทคโนโลยี |
+|---|---|
+| 🎨 **Frontend** | React 19, Vite, TypeScript, React Router, Axios, Lucide React |
+| ⚙️ **Backend** | Node.js, Express 5, TypeScript |
+| 🗄️ **Database** | PostgreSQL + Drizzle ORM |
+| 🔐 **Auth** | JWT, bcryptjs, Google OAuth (`@react-oauth/google`, `google-auth-library`) |
+| 🛡️ **Security** | Helmet, CORS |
+| 🐳 **DevOps** | Docker, Docker Compose |
+ 
 ---
+ 
+## 📁 โครงสร้างโปรเจกต์
+ 
+```text
+PreFlightProjectG08/
+├── BACKEND/             # Express API + Drizzle ORM
+│   ├── src/             # โค้ดหลักของ API
+│   └── db/              # Schema และไฟล์ฐานข้อมูล
+├── FRONTEND/            # React + Vite client
+├── docker-compose.yml   # รันทุกบริการพร้อมกัน
+└── README.md
+```
+ 
+---
+ 
+## 🧰 สิ่งที่ต้องเตรียม
+ 
+| วิธีรัน | ต้องมี |
+|---|---|
+| 🐳 Docker | [Docker](https://www.docker.com/) และ Docker Compose |
+| 💻 Local | [Node.js](https://nodejs.org/) (แนะนำ LTS ล่าสุด) + npm และ [PostgreSQL](https://www.postgresql.org/) (พอร์ต `5432`) |
+ 
+---
+ 
+## 🔐 ตั้งค่า Environment
+ 
+สร้างไฟล์ `.env` ในโฟลเดอร์ `BACKEND` และ `FRONTEND` ตามตัวอย่างด้านล่าง
+ 
+**`BACKEND/.env`**
+ 
+```env
+PORT=3001
+DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/DB_NAME
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+```
+ 
+**`FRONTEND/.env`**
+ 
+```env
+VITE_API_URL=http://localhost:3001
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+ 
+> ⚠️ **ห้าม commit ไฟล์ `.env` ขึ้น Git** ให้เพิ่มไว้ใน `.gitignore`
+> 💡 ขอ Google Client ID ได้ที่ [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+ 
+---
+ 
+## 💻 วิธีที่ 1: รันแบบ Local (Manual)
+ 
+> ⚠️ ใช้สำหรับทดสอบหรือรันโปรเจกต์โดยตรงบนเครื่อง
+> **ต้องเปิด PostgreSQL ไว้ที่พอร์ต `5432` ก่อนเริ่ม**
+ 
+### 🔧 ขั้นตอนที่ 1: Backend API (Terminal 1)
+ 
+```bash
+cd BACKEND
+npm install
+npx drizzle-kit push
+npm run db:seed      # (ไม่บังคับ) ใส่ข้อมูลตั้งต้น
+npm run dev
+```
+ 
+✅ Backend จะทำงานที่ 👉 **http://localhost:3001**
+ 
+### 🎨 ขั้นตอนที่ 2: Frontend Client (Terminal 2)
+ 
+```bash
+cd FRONTEND
+npm install
+npm run dev
+```
+ 
+✅ Frontend จะทำงานที่ 👉 **http://localhost:5173**
+ 
+---
+ 
+## 🗄️ คำสั่งฐานข้อมูล
+ 
+รันในโฟลเดอร์ `BACKEND`
+ 
+| คำสั่ง | หน้าที่ |
+|---|---|
+| `npm run db:generate` | สร้างไฟล์ migration จาก schema |
+| `npm run db:push` | ซิงก์ schema เข้าฐานข้อมูลโดยตรง |
+| `npm run db:migrate` | รัน migration |
+| `npm run db:seed` | ใส่ข้อมูลตั้งต้น (seed) |
+ 
+### 📦 สคริปต์อื่นๆ
+ 
+| ส่วน | คำสั่ง | หน้าที่ |
+|---|---|---|
+| Backend | `npm run build` | คอมไพล์ TypeScript |
+| Backend | `npm start` | รันโค้ดที่บิลด์แล้ว (production) |
+| Frontend | `npm run build` | บิลด์สำหรับ production |
+| Frontend | `npm run lint` | ตรวจโค้ดด้วย ESLint |
+| Frontend | `npm run preview` | พรีวิวเวอร์ชันที่บิลด์แล้ว |
+ 
+---
+ 
+## 🌐 พอร์ตที่ใช้งาน
+ 
+| บริการ | โหมด | URL |
+|---|---|---|
+| 🖥️ Web App | Docker | http://localhost:6008 |
+| ⚙️ Backend API | Local | http://localhost:3001 |
+| 🎨 Frontend | Local | http://localhost:5173 |
+| 🗄️ PostgreSQL | Local | `localhost:5432` |
+ 
+---
+ 
+## 🩺 แก้ปัญหาที่พบบ่อย
+ 
+| ปัญหา | วิธีแก้ |
+|---|---|
+| ❌ พอร์ตถูกใช้งานอยู่ | ปิดโปรแกรมที่ใช้พอร์ตนั้น หรือเปลี่ยนพอร์ตใน `docker-compose.yml` |
+| ❌ เชื่อมต่อฐานข้อมูลไม่ได้ | ตรวจว่า PostgreSQL เปิดอยู่ และ `DATABASE_URL` ถูกต้อง |
+| ❌ ข้อมูลใน Docker เพี้ยน | รัน `docker compose down -v` แล้ว `docker compose up --build -d` ใหม่ |
+| ❌ Google Login ใช้ไม่ได้ | ตรวจ `GOOGLE_CLIENT_ID` และเพิ่ม `http://localhost:5173` ใน Authorized origins |
+ 
+---
+ 
+ 
 
-
-🎨 สเปกโทนสีของแอป (Design Tokens)
-สีทองนวล (Primary Gold): #C9A03D
-
-สีแดงอิฐ (Stamp Red): #8C3B3B
-
-สีพื้นหลังครีม (Background Cream): #FDFBF7
-
-สีตัวหนังสือหลัก (Text Main): #332C27
-
-ฟอนต์หลัก: Noto Serif Thai (หัวข้อ) / Noto Sans Thai (เนื้อหา)
+**สาธุ 🙏 ขอให้โชคดีมีสุข**
+ 
+Made with ❤️ by PreFlight Group 08
+---

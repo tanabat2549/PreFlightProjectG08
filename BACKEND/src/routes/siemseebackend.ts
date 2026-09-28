@@ -3,46 +3,61 @@ import type { Request, Response } from 'express';
 import { dbClient as db } from '../db/client.js';
 import { fortunes, siemseeHistories } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
-import { optionalAuth, type AuthRequest} from '../middlewares/optionalAuth.js'
+import { requireAuth, type AuthRequest} from '../middlewares/requireAuth.ts'
 
 const router = Router();
 
 // GET /api/siemsee/draw
-router.get('/draw', optionalAuth, async (req: AuthRequest, res: Response) => {
+router.get('/draw', async (_req: Request, res: Response) => {
   try {
-    // ให้ Database สุ่มรายการมา 1 รายการโดยตรง
     const fortuneList = await db
       .select()
-      .from(fortunes) // src from database
-      .orderBy(sql`RANDOM()`) // สุ่ม
+      .from(fortunes)
+      .orderBy(sql`RANDOM()`)
       .limit(1);
 
     if (fortuneList.length === 0) {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
     }
 
-    const picked = fortuneList[0];
-
-    if (req.userId) {
-      try {
-        await db.insert(siemseeHistories).values({
-          userId: req.userId,
-          fortuneId: picked.id,
-        });
-      } catch (err) {
-        console.error('Save siemsee history error:', err);
-      }
-    }
-
-    return res.json({
-      success: true,
-      data: fortuneList[0]
-    });
+    return res.json({ success: true, data: fortuneList[0] });
   } catch (error) {
     console.error('Error drawing fortune:', error);
     return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
+
+// POST /api/siemsee/save — กด "เก็บใบเซียมซี" ถึงจะบันทึกลงประวัติ
+// (การ "ทิ้งเซียมซี" ไม่ต้องมี API เพราะยังไม่มีอะไรถูกเก็บ)
+router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const fortuneId = Number(req.body?.fortuneId);
+    if (!Number.isInteger(fortuneId)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุ fortuneId' });
+    }
+
+    const exists = await db
+      .select({ id: fortunes.id })
+      .from(fortunes)
+      .where(eq(fortunes.id, fortuneId))
+      .limit(1);
+
+    if (exists.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบใบเซียมซีนี้' });
+    }
+
+    await db.insert(siemseeHistories).values({
+      userId: req.userId!,
+      fortuneId,
+    });
+
+    return res.status(201).json({ success: true, message: 'เก็บใบเซียมซีเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Save siemsee error:', error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
 
 // GET /api/siemsee/fortunes
 router.get('/fortunes', async (req: Request, res: Response) => {
