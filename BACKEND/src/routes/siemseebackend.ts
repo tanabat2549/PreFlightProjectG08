@@ -3,13 +3,17 @@ import type { Request, Response } from 'express';
 import { dbClient as db } from '../db/client.js';
 import { fortunes, siemseeHistories } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
-import { requireAuth, type AuthRequest} from '../middlewares/requireAuth.ts'
+import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
+import { generatePersonalizedSiamsi } from '../services/aisimsee.js';
 
 const router = Router();
 
-// GET /api/siemsee/draw
-router.get('/draw', async (_req: Request, res: Response) => {
+// GET /api/siemsee/draw?name=สมชาย
+router.get('/draw', async (req: Request, res: Response) => {
   try {
+    const name = req.query.name as string | undefined;
+
+    // 1. สุ่มใบเซียมซีจากฐานข้อมูล
     const fortuneList = await db
       .select()
       .from(fortunes)
@@ -20,15 +24,31 @@ router.get('/draw', async (_req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
     }
 
-    return res.json({ success: true, data: fortuneList[0] });
+    const fortune = fortuneList[0];
+let personalizedFortune: string | null = null;
+
+// 2. ถ้ามีการส่งชื่อเข้ามา ให้เรียกใช้ Gemini AI แปลคำทำนาย
+if (name) {
+  try {
+    const aiResult = await generatePersonalizedSiamsi(fortune, { name }); // 🆕 ส่งเป็น object { name }
+    personalizedFortune = aiResult.text; // 🆕 ดึงแค่ field .text ออกมา (ไม่ใช่ทั้ง object)
+  } catch (aiError) {
+    console.error('Gemini AI Generation Error:', aiError);
+  }
+}
+
+    return res.json({ 
+      success: true, 
+      data: fortune,
+      personalizedFortune 
+    });
   } catch (error) {
     console.error('Error drawing fortune:', error);
     return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
 
-// POST /api/siemsee/save — กด "เก็บใบเซียมซี" ถึงจะบันทึกลงประวัติ
-// (การ "ทิ้งเซียมซี" ไม่ต้องมี API เพราะยังไม่มีอะไรถูกเก็บ)
+// POST /api/siemsee/save — บันทึกลงประวัติ
 router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const fortuneId = Number(req.body?.fortuneId);
@@ -58,9 +78,8 @@ router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-
 // GET /api/siemsee/fortunes
-router.get('/fortunes', async (req: Request, res: Response) => {
+router.get('/fortunes', async (_req: Request, res: Response) => {
   try {
     const allFortunes = await db.select().from(fortunes);
 
