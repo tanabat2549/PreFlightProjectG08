@@ -27,7 +27,7 @@ async function main() {
   }
 }
 
-// เช็กให้รันเฉพาะเมื่อเรียกผ่าน CLI โดยตรง
+// เช็กให้รันเฉพาะเมื่อเรียกผ่าน CLI 
 const isDirectCall = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isDirectCall) {
   main().then(() => process.exit(0));

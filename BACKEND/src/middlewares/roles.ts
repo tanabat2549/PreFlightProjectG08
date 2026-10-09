@@ -10,7 +10,7 @@ export interface AdminRequest extends Request {
     role: string;
   };
 }
-
+// Middleware สำหรับตรวจสอบสิทธิ์ SuperAdmin
 export function requireSuperAdmin(req: AdminRequest, res: Response, next: NextFunction) {
   if (!req.actor) {
     return res.status(401).json({ success: false, message: 'กรุณาเข้าสู่ระบบก่อนใช้งาน' });

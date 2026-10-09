@@ -43,3 +43,4 @@ async function main() {
 }
 
 main();
+//สคริปต์ซ่อม database

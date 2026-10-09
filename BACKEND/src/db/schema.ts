@@ -180,3 +180,4 @@ export const siemseeHistoriesRelations = relations(siemseeHistories, ({ one }) =
     references: [fortunes.id],
   }),
 }));
+//

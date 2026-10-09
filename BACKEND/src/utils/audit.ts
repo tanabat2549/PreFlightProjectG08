@@ -11,7 +11,7 @@ export async function logAudit(
   try {
     const actorId = req.actor?.id || null;
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
-
+//
     await db.insert(auditLogs).values({
       actorId,
       action,

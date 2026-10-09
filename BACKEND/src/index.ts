@@ -39,7 +39,7 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-
+// เพิ่ม middleware สำหรับแปลง request body เป็น JSON
 app.use(express.json());
 
 app.use('/api/siemsee', siemseeRouter);
