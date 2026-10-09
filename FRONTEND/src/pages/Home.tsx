@@ -172,41 +172,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 2. Interactive Digital Sanctuary Hero */}
-      <section className="sanctuary-hero">
-        <div className="hero-glow-bg" />
-        <div className="hero-content">
-          <span className="daily-quote-tag">คติธรรมเตือนใจวันนี้</span>
-          <h3 className="hero-quote">"จิตที่ฝึกดีแล้ว นำสุขมาให้"</h3>
-          <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
-          <button
-            type="button"
-            className={`btn-altar-action ${hasOffered ? 'offered' : ''}`}
-            onClick={handleDailyMerit}
-          >
-            {hasOffered ? <Icons.CheckCircle size={16} /> : <Icons.Flame size={16} />}
-            <span>{offerText}</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 3. Daily Auspicious Guide (มงคลประจำวันเกิด) */}
-      <section className="lucky-section">
-        <div className="section-title-wrap">
-          <div className="title-with-icon">
-            <Icons.Sparkles size={18} color="var(--sms-gold)" />
-            <h3>มงคลประจำวัน • {auspicious.dayName}</h3>
-          </div>
-          <Link to="/profile" className="link-settings" title="เปลี่ยนวันเกิด">
-            <Icons.Settings size={14} />
-            <span>เปลี่ยนวันเกิด</span>
-          </Link>
-        </div>
-      </header>
-
       {/* 🌟 Dashboard Layout แบบ 2 คอลัมน์บน Desktop */}
       <div className="home-dashboard-layout">
-        
+
         {/* คอลัมน์หลักฝั่งซ้าย: Hero Banner + Master Card มงคลประจำวัน */}
         <div className="dashboard-main-col">
           {/* 2. Interactive Digital Sanctuary Hero */}
@@ -232,7 +200,6 @@ export default function Home() {
             {/* ส่วนหัวในกล่องใหญ่ */}
             <div className="master-card-header">
               <div className="title-with-icon">
-               
                 <div className="title-text-group">
                   <span className="auspicious-sup-tag">คำทำนายและฤกษ์มงคล</span>
                   <h3 className="auspicious-heading">
