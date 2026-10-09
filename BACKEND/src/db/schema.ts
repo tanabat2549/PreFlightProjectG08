@@ -1,6 +1,6 @@
 import { 
   pgTable, serial, varchar, text, integer, doublePrecision, 
-  timestamp, date, boolean, unique, index, time, pgEnum 
+  timestamp, date, boolean, unique, index, time, pgEnum, jsonb 
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -12,6 +12,8 @@ export const zodiacEnum = pgEnum('zodiac_sign', [
   'leo', 'virgo', 'libra', 'scorpio', 
   'sagittarius', 'capricorn', 'aquarius', 'pisces'
 ]);
+
+export const roleEnum = pgEnum('user_role', ['user', 'superadmin']);
 
 // ==========================================
 // 1. ตารางผู้ใช้งาน
@@ -26,6 +28,8 @@ export const users = pgTable('users', {
   blessing: text('blessing'),
   picture: text('picture'),
   googleId: varchar('google_id', { length: 255 }),
+  role: roleEnum('role').notNull().default('user'),
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().$onUpdateFn(() => new Date()).notNull(),
 }, (t) => ({
@@ -125,6 +129,20 @@ export const auspiciousDays = pgTable('auspicious_days', {
 });
 
 // ==========================================
+// 8. ตารางประวัติการใช้งาน (Audit Logs)
+// ==========================================
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  actorId: integer('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  action: varchar('action', { length: 100 }).notNull(),
+  targetType: varchar('target_type', { length: 50 }),
+  targetId: integer('target_id'),
+  details: jsonb('details'),
+  ip: varchar('ip', { length: 50 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// ==========================================
 // Drizzle Relations (สำหรับ Relational Queries)
 // ==========================================
 
@@ -162,3 +180,4 @@ export const siemseeHistoriesRelations = relations(siemseeHistories, ({ one }) =
     references: [fortunes.id],
   }),
 }));
+//
