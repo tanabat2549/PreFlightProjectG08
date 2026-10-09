@@ -115,6 +115,7 @@ export default function Temple() {
 
     setLoading(true);
     setErrorMsg("");
+    setTemples([]); 
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {

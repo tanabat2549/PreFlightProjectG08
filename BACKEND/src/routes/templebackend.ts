@@ -144,7 +144,9 @@ interface NearbyQueryParams {
   lat?: string;
   lng?: string;
   radius?: string;
+  query?: string;
 }
+
 
 interface ReviewBody {
   rating: number;
@@ -208,36 +210,73 @@ router.get(/^\/photo\/(.+)$/, async (req: Request, res: Response) => {
 // GET /api/temples — ค้นหาวัด + คำนวณระยะทางจากพิกัด Lat/Lng ผู้ใช้ 
 router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Response): Promise<Response> => {
   try {
-    const { lat, lng, radius = "5000" } = req.query;
-
-    if (!lat || !lng) {
-      return res.status(400).json({
-        success: false,
-        message: "กรุณาระบุพิกัด lat และ lng ใน Query Parameter",
-      });
-    }
-
-    const userLat = parseFloat(lat);
-    const userLng = parseFloat(lng);
+    const { lat, lng, radius = "5000", query } = req.query;
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({ success: false, message: "API Key ไม่ถูกต้อง" });
     }
 
-    const googleResponse = await fetch(
-      "https://places.googleapis.com/v1/places:searchNearby",
-      {
+    const hasCoords = !!lat && !!lng;
+    const userLat = hasCoords ? parseFloat(lat!) : null;
+    const userLng = hasCoords ? parseFloat(lng!) : null;
+    const trimmedQuery = query?.trim();
+
+    // ต้องมีอย่างน้อย query หรือพิกัด
+    if (!trimmedQuery && !hasCoords) {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณาระบุคำค้นหา หรือพิกัด lat และ lng",
+      });
+    }
+
+    const fieldMask =
+      "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos";
+
+    let googleResponse: Response | globalThis.Response;
+
+    if (trimmedQuery) {
+      // ---------- Text Search ----------
+      const body: any = {
+        textQuery: trimmedQuery.includes("วัด") ? trimmedQuery : `วัด ${trimmedQuery}`,
+        includedType: "buddhist_temple",
+        strictTypeFiltering: false,
+        languageCode: "th",
+        regionCode: "TH",
+        pageSize: 20,
+      };
+
+      if (hasCoords) {
+        body.locationBias = {
+          circle: {
+            center: { latitude: userLat, longitude: userLng },
+            radius: 50000, // bias สูงสุด 50km
+          },
+        };
+      }
+
+      googleResponse = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask":
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos",
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify(body),
+      });
+    } else {
+      // ---------- Nearby Search (เดิม) ----------
+      googleResponse = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
         },
         body: JSON.stringify({
           includedTypes: ["buddhist_temple"],
           maxResultCount: 20,
+          languageCode: "th",
           locationRestriction: {
             circle: {
               center: { latitude: userLat, longitude: userLng },
@@ -245,8 +284,8 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
             },
           },
         }),
-      }
-    );
+      });
+    }
 
     const result = (await googleResponse.json()) as GoogleSearchResponse;
 
@@ -260,7 +299,8 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
       const placeLat = place.location?.latitude || 0;
       const placeLng = place.location?.longitude || 0;
 
-      const distanceKm = calculateDistance(userLat, userLng, placeLat, placeLng);
+      const distanceKm =
+        hasCoords ? calculateDistance(userLat!, userLng!, placeLat, placeLng) : null;
 
       return {
         id: place.id,
@@ -268,14 +308,17 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
         address: place.formattedAddress || "",
         rating: place.rating || 0,
         userRatingCount: place.userRatingCount || 0,
-        distanceKm: distanceKm,
+        distanceKm,
         location: { lat: placeLat, lng: placeLng },
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${placeLat},${placeLng}&query_place_id=${place.id}`,
         imageUrl: getPhotoUrl(place.photos),
       };
     });
 
-    temples.sort((a, b) => a.distanceKm - b.distanceKm);
+    // เรียงตามระยะทางเฉพาะตอนมีพิกัด (Text Search ให้ Google เรียงตามความเกี่ยวข้องไว้แล้ว)
+    if (hasCoords && !trimmedQuery) {
+      temples.sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+    }
 
     upsertTemples(temples);
 
@@ -297,14 +340,13 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
     }
 
     const googleResponse = await fetch(
-      `https://places.googleapis.com/v1/places/${templeId}`,
+      `https://places.googleapis.com/v1/places/${encodeURIComponent(templeId)}?languageCode=th&regionCode=TH`,
       {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
           "X-Goog-FieldMask":
-            "id,displayName,formattedAddress,location,rating,userRatingCount,reviews,photos",
+          "id,displayName,formattedAddress,location,rating,userRatingCount,reviews,photos",
         },
       }
     );
