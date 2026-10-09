@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 
@@ -8,11 +9,12 @@ import authRouter from './routes/LoginBackend.js';
 import horoscopeRouter from './routes/horoscopebackend.js';
 import calendarRouter from './routes/calendarbackend.js';
 import templeRouter from './routes/templebackend.js';
-import profileRouter from './routes/profilebackend.js'
-
+import profileRouter from './routes/profilebackend.js';
+import superAdminRouter from './routes/superAdminBackend.js'; // 👈 เพิ่มบรรทัดนี้
 
 const app = express();
 app.disable('etag');
+
 const port = process.env.PORT || 3001;
 
 const allowedOrigins = [
@@ -20,7 +22,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:3000',
   'http://fsg08.cpecmu.com',
-  process.env.CORS_ORIGIN
+  process.env.CORS_ORIGIN,
 ].filter(Boolean) as string[];
 
 app.use(
@@ -33,20 +35,22 @@ app.use(
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
 app.use(express.json());
+
 app.use('/api/siemsee', siemseeRouter);
 app.use('/api/horoscope', horoscopeRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/temples', templeRouter);
-app.use('/api/user', profileRouter)
+app.use('/api/user', profileRouter);
+app.use('/api/admin', superAdminRouter);
 app.use('/api', authRouter);
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
 });
 
