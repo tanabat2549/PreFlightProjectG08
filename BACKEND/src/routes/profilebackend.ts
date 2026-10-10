@@ -1,7 +1,7 @@
 import { Router, type Response, type Request } from 'express';
 import { dbClient } from '../db/client.js';
 import { users, reviews, temples, siemseeHistories, fortunes } from '../db/schema.js';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { requireAuth, type AuthRequest} from '../middlewares/requireAuth.js'
 
 const router = Router();
@@ -182,6 +182,34 @@ router.get('/siemsee-history', requireAuth, async (req: AuthRequest, res: Respon
   } catch (error) {
     console.error('Fetch siemsee history error:', error);
     return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงประวัติ' });
+  }
+});
+
+// ==========================================
+// 🆕 5. DELETE /api/user/siemsee-history/:id — ลบ/ทิ้งใบเซียมซีออกจากประวัติ
+// ==========================================
+router.delete('/siemsee-history/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const userId = req.userId!;
+    const historyId = Number(req.params.id);
+
+    if (!historyId || isNaN(historyId)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุ id ให้ถูกต้อง' });
+    }
+
+    const deleted = await dbClient
+      .delete(siemseeHistories)
+      .where(and(eq(siemseeHistories.id, historyId), eq(siemseeHistories.userId, userId)))
+      .returning();
+
+    if (deleted.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการที่ต้องการลบ หรือไม่มีสิทธิ์ลบ' });
+    }
+
+    return res.json({ success: true, message: 'ทิ้งใบเซียมซีออกจากประวัติเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Delete siemsee history error:', error);
+    return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบประวัติ' });
   }
 });
 

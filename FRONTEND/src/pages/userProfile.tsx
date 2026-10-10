@@ -42,10 +42,10 @@ const GENDER_OPTIONS = ['ชาย', 'หญิง', 'ไม่ระบุ'];
 const DAY_OPTIONS = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 
 
-function getFaithTier(historyCount: number): { title: string;} {
+function getFaithTier(historyCount: number): { title: string; } {
   if (historyCount >= 20) return { title: 'ผู้เชี่ยวชาญสายบุญ' };
   if (historyCount >= 5) return { title: 'ผู้ศรัทธาสม่ำเสมอ' };
-  return { title: 'ผู้เริ่มต้นเส้นทางบุญ'};
+  return { title: 'ผู้เริ่มต้นเส้นทางบุญ' };
 }
 
 export default function UserProfile() {
@@ -214,6 +214,25 @@ export default function UserProfile() {
     fetchSiemseeHistory();
   }, [user?.email]);
 
+  // 🗑️ ทิ้ง/ลบใบเซียมซีออกจากประวัติ
+  const handleDeleteSiemsee = async (historyId: string, stickNumber: number) => {
+    if (!window.confirm(`คุณต้องการทิ้งใบเซียมซีใบที่ ${stickNumber} ออกจากประวัติใช่หรือไม่?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.delete(`/user/siemsee-history/${historyId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.success) {
+        setSiemseeHistory((prev) => prev.filter((item) => item.id !== historyId));
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'ไม่สามารถทิ้งใบเซียมซีได้');
+    }
+  };
+
   return (
     <div className="sms-root">
       {/* Background */}
@@ -222,8 +241,8 @@ export default function UserProfile() {
       <div style={{ flex: 1 }}>
         {/* Header Bar */}
         <div className={`sms-header-bar ${user ? 'left' : 'center'}`}>
-  <span className="sms-font-header sms-header-title">โปรไฟล์</span>
-</div>
+          <span className="sms-font-header sms-header-title">โปรไฟล์</span>
+        </div>
 
         {/* Avatar & Halo */}
         <div className="sms-avatar-container">
@@ -263,7 +282,7 @@ export default function UserProfile() {
           )}
         </div>
 
-        {/* แสดงเฉพาะตอนเข้าสู่ระบบแล้ว: คติธรรมนำชีวิตประจำวัน */}
+        {/* แสดงเฉพาะตอนเข้าสู่ระบบแล้ว: คติธรรมนำชีวิตประจำวัน
         {user && (
           <div className="sms-fortune-banner">
             <div style={{ fontSize: '12px', opacity: 0.85, letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 500 }}>
@@ -273,7 +292,7 @@ export default function UserProfile() {
               "จิตที่ฝึกดีแล้ว นำสุขมาให้ ความเพียรในวันนี้คือโชคดีในวันหน้า"
             </p>
           </div>
-        )}
+        )} */}
 
         {/* ปุ่ม Login กรณีที่ยังไม่ได้เข้าสู่ระบบ */}
         {!user && (
@@ -295,7 +314,7 @@ export default function UserProfile() {
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
             {[
               // 🔧 นับจากประวัติเซียมซีจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
-              { label: 'เขย่าเซียมซี', value: siemseeHistory.length, unit: 'รอบ'},
+              { label: 'เขย่าเซียมซี', value: siemseeHistory.length, unit: 'รอบ' },
               // นับจากรีวิวจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
               { label: 'รีวิวสถานที่มงคล', value: templeReviews.length, unit: 'ครั้ง' },
             ].map((stat) => (
@@ -312,7 +331,7 @@ export default function UserProfile() {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}
               >
-            <div className="sms-font-header" style={{ fontSize: '22px', color: 'var(--sms-maroon)', fontWeight: 600 }}>
+                <div className="sms-font-header" style={{ fontSize: '22px', color: 'var(--sms-maroon)', fontWeight: 600 }}>
                   {stat.value} <span style={{ fontSize: '12px', color: 'var(--sms-sub)', fontWeight: 400 }}>{stat.unit}</span>
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--sms-sub)', marginTop: '2px' }}>{stat.label}</div>
@@ -326,9 +345,9 @@ export default function UserProfile() {
           <>
             <div className="sms-tab-bar">
               {[
-                { key: 'info', label: 'ข้อมูลดวง'},
-                { key: 'history', label: 'ประวัติเซียมซี'},
-                { key: 'reviews', label: 'รีวิววัด'},
+                { key: 'info', label: 'ข้อมูลดวง' },
+                { key: 'history', label: 'ประวัติเซียมซี' },
+                { key: 'reviews', label: 'รีวิววัด' },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -421,7 +440,7 @@ export default function UserProfile() {
                           {item.title}
                         </div>
                         <div style={{ fontSize: '12px', color: 'var(--sms-sub)', marginTop: '2px' }}>
-                           {item.date}
+                          {item.date}
                         </div>
                       </div>
 
@@ -440,6 +459,43 @@ export default function UserProfile() {
                       >
                         💼 {item.workFortune}
                       </p>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSiemsee(item.id, item.stickNumber)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '5px 12px',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            color: '#991B1B',
+                            backgroundColor: '#FEF2F2',
+                            border: '1px solid #FECACA',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FEE2E2';
+                            e.currentTarget.style.borderColor = '#FCA5A5';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FEF2F2';
+                            e.currentTarget.style.borderColor = '#FECACA';
+                          }}
+                          title="ทิ้งใบเซียมซีนี้ออกจากประวัติ"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                          </svg>
+                          ทิ้งใบนี้
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -504,7 +560,7 @@ export default function UserProfile() {
           <div className="sms-modal-sheet sms-rise" onClick={(e) => e.stopPropagation()}>
             <div style={{ height: '4px', width: '40px', background: 'var(--sms-paper-deep)', borderRadius: '10px', margin: '0 auto 16px' }} />
             <h3 className="sms-font-header" style={{ color: 'var(--sms-maroon-deep)', margin: '0 0 16px', fontSize: '18px', fontWeight: 600 }}>
-             บันทึกดวงชะตาและข้อมูลส่วนตัว
+              บันทึกดวงชะตาและข้อมูลส่วนตัว
             </h3>
 
             <FormField label="ชื่อ-นามสกุล / ชื่อเสริมดวง">

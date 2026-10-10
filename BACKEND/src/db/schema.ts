@@ -4,14 +4,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// ==========================================
-// 0. Enums (ประกาศค่าคงที่ที่ตายตัว)
-// ==========================================
-export const zodiacEnum = pgEnum('zodiac_sign', [
-  'aries', 'taurus', 'gemini', 'cancer', 
-  'leo', 'virgo', 'libra', 'scorpio', 
-  'sagittarius', 'capricorn', 'aquarius', 'pisces'
-]);
+
 
 // ==========================================
 // 1. ตารางผู้ใช้งาน
@@ -103,14 +96,13 @@ export const siemseeHistories = pgTable('siemsee_histories', {
 // ==========================================
 export const dailyHoroscopes = pgTable('daily_horoscopes', {
   id: serial('id').primaryKey(),
-  zodiacSign: zodiacEnum('zodiac_sign').notNull(),
-  date: date('date').notNull(),
+  description: text('description').notNull(),
   luckyColor: varchar('lucky_color', { length: 50 }).notNull(),
   luckyNumber: varchar('lucky_number', { length: 50 }).notNull(),
-  description: text('description').notNull(),
-}, (t) => ({
-  unq: unique('zodiac_date_idx').on(t.zodiacSign, t.date),
-}));
+  friends: varchar('friends').notNull(),
+  tips: varchar('tips').notNull(),
+  
+}, (t) => ({}));
 
 // ==========================================
 // 7. ตารางปฏิทินวันพระ / วันมงคล

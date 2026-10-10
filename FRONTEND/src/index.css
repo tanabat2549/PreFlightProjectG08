@@ -18,29 +18,84 @@
   padding: 0;
 }
 
-body {
-  font-family: var(--font-body);
-  background-color: #ECE8DF; /* สีพื้นหลังรอบนอกหน้าจอ Desktop */
-  color: var(--text-main);
-  -webkit-font-smoothing: antialiased;
+html {
+  width: 100%;
+  min-height: 100vh;
+  /* ป้องกันการเกิดแถบเลื่อนแนวนอน (Horizontal Scrollbar) ที่มักเกิดจาก element ล้นจอ */
+  overflow-x: hidden; 
+  overflow-y: auto;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #484141; /* สีพื้นหลังขอบซ้าย-ขวาบนจอคอม */
+  justify-content: center;
+  align-items: flex-start;
+  overflow: visible;
+}
 
+/* 2. กรอบ #root ล็อคขนาดกว้าง 1200px เท่ากับ BottomNav และใส่รูปพื้นหลังตรงนี้ */
 #root {
   width: 100%;
-  max-width: 1200px; /* ขยายรองรับหน้าจอ PC */
+  max-width: 100%;
+  /* กำหนดความสูงเท่ากับหน้าจอโน้ตบุ๊กพอดี */
   min-height: 100vh;
   margin: 0 auto;
-  background-color: var(--bg-cream);
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  overflow: visible;
+  /* 🖼️ ภาพขนาด 1200x850 px */
+  background-image: url('./assets/bg7.png');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;          /* รักษาสัดส่วนภาพ ไม่โดนบีบ */
+  background-attachment: fixed;    /* ล็อคพื้นหลังให้อยู่กับที่ */
 }
 
-/* คอลัมน์การ์ดสำหรับ PC */
+/* ===================================================
+   Container กลางสำหรับหุ้มเนื้อหาทุกหน้า (ยืดหยุ่นตามจอ)
+   =================================================== */
+.page-container,
+.home-container {
+  width: 100%;
+  max-width: 100%; /* ไม่ให้กว้างเกินไปบนจอคอม Ultra-wide */
+  margin: 0;
+  padding: 16px 20px 100px; /* Padding สำหรับจอมือถือ */
+  box-sizing: border-box;
+}
+
+/* ปรับระยะห่างบนหน้าจอคอม (>= 768px) */
+@media (min-width: 768px) {
+  .page-container,
+  .home-container {
+    padding: 32px 40px 100px;
+  }
+}
+
+/* ===================================================
+   ระบบ Grid อัจฉริยะ (ยืดหดคอลัมน์อัตโนมัติ)
+   =================================================== */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  /* auto-fit: บนมือถือจะเป็น 1 แถว พอจอคอมกว้างขึ้นจะเพิ่มเป็น 2, 3, 4 คอลัมน์เอง */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .grid-container {
+    gap: 24px;
+  }
+}
+
+/* รูปภาพและไอคอนทั้งหมดจะไม่ล้นหน้าจอ */
+img, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 h1, h2, h3, h4 {

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../services/api';
 import './Home.css';
 
 import iconTemple from '../assets/icon/iconTemple.png';
 
-// SVG Icons แบบ Minimal (ใช้ SVG ตรง ไม่พึ่งพา external library ลดปัญหา hook conflict)
+// SVG Icons แบบ Minimal
 const Icons = {
   Sparkles: ({ size = 18, color = 'currentColor' }: { size?: number; color?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,17 +72,6 @@ const Icons = {
       <line x1="3" x2="21" y1="10" y2="10" />
     </svg>
   ),
-  Landmark: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="2" x2="22" y1="22" y2="22" />
-      <line x1="12" x2="12" y1="2" y2="6" />
-      <path d="m2 6 10-4 10 4" />
-      <line x1="6" x2="6" y1="10" y2="18" />
-      <line x1="10" x2="10" y1="10" y2="18" />
-      <line x1="14" x2="14" y1="10" y2="18" />
-      <line x1="18" x2="18" y1="10" y2="18" />
-    </svg>
-  ),
   MapPin: ({ size = 12, color = 'currentColor' }: { size?: number; color?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -126,9 +116,74 @@ interface AuspiciousInfo {
   luckyNumbers: string[];
   compatibleDay: { day: string; perk: string };
   tip: string;
+  overviewDescription?: string;
 }
 
-const dailyAuspiciousData: Record<string, AuspiciousInfo> = {
+interface TempleItem {
+  id: string;
+  name: string;
+  address: string;
+  rating: number;
+  distanceKm: number | null;
+  imageUrl?: string | null;
+}
+
+interface BuddhaDayData {
+  id: number;
+  date: string;
+  title: string;
+  recommendedActivities?: Array<{ id: string; title: string; icon?: string }>;
+}
+
+const ALL_DAYS_DATA: Record<string, AuspiciousInfo> = {
+  sunday: {
+    dayName: 'วันอาทิตย์',
+    luckyColors: [
+      { name: 'เขียว', hex: '#2E7D32', role: 'เหนี่ยวทรัพย์ โชคลาภ' },
+      { name: 'ชมพู', hex: '#E91E63', role: 'เมตตามหานิยม มีเสน่ห์' },
+    ],
+    unluckyColor: { name: 'น้ำเงิน', hex: '#1565C0' },
+    luckyNumbers: ['1', '8', '4'],
+    compatibleDay: { day: 'คนเกิดวันพฤหัสบดี', perk: 'เกื้อหนุนด้านสติปัญญา และการงานก้าวหน้า' },
+    tip: 'ถวายหลอดไฟ หรือเติมน้ำมันตะเกียง เสริมแสงสว่างส่องทางชีวิต',
+    overviewDescription: 'จิตที่ฝึกดีแล้ว นำสุขมาให้',
+  },
+  monday: {
+    dayName: 'วันจันทร์',
+    luckyColors: [
+      { name: 'ม่วง', hex: '#7B1FA2', role: 'รับทรัพย์ เงินทองไหลมา' },
+      { name: 'เขียว', hex: '#388E3C', role: 'การงานราบรื่น ผู้ใหญ่รัก' },
+    ],
+    unluckyColor: { name: 'แดง', hex: '#D32F2F' },
+    luckyNumbers: ['2', '4', '6'],
+    compatibleDay: { day: 'คนเกิดวันพุธ', perk: 'เจรจาธุรกิจราบรื่น ค้าขายได้กำไรดี' },
+    tip: 'ทำบุญบริจาคน้ำดื่ม หรือถวายน้ำปานะ เสริมความร่มเย็นเป็นสุข',
+    overviewDescription: 'ความสงบแห่งจิต นำมาซึ่งปัญญาและความสุข',
+  },
+  tuesday: {
+    dayName: 'วันอังคาร',
+    luckyColors: [
+      { name: 'ส้ม', hex: '#F57C00', role: 'โชคลาภ เงินทองไม่ขาดสาย' },
+      { name: 'ดำ/เทา', hex: '#424242', role: 'อำนาจบารมี ชนะอุปสรรค' },
+    ],
+    unluckyColor: { name: 'ขาว/ครีม', hex: '#EEEEEE' },
+    luckyNumbers: ['3', '5', '8'],
+    compatibleDay: { day: 'คนเกิดวันศุกร์', perk: 'ช่วยเหลือเกื้อกูลด้านการเงิน มีที่ปรึกษาดี' },
+    tip: 'บริจาคเลือด หรือทำบุญอุปกรณ์การแพทย์ เสริมแคล้วคลาดปลอดภัย',
+    overviewDescription: 'ความเพียรเป็นเลิศ ย่อมเอาชนะทุกอุปสรรค',
+  },
+  wednesday: {
+    dayName: 'วันพุธ',
+    luckyColors: [
+      { name: 'ดำ/เทา', hex: '#424242', role: 'เรียกทรัพย์ โชคลาภก้อนโต' },
+      { name: 'ฟ้า/น้ำเงิน', hex: '#1976D2', role: 'การงานเจริญรุ่งเรือง' },
+    ],
+    unluckyColor: { name: 'ชมพู', hex: '#E91E63' },
+    luckyNumbers: ['2', '8', '5'],
+    compatibleDay: { day: 'คนเกิดวันจันทร์', perk: 'ร่วมคิดร่วมทำโปรเจกต์ประสบความสำเร็จสูง' },
+    tip: 'ทำบุญปล่อยปลา หรือบริจาคทานผู้ยากไร้ เสริมความคล่องตัวในชีวิต',
+    overviewDescription: 'วาจาสุภาษิต เป็นมงคลสูงสุดแก่ชีวิต',
+  },
   thursday: {
     dayName: 'วันพฤหัสบดี',
     luckyColors: [
@@ -137,27 +192,352 @@ const dailyAuspiciousData: Record<string, AuspiciousInfo> = {
     ],
     unluckyColor: { name: 'ดำสนิท', hex: '#212121' },
     luckyNumbers: ['5', '9', '1'],
-    compatibleDay: {
-      day: 'คนเกิดวันศุกร์',
-      perk: 'เจรจาราบรื่น ค้าขายคล่อง ได้รับเมตตาอุปถัมภ์เป็นพิเศษ',
-    },
+    compatibleDay: { day: 'คนเกิดวันศุกร์', perk: 'เจรจาราบรื่น ค้าขายคล่อง ได้รับเมตตาอุปถัมภ์เป็นพิเศษ' },
     tip: 'เติมน้ำมันตะเกียง หรือโอนทำบุญค่าน้ำ-ไฟวัดลงท้ายด้วยเลข 9 เพื่อเปิดทางสว่างให้ชีวิต',
+    overviewDescription: 'ปัญญาประดุจแสงสว่าง นำทางข้ามพ้นปัญหา',
+  },
+  friday: {
+    dayName: 'วันศุกร์',
+    luckyColors: [
+      { name: 'ชมพู', hex: '#E91E63', role: 'เงินทองไหลมาเทมา มีโชค' },
+      { name: 'ขาว/ครีม', hex: '#E0E0E0', role: 'ผู้ใหญ่อุปถัมภ์ค้ำชู' },
+    ],
+    unluckyColor: { name: 'ม่วง', hex: '#7B1FA2' },
+    luckyNumbers: ['6', '3', '7'],
+    compatibleDay: { day: 'คนเกิดวันอังคาร', perk: 'กระตุ้นพลังบวกและความกระตือรือร้น' },
+    tip: 'ถวายดอกไม้สดหอมบูชาพระ เสริมเสน่ห์และสิริมงคล',
+    overviewDescription: 'ความเมตตาปรารถนาดี นำพามิตรภาพและความร่มเย็น',
+  },
+  saturday: {
+    dayName: 'วันเสาร์',
+    luckyColors: [
+      { name: 'ฟ้า/น้ำเงิน', hex: '#1565C0', role: 'เหนี่ยวทรัพย์ รับโชคใหญ่' },
+      { name: 'แดง', hex: '#C62828', role: 'การงานก้าวหน้า มั่นคง' },
+    ],
+    unluckyColor: { name: 'เขียว', hex: '#2E7D32' },
+    luckyNumbers: ['7', '8', '2'],
+    compatibleDay: { day: 'คนเกิดวันพุธกลางคืน', perk: 'เสริมความมั่นคงและแก้ไขวิกฤตได้ดี' },
+    tip: 'ทำบุญโลงศพ หรือไถ่ชีวิตโคกระบือ ปัดเป่าอุปสรรคให้ราบรื่น',
+    overviewDescription: 'สติมั่นคง ไม่หวั่นไหวต่อโลกธรรม',
   },
 };
 
-export default function Home() {
-  const [userBirthDay] = useState<string>('thursday');
-  const [meritCount, setMeritCount] = useState<number>(1280);
-  const [hasOffered, setHasOffered] = useState<boolean>(false);
-  const [offerText, setOfferText] = useState<string>('ถวายประทีปบูชาประจำวัน');
+const mapThaiDayToKey = (thaiDay?: string): string => {
+  if (!thaiDay) return '';
+  if (thaiDay.includes('อาทิตย์')) return 'sunday';
+  if (thaiDay.includes('จันทร์')) return 'monday';
+  if (thaiDay.includes('อังคาร')) return 'tuesday';
+  if (thaiDay.includes('พุธ')) return 'wednesday';
+  if (thaiDay.includes('พฤหัส')) return 'thursday';
+  if (thaiDay.includes('ศุกร์')) return 'friday';
+  if (thaiDay.includes('เสาร์')) return 'saturday';
+  return '';
+};
 
-  const auspicious = dailyAuspiciousData[userBirthDay] || dailyAuspiciousData['thursday'];
+const getTodayKey = (): string => {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return days[new Date().getDay()];
+};
+
+const COLOR_HEX_MAP: Record<string, string> = {
+  'เขียวหยก': '#1B5E20',
+  'ส้มอิฐ': '#E65100',
+  'ดำสนิท': '#212121',
+  'ขาว': '#EEEEEE',
+  'ครีม': '#FFF9C4',
+  'แดงเลือดหมู': '#880E4F',
+  'ม่วง': '#7B1FA2',
+  'ดำ': '#212121',
+  'ฟ้า': '#42A5F5',
+  'น้ำเงิน': '#1565C0',
+  'เหลือง': '#FBC02D',
+  'ชมพู': '#E91E63',
+  'แดง': '#D32F2F',
+  'เทา': '#9E9E9E',
+  'ส้ม': '#FF9800',
+  'ทอง': '#FFD700',
+  'เขียวอ่อน': '#81C784',
+  'น้ำตาล': '#795548',
+  'บรอนซ์': '#CD7F32',
+  'เขียว': '#2E7D32',
+};
+
+const getColorHex = (name: string): string => {
+  const clean = name.trim();
+  for (const [key, hex] of Object.entries(COLOR_HEX_MAP)) {
+    if (clean.includes(key)) return hex;
+  }
+  return '#C99726';
+};
+
+interface DailyHoroscopeItem {
+  id?: number;
+  description: string;
+  luckyColor: string;
+  luckyNumber: string;
+  friends: string;
+  tips: string;
+}
+
+const getUserBirthDayDisplay = (u: any): string => {
+  const raw = u?.birthDayOfWeek || u?.weekdaydate;
+  if (raw) {
+    return raw.startsWith('วัน') ? raw : `วัน${raw}`;
+  }
+  if (u?.birthday) {
+    const d = new Date(u.birthday);
+    if (!isNaN(d.getTime())) {
+      const days = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+      return days[d.getDay()];
+    }
+  }
+  const days = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+  return days[new Date().getDay()];
+};
+
+const parseHoroscope = (item: DailyHoroscopeItem, dayName: string): AuspiciousInfo => {
+  let luckyStr = item.luckyColor || '';
+  let unluckyName = 'ดำ';
+  const avoidMatch = luckyStr.match(/\(เลี่ยง\s*([^)]+)\)/);
+  if (avoidMatch) {
+    unluckyName = avoidMatch[1].trim();
+    luckyStr = luckyStr.replace(avoidMatch[0], '').trim();
+  }
+
+  const luckyColorParts = luckyStr
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const luckyColors: LuckyColor[] = luckyColorParts.map((name, idx) => ({
+    name,
+    hex: getColorHex(name),
+    role: idx === 0 ? 'เหนี่ยวทรัพย์ โชคลาภ' : 'งานรุ่ง ผู้ใหญ่หนุน',
+  }));
+
+  const luckyNumbers = (item.luckyNumber || '')
+    .split(',')
+    .map((n) => n.trim())
+    .filter(Boolean);
+
+  return {
+    dayName,
+    luckyColors: luckyColors.length > 0 ? luckyColors : [
+      { name: 'ทอง', hex: '#FFD700', role: 'เหนี่ยวทรัพย์ โชคลาภ' },
+    ],
+    unluckyColor: {
+      name: unluckyName,
+      hex: getColorHex(unluckyName),
+    },
+    luckyNumbers: luckyNumbers.length > 0 ? luckyNumbers : ['5', '9', '1'],
+    compatibleDay: {
+      day: item.friends || 'กัลยาณมิตร',
+      perk: 'ช่วยส่งเสริมให้การงานและชีวิตราบรื่น สมหวังดังปรารถนา',
+    },
+    tip: item.tips || 'ทำบุญสร้างกุศลเพื่อเปิดทางสว่างให้ชีวิต',
+    overviewDescription: item.description,
+  };
+};
+
+const formatThaiShortDate = (dateString?: string) => {
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-').map(Number);
+  const dateObj = new Date(year, month - 1, day);
+  const thaiMonths = [
+    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+  ];
+  const thaiDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+  return `วัน${thaiDays[dateObj.getDay()]}ที่ ${day} ${thaiMonths[month - 1]}`;
+};
+
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+};
+
+export default function Home() {
+  // 1. ผู้ใช้งานที่ล็อกอิน
+  const [user, setUser] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem('userData');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // 2. แต้มบารมี & การถวายประทีปประจำวัน
+  const [meritCount, setMeritCount] = useState<number>(() => {
+    const saved = localStorage.getItem('user_merit_score');
+    return saved ? Number(saved) : 1280;
+  });
+
+  const [hasOffered, setHasOffered] = useState<boolean>(() => {
+    const todayStr = getTodayDateString();
+    return localStorage.getItem('last_offered_date') === todayStr;
+  });
+
+  const [offerText, setOfferText] = useState<string>(() => {
+    const todayStr = getTodayDateString();
+    return localStorage.getItem('last_offered_date') === todayStr
+      ? 'อนุโมทนา สาธุ (+50 บารมี)'
+      : 'ถวายประทีปบูชาประจำวัน';
+  });
+
+  // 3. วันพระถัดไป (ดึงจาก API /calendar/next)
+  const [nextBuddhaDay, setNextBuddhaDay] = useState<BuddhaDayData | null>(null);
+  const [buddhaDaysLeft, setBuddhaDaysLeft] = useState<number>(2);
+
+  // 4. วัดใกล้เคียง (ดึงจาก Cache หรือ API /temples)
+  const [nearestTemple, setNearestTemple] = useState<TempleItem | null>(null);
+
+  // 5. ดวงประจำวันแบบสุ่ม (ดึงจาก seed ตาราง dailyHoroscopes และล็อกรายวันด้วย localStorage)
+  const userBirthDayName = getUserBirthDayDisplay(user);
+  const userDayKey = mapThaiDayToKey(user?.birthDayOfWeek) || getTodayKey();
+  const fallbackAuspicious = ALL_DAYS_DATA[userDayKey] || ALL_DAYS_DATA.thursday;
+
+  const [randomHoroscope, setRandomHoroscope] = useState<AuspiciousInfo | null>(() => {
+    try {
+      const todayStr = getTodayDateString();
+      const savedDate = localStorage.getItem('daily_horoscope_date');
+      const savedData = localStorage.getItem('daily_horoscope_data');
+      if (savedDate === todayStr && savedData) {
+        const item: DailyHoroscopeItem = JSON.parse(savedData);
+        if (item && item.luckyColor) {
+          return parseHoroscope(item, getUserBirthDayDisplay(user));
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse initial daily horoscope', e);
+    }
+    return null;
+  });
+  const [horoscopeLoading, setHoroscopeLoading] = useState<boolean>(false);
+
+  const auspicious = randomHoroscope || fallbackAuspicious;
+
+  // ฟังก์ชันโหลด/สุ่มดวงประจำวัน (เช็คตามวันที่ใน localStorage ก่อนสุ่มใหม่)
+  const fetchOrLoadDailyHoroscope = async (forceRandom: boolean = false) => {
+    const todayStr = getTodayDateString();
+    const savedDate = localStorage.getItem('daily_horoscope_date');
+    const savedData = localStorage.getItem('daily_horoscope_data');
+
+    // ถ้าไม่ได้กดปุ่มสุ่มใหม่ และมีข้อมูลของวันนี้เก็บไว้แล้ว ให้ใช้ข้อมูลเดิมทันที
+    if (!forceRandom && savedDate === todayStr && savedData) {
+      try {
+        const item: DailyHoroscopeItem = JSON.parse(savedData);
+        if (item && item.luckyColor) {
+          const parsed = parseHoroscope(item, userBirthDayName);
+          setRandomHoroscope(parsed);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to parse cached daily horoscope', err);
+      }
+    }
+
+    // ถ้าเป็นวันใหม่หรือกดสุ่มดวงใหม่ ให้ดึงจาก Backend
+    setHoroscopeLoading(true);
+    try {
+      const res = await api.get('/horoscope/daily');
+      if (res.data) {
+        const item: DailyHoroscopeItem = res.data.data || res.data;
+        if (item && item.luckyColor) {
+          localStorage.setItem('daily_horoscope_date', todayStr);
+          localStorage.setItem('daily_horoscope_data', JSON.stringify(item));
+
+          const parsed = parseHoroscope(item, userBirthDayName);
+          setRandomHoroscope(parsed);
+        }
+      }
+    } catch (err) {
+      console.error('Fetch daily horoscope error:', err);
+    } finally {
+      setHoroscopeLoading(false);
+    }
+  };
+
+  // โหลดดวงประจำวันตามวันที่ใน localStorage หรือเมื่อวันเกิดเปลี่ยน
+  useEffect(() => {
+    fetchOrLoadDailyHoroscope(false);
+  }, [userBirthDayName]);
+
+  // โหลดวันพระถัดไปจาก Backend
+  useEffect(() => {
+    const fetchNextBuddhaDay = async () => {
+      try {
+        const res = await api.get('/calendar/next');
+        if (res.data?.success && res.data.data) {
+          const item: BuddhaDayData = res.data.data;
+          setNextBuddhaDay(item);
+
+          // คำนวณวันนับถอยหลัง
+          const [y, m, d] = item.date.split('-').map(Number);
+          const target = new Date(y, m - 1, d);
+          target.setHours(0, 0, 0, 0);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const diffDays = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          setBuddhaDaysLeft(Math.max(0, diffDays));
+        }
+      } catch (err) {
+        console.error('Fetch next buddha day error:', err);
+      }
+    };
+
+    fetchNextBuddhaDay();
+  }, []);
+
+  // โหลดวัดใกล้เคียง
+  useEffect(() => {
+    const loadNearestTemple = async () => {
+      try {
+        // ตรวจสอบแคชใน sessionStorage ก่อน
+        const cached = sessionStorage.getItem('cached_temples');
+        if (cached) {
+          const parsed: TempleItem[] = JSON.parse(cached);
+          if (parsed.length > 0) {
+            setNearestTemple(parsed[0]);
+            return;
+          }
+        }
+
+        // ถ้าไม่มีในแคช ดึงจาก API /temples
+        const res = await api.get('/temples', {
+          params: { radius: '10000' },
+        });
+        if (res.data?.success && res.data.data?.length > 0) {
+          setNearestTemple(res.data.data[0]);
+        }
+      } catch (err) {
+        console.error('Fetch nearest temple error:', err);
+      }
+    };
+
+    loadNearestTemple();
+  }, []);
+
+  // อัปเดตข้อมูล user ล่าสุดหากมีการล็อกอิน
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('userData');
+      if (saved) setUser(JSON.parse(saved));
+    } catch {}
+  }, []);
 
   const handleDailyMerit = () => {
     if (!hasOffered) {
+      const todayStr = getTodayDateString();
       setHasOffered(true);
-      setMeritCount((prev) => prev + 50);
+      const newScore = meritCount + 50;
+      setMeritCount(newScore);
       setOfferText('อนุโมทนา สาธุ (+50 บารมี)');
+      localStorage.setItem('user_merit_score', String(newScore));
+      localStorage.setItem('last_offered_date', todayStr);
     }
   };
 
@@ -167,10 +547,19 @@ export default function Home() {
       <header className="home-header">
         <div className="header-greeting">
           <div className="avatar-circle">
-            <Icons.Sparkles size={22} color="var(--sms-gold)" />
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt={user.name}
+                referrerPolicy="no-referrer"
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+              />
+            ) : (
+              <Icons.Sparkles size={22} color="var(--sms-gold)" />
+            )}
           </div>
           <div className="header-text">
-            <h2>สวัสดีตอนเช้า</h2>
+            <h2>{user?.name ? `สวัสดีคุณ ${user.name}` : 'สวัสดีตอนเช้า'}</h2>
             <p className="sub-greeting">ขอให้วันนี้เป็นวันที่ราบรื่นและเปี่ยมด้วยกุศลจิต</p>
           </div>
         </div>
@@ -183,197 +572,247 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 2. Interactive Digital Sanctuary Hero */}
-      <section className="sanctuary-hero">
-        <div className="hero-glow-bg" />
-        <div className="hero-content">
-          <span className="daily-quote-tag">คติธรรมเตือนใจวันนี้</span>
-          <h3 className="hero-quote">"จิตที่ฝึกดีแล้ว นำสุขมาให้"</h3>
-          <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
-          <button
-            type="button"
-            className={`btn-altar-action ${hasOffered ? 'offered' : ''}`}
-            onClick={handleDailyMerit}
-          >
-            {hasOffered ? <Icons.CheckCircle size={16} /> : <Icons.Flame size={16} />}
-            <span>{offerText}</span>
-          </button>
-        </div>
-      </section>
+      {/* 🌟 Dashboard Layout แบบ 2 คอลัมน์บน Desktop */}
+      <div className="home-dashboard-layout">
 
-      {/* 3. Daily Auspicious Guide (มงคลประจำวันเกิด) */}
-      <section className="lucky-section">
-        <div className="section-title-wrap">
-          <div className="title-with-icon">
-            <Icons.Sparkles size={18} color="var(--sms-gold)" />
-            <h3>มงคลประจำวัน • {auspicious.dayName}</h3>
-          </div>
-          <Link to="/profile" className="link-settings" title="เปลี่ยนวันเกิด">
-            <Icons.Settings size={14} />
-            <span>เปลี่ยนวันเกิด</span>
-          </Link>
-        </div>
-
-        <div className="lucky-bento-grid">
-          {/* Card: สีมงคล */}
-          <div className="bento-card bento-colors">
-            <div className="card-top-label">
-              <Icons.Palette size={13} />
-              <span>สีมงคลเปิดดวง</span>
+        {/* คอลัมน์หลักฝั่งซ้าย: Hero Banner + Master Card มงคลประจำวัน */}
+        <div className="dashboard-main-col">
+          {/* 2. Interactive Digital Sanctuary Hero */}
+          <section className="sanctuary-hero">
+            <div className="hero-glow-bg" />
+            <div className="hero-content">
+              <span className="daily-quote-tag">คติธรรมนำชีวิตประจำวัน</span>
+              <h3 className="hero-quote">"{auspicious.overviewDescription || 'จิตที่ฝึกดีแล้ว นำสุขมาให้'}"</h3>
+              <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
+              <button
+                type="button"
+                className={`btn-altar-action ${hasOffered ? 'offered' : ''}`}
+                onClick={handleDailyMerit}
+              >
+                {hasOffered ? <Icons.CheckCircle size={16} /> : <Icons.Flame size={16} />}
+                <span>{offerText}</span>
+              </button>
             </div>
-            <div className="color-list">
-              {auspicious.luckyColors.map((color, idx) => (
-                <div key={idx} className="color-pill">
-                  <span className="color-indicator" style={{ backgroundColor: color.hex }} />
-                  <div className="color-desc">
-                    <strong>{color.name}</strong>
-                    <small>{color.role}</small>
+          </section>
+
+          {/* 3. Daily Auspicious Guide (กล่องใหญ่ครอบข้อมูลดวงวันเกิดทั้งหมด) */}
+          <section className="auspicious-master-card">
+            {/* ส่วนหัวในกล่องใหญ่ */}
+            <div className="master-card-header">
+              <div className="title-with-icon">
+                <div className="title-text-group">
+                  <span className="auspicious-sup-tag">คำทำนายและฤกษ์มงคล</span>
+                  <h3 className="auspicious-heading">
+                    มงคลประจำวัน <span className="highlight-day-chip">{userBirthDayName}</span>
+                  </h3>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn-change-birthday"
+                  onClick={() => fetchOrLoadDailyHoroscope(true)}
+                  title="สุ่มดวงใหม่จากระบบ"
+                  disabled={horoscopeLoading}
+                  style={{ cursor: 'pointer', border: 'none', background: 'var(--sms-gold-light)' }}
+                >
+                  <span className="btn-icon-bubble">
+                    <Icons.Sparkles size={14} color="var(--sms-gold)" />
+                  </span>
+                  <span>{horoscopeLoading ? 'กำลังสุ่ม...' : 'สุ่มดวงใหม่'}</span>
+                </button>
+
+                <Link to="/profile" className="btn-change-birthday" title="เปลี่ยนวันเกิด">
+                  <span className="btn-icon-bubble">
+                    <Icons.Settings size={14} />
+                  </span>
+                  <span>เปลี่ยนวันเกิด</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* กล่อง Bento ภายในกล่องใหญ่ */}
+            <div className="lucky-bento-grid">
+              {/* Card: สีมงคล */}
+              <div className="bento-card bento-colors">
+                <div className="card-top-label">
+                  <Icons.Palette size={13} />
+                  <span>สีมงคลเปิดดวง</span>
+                </div>
+                <div className="color-list">
+                  {auspicious.luckyColors.map((color, idx) => (
+                    <div key={idx} className="color-pill">
+                      <span className="color-indicator" style={{ backgroundColor: color.hex }} />
+                      <div className="color-desc">
+                        <strong>{color.name}</strong>
+                        <small>{color.role}</small>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="color-pill unlucky-pill">
+                    <span className="color-indicator" style={{ backgroundColor: auspicious.unluckyColor.hex }} />
+                    <div className="color-desc">
+                      <strong>เลี่ยง {auspicious.unluckyColor.name}</strong>
+                      <small>กาลกิณีประจำวัน</small>
+                    </div>
                   </div>
                 </div>
-              ))}
-              <div className="color-pill unlucky-pill">
-                <span className="color-indicator" style={{ backgroundColor: auspicious.unluckyColor.hex }} />
-                <div className="color-desc">
-                  <strong>เลี่ยง {auspicious.unluckyColor.name}</strong>
-                  <small>กาลกิณีประจำวัน</small>
-                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Card: เลขมงคล */}
-          <div className="bento-card bento-numbers">
-            <div className="card-top-label">
-              <Icons.Hash size={13} />
-              <span>เลขเด่นนำโชค</span>
-            </div>
-            <div className="lucky-number-row">
-              {auspicious.luckyNumbers.map((num, idx) => (
-                <div key={idx} className="lucky-gold-coin">
-                  <span>{num}</span>
-                </div>
-              ))}
-            </div>
-            <p className="number-note">เหมาะสำหรับเจรจาหรือเลือกเวลามงคล</p>
-          </div>
-
-          {/* Card: คนวันเกิดถูกชะตา */}
-          <div className="bento-card bento-friend">
-            <div className="card-top-label">
-              <Icons.Users size={13} />
-              <span>กัลยาณมิตรเกื้อหนุน</span>
-            </div>
-            <div className="friend-content">
-              <div className="friend-badge">{auspicious.compatibleDay.day}</div>
-              <p className="friend-perk">{auspicious.compatibleDay.perk}</p>
-            </div>
-          </div>
-
-          {/* Card: เคล็ดลับเสริมดวงประจำวัน */}
-          <div className="bento-card bento-tip">
-            <div className="tip-left">
-              <div className="tip-icon-wrap">
-                <Icons.Lightbulb size={18} color="var(--sms-gold)" />
-              </div>
-              <div>
+              {/* Card: เลขมงคล */}
+              <div className="bento-card bento-numbers">
                 <div className="card-top-label">
-                  <span>เคล็ดลับเสริมดวงวันนี้</span>
+                  <Icons.Hash size={13} />
+                  <span>เลขเด่นนำโชค</span>
                 </div>
-                <p className="tip-text">{auspicious.tip}</p>
+                <div className="lucky-number-row">
+                  {auspicious.luckyNumbers.map((num, idx) => (
+                    <div key={idx} className="lucky-gold-coin">
+                      <span>{num}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="number-note">เหมาะสำหรับเจรจาหรือเลือกเวลามงคล</p>
+              </div>
+
+              {/* Card: คนวันเกิดถูกชะตา */}
+              <div className="bento-card bento-friend">
+                <div className="card-top-label">
+                  <Icons.Users size={13} />
+                  <span>กัลยาณมิตรเกื้อหนุน</span>
+                </div>
+                <div className="friend-content">
+                  <div className="friend-badge">{auspicious.compatibleDay.day}</div>
+                  <p className="friend-perk">{auspicious.compatibleDay.perk}</p>
+                </div>
+              </div>
+
+              {/* Card: เคล็ดลับเสริมดวงประจำวัน */}
+              <div className="bento-card bento-tip">
+                <div className="tip-left">
+                  <div className="tip-icon-wrap">
+                    <Icons.Lightbulb size={18} color="var(--sms-gold)" />
+                  </div>
+                  <div>
+                    <div className="card-top-label">
+                      <span>เคล็ดลับเสริมดวงวันนี้</span>
+                    </div>
+                    <p className="tip-text">{auspicious.tip}</p>
+                  </div>
+                </div>
+                <Link to="/temples" className="btn-find-temple">
+                  <span>ค้นหาวัดเสริมดวง</span>
+                  <Icons.ArrowRight size={14} />
+                </Link>
               </div>
             </div>
-            <Link to="/temples" className="btn-find-temple">
-              <span>ค้นหาวัดเสริมดวง</span>
-              <Icons.ArrowRight size={14} />
-            </Link>
-          </div>
+          </section>
         </div>
-      </section>
 
-      {/* 4. Dual Feature Cards: เซียมซี & ปฏิทินวันพระ */}
-      <div className="dual-feature-grid">
-        {/* เซียมซีการ์ด */}
-        <section className="interactive-siemsee-card">
-          <div className="siemsee-decor">
-            <Icons.ScrollText size={72} strokeWidth={1} color="var(--sms-gold)" />
-          </div>
-          <div className="siemsee-body">
-            <div className="tag-popular">เสี่ยงทายประจำวัน</div>
-            <h3>เซียมซีส่องทางชีวิต</h3>
-            <p>ตั้งจิตอธิษฐานถามถึงการงาน การเงิน หรือความรัก เพื่อรับคำกลอนเตือนสติ</p>
-            <Link to="/siemsee" className="btn-primary-glow">
-              <Icons.ScrollText size={16} />
-              <span>เขย่าเซียมซีวันนี้</span>
-            </Link>
-          </div>
-        </section>
+        {/* คอลัมน์ขวา: ฟีเจอร์เสริม (เซียมซี, ปฏิทินวันพระ, วัดใกล้คุณ) */}
+        <aside className="dashboard-side-col">
+          {/* เซียมซีการ์ด */}
+          <section className="interactive-siemsee-card">
+            <div className="siemsee-decor">
+              <Icons.ScrollText size={72} strokeWidth={1} color="var(--sms-gold)" />
+            </div>
+            <div className="siemsee-body">
+              <div className="tag-popular">เสี่ยงทายประจำวัน</div>
+              <h3>เซียมซีส่องทางชีวิต</h3>
+              <p>ตั้งจิตอธิษฐานถามถึงการงาน การเงิน หรือความรัก เพื่อรับคำกลอนเตือนสติ</p>
+              <Link to="/siemsee" className="btn-primary-glow">
+                <Icons.ScrollText size={16} />
+                <span>เขย่าเซียมซีวันนี้</span>
+              </Link>
+            </div>
+          </section>
 
-        {/* ปฏิทินวันพระ Widget */}
-        <section className="buddhist-calendar-card">
-          <div className="calendar-header">
-            <span className="cal-tag">
-              <Icons.Calendar size={14} />
-              <span>ปฏิทินธรรมะ</span>
-            </span>
-            <Link to="/calendar" className="cal-link">
-              ดูทั้งหมด &gt;
-            </Link>
-          </div>
-          <div className="calendar-content">
-            <div className="countdown-box">
-              <span className="countdown-number">2</span>
-              <span className="countdown-unit">วัน</span>
+          {/* ปฏิทินวันพระ Widget */}
+          <section className="buddhist-calendar-card">
+            <div className="calendar-header">
+              <span className="cal-tag">
+                <Icons.Calendar size={14} />
+                <span>ปฏิทินธรรมะ</span>
+              </span>
+              <Link to="/calendar" className="cal-link">
+                ดูทั้งหมด &gt;
+              </Link>
             </div>
-            <div className="upcoming-info">
-              <h4>วันพระที่จะถึง (แรม ๑๕ ค่ำ)</h4>
-              <p>วันศุกร์นี้ • แนะนำรักษาศีล สวดมนต์ หรือถวายสังฆทาน</p>
+            <div className="calendar-content">
+              <div className="countdown-box">
+                <span className="countdown-number">
+                  {buddhaDaysLeft === 0 ? 'วันนี้' : buddhaDaysLeft}
+                </span>
+                <span className="countdown-unit">
+                  {buddhaDaysLeft === 0 ? 'วันพระ' : 'วัน'}
+                </span>
+              </div>
+              <div className="upcoming-info">
+                <h4>วันพระที่จะถึง ({nextBuddhaDay?.title || 'วันพระมงคล'})</h4>
+                <p>
+                  {nextBuddhaDay?.date ? formatThaiShortDate(nextBuddhaDay.date) : 'เร็วๆ นี้'}
+                  {' • '}
+                  {nextBuddhaDay?.recommendedActivities && nextBuddhaDay.recommendedActivities.length > 0
+                    ? `แนะนำ ${nextBuddhaDay.recommendedActivities.map((a) => a.title).slice(0, 2).join(', ')}`
+                    : 'แนะนำรักษาศีล สวดมนต์ หรือทำบุญตักบาตร'}
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* วัดใกล้ฉัน Section */}
+          <section className="temples-showcase-section">
+            <div className="section-title-wrap">
+              <div className="title-with-icon">
+                <img src={iconTemple} alt="วัด" className="templeThumb" />
+                <h3>วัดใกล้คุณในเชียงใหม่</h3>
+              </div>
+              <Link to="/temples" className="link-more">
+                ดูทั้งหมด &gt;
+              </Link>
+            </div>
+
+            <div className="temple-card-modern">
+              <div className="temple-cover-avatar">
+                <img
+                  src={nearestTemple?.imageUrl || iconTemple}
+                  alt={nearestTemple?.name || 'วัด'}
+                  className="templeThumb"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = iconTemple;
+                  }}
+                />
+              </div>
+              <div className="temple-details">
+                <div className="temple-title-row">
+                  <h4>{nearestTemple?.name || 'วัดพระธาตุดอยสุเทพฯ'}</h4>
+                  <span className="badge-highlight">
+                    {nearestTemple ? 'วัดใกล้คุณ' : 'วัดคู่บ้านคู่เมือง'}
+                  </span>
+                </div>
+                <p className="temple-location">
+                  {nearestTemple?.address || 'ต.สุเทพ อ.เมือง เชียงใหม่'}
+                </p>
+                <div className="temple-meta-tags">
+                  <span className="meta-tag">
+                    <Icons.MapPin size={11} />
+                    {nearestTemple?.distanceKm != null ? `${nearestTemple.distanceKm} กม.` : 'ใกล้คุณ'}
+                  </span>
+                  <span className="meta-tag rating">
+                    <Icons.Star size={11} />
+                    {nearestTemple?.rating ? nearestTemple.rating.toFixed(1) : '4.8'}
+                  </span>
+                </div>
+              </div>
+              <Link to="/temples" className="btn-direct-nav" title="ดูเส้นทาง">
+                <Icons.ArrowUpRight size={16} />
+              </Link>
+            </div>
+          </section>
+        </aside>
+
       </div>
-
-      {/* 5. วัดใกล้ฉัน Section */}
-      <section className="temples-showcase-section">
-        <div className="section-title-wrap">
-          <div className="title-with-icon">
-            <img src={iconTemple} alt="วัด" className="templeThumb"/> 
-            <h3>วัดใกล้คุณในเชียงใหม่</h3>
-          </div>
-          <Link to="/temples" className="link-more">
-            ดูทั้งหมด &gt;
-          </Link>
-        </div>
-
-        <div className="temple-card-modern">
-          <div className="temple-cover-avatar">
-           <img src={iconTemple} alt="วัด" className="templeThumb"/>
-          </div>
-          <div className="temple-details">
-            <div className="temple-title-row">
-              <h4>วัดพระธาตุดอยสุเทพราชวรวิหาร</h4>
-              <span className="badge-highlight">วัดคู่บ้านคู่เมือง</span>
-            </div>
-            <p className="temple-location">ต.สุเทพ อ.เมือง จ.เชียงใหม่</p>
-            <div className="temple-meta-tags">
-              <span className="meta-tag">
-                <Icons.MapPin size={11} />
-                2.4 กม.
-              </span>
-              <span className="meta-tag rating">
-                <Icons.Star size={11} />
-                4.9 (1,420 รีวิว)
-              </span>
-              <span className="meta-tag highlight">
-                <Icons.Sparkles size={11} color="var(--sms-maroon)" />
-                ขอพรบารมี
-              </span>
-            </div>
-          </div>
-          <Link to="/temples" className="btn-direct-nav" title="ดูเส้นทาง">
-            <Icons.ArrowUpRight size={16} />
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

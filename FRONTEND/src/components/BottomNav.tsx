@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './BottomNav.css'; // อย่าลืมสร้างไฟล์ CSS นี้
+import './BottomNav.css';
 
 import homeIcon from '../assets/icon/home.png';
 import searchIcon from '../assets/icon/search.png';
@@ -11,8 +11,7 @@ import profileIcon from '../assets/icon/profile.png';
 const navItems = [
   { path: '/', label: 'หน้าแรก', img: homeIcon },
   { path: '/temples', label: 'ค้นหาวัด', img: searchIcon },
-  // เอา property isFab: true ออก เพราะเราต้องการให้มันเหมือนเพื่อน
-  { path: '/siemsee', label: 'เซียมซี', img: siemseeIcon }, 
+  { path: '/siemsee', label: 'เซียมซี', img: siemseeIcon },
   { path: '/calendar', label: 'ปฏิทิน', img: calendarIcon },
   { path: '/profile', label: 'โปรไฟล์', img: profileIcon },
 ];
@@ -21,6 +20,12 @@ export default function BottomNav() {
   const location = useLocation();
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
+
+  // คำนวณ Index ของเมนูที่กำลังเลือกอยู่ (0 ถึง 4)
+  const activeIndex = Math.max(
+    0,
+    navItems.findIndex((item) => item.path === location.pathname)
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,20 +38,21 @@ export default function BottomNav() {
       lastScrollY.current = currentScrollY;
     };
 
- 
     window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <nav className={`bottom-nav ${hidden ? 'nav-hidden' : ''}`}>
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
+    <nav
+      className={`bottom-nav ${hidden ? 'nav-hidden' : ''}`}
+      style={{ '--active-index': activeIndex } as React.CSSProperties}
+    >
+      {/* 🔮 วงกลมพื้นหลังก้อนเดียวที่จะไหลไปตาม index */}
+      <div className="nav-indicator" />
 
-        // ใช้โครงสร้างเดียวสำหรับทุกปุ่ม
+      {navItems.map((item, index) => {
+        const isActive = activeIndex === index;
+
         return (
           <Link
             key={item.path}

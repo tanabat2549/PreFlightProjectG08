@@ -3,43 +3,105 @@ import type { Request, Response } from 'express';
 import { dbClient as db } from '../db/client.js';
 import { fortunes, siemseeHistories } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
-import { optionalAuth, type AuthRequest} from '../middlewares/optionalAuth.js'
+import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
 
 const router = Router();
 
 // GET /api/siemsee/draw
-router.get('/draw', optionalAuth, async (req: AuthRequest, res: Response) => {
+router.get('/draw', async (req: Request, res: Response) => {
   try {
-    // ให้ Database สุ่มรายการมา 1 รายการโดยตรง
+    const rawName = req.query.name as string | undefined;
+
+    // Sanitize: ตัดช่องว่าง, จำกัดความยาว กัน query string ยาวเกินจำเป็น
+    const name = rawName?.trim().slice(0, 50) || undefined;
+
+    // 1. สุ่มใบเซียมซีจากฐานข้อมูล (ยังไม่บันทึกประวัติ จนกว่าผู้ใช้จะกด "เก็บใบเซียมซี")
     const fortuneList = await db
       .select()
-      .from(fortunes) // src from database
-      .orderBy(sql`RANDOM()`) // สุ่ม
+      .from(fortunes)
+      .orderBy(sql`RANDOM()`)
       .limit(1);
 
     if (fortuneList.length === 0) {
-      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล',
+      });
     }
 
-    const picked = fortuneList[0];
+    const fortune = fortuneList[0];
 
-    if (req.userId) {
-      try {
-        await db.insert(siemseeHistories).values({
-          userId: req.userId,
-          fortuneId: picked.id,
-        });
-      } catch (err) {
-        console.error('Save siemsee history error:', err);
-      }
-    }
+    // 2. ถ้ามีชื่อส่งมา ใส่คำทักทายส่วนตัวในข้อความคำทำนาย
+    const greeting = name
+      ? `คุณ${name} ได้รับใบที่ ${fortune.number}`
+      : undefined;
 
     return res.json({
       success: true,
-      data: fortuneList[0]
+      data: fortune,
+      ...(greeting && { greeting }),
     });
   } catch (error) {
     console.error('Error drawing fortune:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+});
+
+// POST /api/siemsee/save — บันทึกประวัติใบเซียมซี (เก็บใบเซียมซี)
+router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const fortuneId = Number(req.body?.fortuneId);
+    if (!fortuneId || isNaN(fortuneId)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุ fortuneId' });
+    }
+
+    const exists = await db
+      .select({ id: fortunes.id })
+      .from(fortunes)
+      .where(eq(fortunes.id, fortuneId))
+      .limit(1);
+
+    if (exists.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบใบเซียมซีนี้' });
+    }
+
+    await db.insert(siemseeHistories).values({
+      userId: req.userId!,
+      fortuneId,
+    });
+
+    return res.status(201).json({ success: true, message: 'บันทึกใบเซียมซีเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Error saving fortune history:', error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+// DELETE /api/siemsee/history/:id — ทิ้ง/ลบใบเซียมซีออกจากประวัติ
+router.delete('/history/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const historyId = Number(req.params.id);
+
+    if (!historyId || isNaN(historyId)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุ history id ให้ถูกต้อง' });
+    }
+
+    const deleted = await db
+      .delete(siemseeHistories)
+      .where(sql`${siemseeHistories.id} = ${historyId} AND ${siemseeHistories.userId} = ${userId}`)
+      .returning();
+
+    if (deleted.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการที่ต้องการลบ หรือไม่มีสิทธิ์ลบ' });
+    }
+
+    return res.json({ success: true, message: 'ทิ้งใบเซียมซีเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Delete siemsee history error:', error);
     return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });

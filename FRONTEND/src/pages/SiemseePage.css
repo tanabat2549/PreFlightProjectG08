@@ -1,80 +1,90 @@
 /* ===========================================================
-   SiemseePage animations — ใช้ asset จริงจาก /assets/siemsee/
-   cylinder.png, stick.png, smoke.png, light.png
+   SiemseePage CSS - Flow 3 Steps (Full-Screen -> Reveal -> Split)
    =========================================================== */
 
-/* ป้องกันทั้งหน้ารวมไม่ให้มี Horizontal Scrollbar */
 .siemsee-page-container {
   min-height: 100vh;
   width: 100%;
-  max-width: 100vw;
-  padding: 20px;
+  padding: 24px 20px 120px;
   box-sizing: border-box;
-  overflow-x: hidden; /* ล็อกไม่ให้เลื่อนซ้ายขวา */
-  background: 
-    radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, #2b0c0d 0%, #140405 100%) !important;
+ 
+  color: #FDF6E2;
 }
 
-/* -------------------------------------------
-   NEW: Animation หัวข้อ "เขย่าเซียมซี" ให้เอียงซ้ายขวา
-------------------------------------------- */
+.siemsee-header-wrap {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
 .shaking-title {
   display: inline-block;
+  font-size: 28px;
+  color: #8C3B3B;
+  text-shadow: 0 2px 10px rgba(215, 209, 78, 0.4), 0 0 20px rgba(194, 165, 0, 0.8);
   animation: titleShake 2.5s ease-in-out infinite;
   transform-origin: center bottom;
 }
 
 @keyframes titleShake {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  15% {
-    transform: rotate(-6deg) scale(1.02);
-  }
-  30% {
-    transform: rotate(5deg) scale(1.02);
-  }
-  45% {
-    transform: rotate(-4deg);
-  }
-  60% {
-    transform: rotate(3deg);
-  }
-  75% {
-    transform: rotate(-1deg);
-  }
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg) scale(1.02); }
+  30% { transform: rotate(4deg) scale(1.02); }
+  45% { transform: rotate(-3deg); }
+  60% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+.siemsee-subtitle {
+  font-size: 13.5px;
+  color: #af4f2b;
+  margin: 6px 0 0;
+}
+
+.siemsee-error-text {
+  color: #F87171;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* ===========================================================
+   STEP 1: กระบอกเขย่าเต็มจอกลางหน้า
+   =========================================================== */
+.siemsee-center-fullscreen-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 .siemsee-stage {
   position: relative;
-  width: 340px;
+  width: 320px;
   max-width: 100%;
-  height: 480px;
-  margin: 30px auto;
-  box-shadow: 0 0 100px rgba(212, 175, 55, 0.05);
-  border-radius: 50%;
+  height: 420px;
+  margin: 10px auto;
 }
 
-/* เงา ใต้กระบอก */
 .shadow-layer {
   position: absolute;
-  bottom: 6px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
-  height: 20px;
+  width: 190px;
+  height: 18px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.25), transparent 70%);
-  filter: blur(2px);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), transparent 70%);
 }
 
 .cylinder-layer {
   position: absolute;
-  bottom: -20px;
+  bottom: -18px;
   left: 50%;
-  width: 220px;
-  height: 427px;
+  width: 200px;
+  height: 388px;
   transform: translateX(-50%);
   z-index: 2;
 }
@@ -83,11 +93,11 @@
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.45));
 }
 
 .cylinder-layer.shake {
-  animation: cylinderShake 0.5s ease-in-out infinite;
+  animation: cylinderShake 0.45s ease-in-out infinite;
 }
 
 @keyframes cylinderShake {
@@ -111,14 +121,13 @@
   }
 }
 
-/* แก้ขนาด width จาก 2000px เป็น 100% เพื่อไม่ให้ดันหน้าจอกว้างเกินไป */
 .stick-bundle-wrap {
   position: absolute;
   left: 50%;
-  bottom: 368px;
+  bottom: 334px;
   width: 100%;
-  max-width: 340px;
-  height: 90px;
+  max-width: 300px;
+  height: 85px;
   transform: translateX(-50%);
   overflow: hidden;
   z-index: 3;
@@ -128,7 +137,7 @@
   position: absolute;
   top: var(--dy, 0px);
   left: 50%;
-  width: 26px;
+  width: 24px;
   height: var(--h, 170px);
   transform-origin: 50% 100%;
   transform: translateX(calc(-50% + var(--dx, 0px))) rotate(var(--rot, 0deg));
@@ -147,20 +156,15 @@
 }
 
 @keyframes stickJitter {
-  from {
-    transform: translateX(calc(-50% + var(--dx, 0px))) rotate(var(--rot, 0deg)) translateY(0);
-  }
-  to {
-    transform: translateX(calc(-50% + var(--dx, 0px))) rotate(calc(var(--rot, 0deg) + 1.5deg)) translateY(-3px);
-  }
+  from { transform: translateX(calc(-50% + var(--dx, 0px))) rotate(var(--rot, 0deg)); }
+  to { transform: translateX(calc(-50% + var(--dx, 0px))) rotate(calc(var(--rot, 0deg) + 2deg)) translateY(-3px); }
 }
 
-/* ควัน */
 .smoke-layer {
   position: absolute;
-  top: 30px;
+  top: 20px;
   left: 50%;
-  width: 150px;
+  width: 140px;
   transform: translate(-50%, 0);
   opacity: 0;
   pointer-events: none;
@@ -169,35 +173,24 @@
 
 .smoke-layer img {
   width: 100%;
-  display: block;
 }
 
 .smoke-layer.puff {
-  animation: smokePuff 0.9s ease-out forwards;
+  animation: smokePuff 0.85s ease-out forwards;
 }
 
 @keyframes smokePuff {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 10px) scale(0.6);
-  }
-  40% {
-    opacity: 0.85;
-    transform: translate(-50%, -10px) scale(1.05);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -35px) scale(1.3);
-  }
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.6); }
+  50% { opacity: 0.85; transform: translate(-50%, -10px) scale(1.05); }
+  100% { opacity: 0; transform: translate(-50%, -30px) scale(1.25); }
 }
 
-/* ไม้ที่ถูกเลือก */
 .popped-stick {
   position: absolute;
-  top: 140px;
-  left: 10%;
+  top: 130px;
+  left: 5%;
   width: 50px;
-  height: 230px;
+  height: 210px;
   transform: translate(-50%, -20px) rotate(-10deg) scale(0.6);
   opacity: 0;
   z-index: 5;
@@ -207,7 +200,6 @@
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
 }
 
 .popped-stick.popping {
@@ -216,42 +208,19 @@
 
 .popped-stick.landed,
 .popped-stick.revealed {
-  transform: translate(calc(-50% + 2px), 94px) rotate(-4deg) scale(1);
+  transform: translate(calc(-50% + 2px), 80px) rotate(-4deg) scale(1);
   opacity: 1;
 }
 
 @keyframes stickPopOut {
-  0% {
-    transform: translate(-50%, -20px) rotate(-8deg) scale(0.6);
-    opacity: 0;
-  }
-  30% {
-    transform: translate(calc(-50% + 6px), -55px) rotate(6deg) scale(0.9);
-    opacity: 1;
-  }
-  60% {
-    transform: translate(calc(-50% - 4px), 30px) rotate(14deg) scale(1.05);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(calc(-50% + 2px), 94px) rotate(-4deg) scale(1);
-    opacity: 1;
-  }
-}
-
-.glow-layer img {
-  width: 100%;
-  display: block;
-}
-
-.glow-layer.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.1);
+  0% { transform: translate(-50%, -20px) rotate(-8deg) scale(0.6); opacity: 0; }
+  35% { transform: translate(calc(-50% + 6px), -50px) rotate(6deg) scale(0.9); opacity: 1; }
+  100% { transform: translate(calc(-50% + 2px), 80px) rotate(-4deg) scale(1); opacity: 1; }
 }
 
 .stick-number {
   position: absolute;
-  top: 26px;
+  top: 24px;
   left: 50%;
   transform: translate(-50%, 0);
   width: 22px;
@@ -260,20 +229,54 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #8b1e1e;
-  color: #fbe7b0;
-  font-size: 12px;
+  background: #8B1E1E;
+  color: #FBE7B0;
+  font-size: 11px;
   font-weight: bold;
-  box-shadow: 0 0 0 2px #fbe7b0;
+  box-shadow: 0 0 0 2px #FBE7B0;
   opacity: 0;
-  transition: opacity 0.6s ease 0.1s;
+  transition: opacity 0.5s ease 0.1s;
 }
 
 .stick-number.show {
   opacity: 1;
 }
 
-/* ป๊อปอัพเต็มจอ */
+.siemsee-btn-wrap {
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.siemsee-action-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 13px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #efd272 0%, #dbaa39 100%);
+  color: #260707;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+  transition: all 0.25s ease;
+}
+
+.siemsee-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(212, 175, 55, 0.55);
+}
+
+.siemsee-action-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* ===========================================================
+   STEP 2: FULLSCREEN MODAL REVEAL OVERLAY[cite: 19]
+   =========================================================== */
 .reveal-overlay {
   position: fixed;
   inset: 0;
@@ -282,13 +285,12 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: radial-gradient(circle at 50% 42%, rgba(74, 28, 14, 0.92), rgba(10, 4, 2, 0.96));
-  z-index: 1000;
-  opacity: 0;
-  animation: revealOverlayFadeIn 0.4s ease forwards;
+  background: radial-gradient(circle at 50% 42%, rgba(111, 42, 21, 0.94), rgba(10, 4, 2, 0.98));
+  z-index: 9999;
+  animation: revealFadeIn 0.4s ease forwards;
 }
 
-@keyframes revealOverlayFadeIn {
+@keyframes revealFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
@@ -302,32 +304,19 @@
   justify-content: center;
 }
 
-.reveal-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  overflow: hidden;
-  transform: translate(-50%, -50%) rotate(0deg);
-  animation: revealGlowSpin 9s linear infinite;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 1;
-}
- 
+
+
 .reveal-glow img {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 160%;
-  height: 160%;
+  width: 100%;
+  height: 100%;
   transform: translate(-50%, -50%);
   display: block;
 }
 
-@keyframes revealGlowSpin {
+@keyframes auraSpin {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
@@ -337,238 +326,436 @@
   width: 200px;
   height: 490px;
   z-index: 2;
-  opacity: 0;
-  transform: scale(0.4) translateY(40px);
   animation: revealStickIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  animation-delay: 0.05s;
 }
 
 .reveal-stick img {
   width: 100%;
   height: 100%;
-  display: block;
-  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.55));
+  object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6));
 }
 
 @keyframes revealStickIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.4) translateY(40px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  0% { opacity: 0; transform: scale(0.4) translateY(40px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .reveal-number {
   position: absolute;
   top: 15%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.5);
+  transform: translate(-50%, -50%);
   width: 54px;
   height: 54px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #8b1e1e;
-  color: #fbe7b0;
+  background: #8B1E1E;
+  color: #FBE7B0;
   font-size: 24px;
-  font-weight: bold;
-  box-shadow: 0 0 0 3px #fbe7b0, 0 0 26px 6px rgba(251, 231, 176, 0.55);
-  opacity: 0;
-  animation: revealNumberIn 0.5s ease forwards, numberPulse 2s ease-in-out infinite 1s !important;
-  animation-delay: 0.5s;
+  font-weight: 800;
+  box-shadow: 0 0 0 3px #FBE7B0, 0 0 26px 6px rgba(251, 231, 176, 0.6);
   z-index: 3;
-}
-
-@keyframes revealNumberIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes numberPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 3px #fbe7b0, 0 0 26px 6px rgba(251, 231, 176, 0.55);
-  }
-  50% {
-    box-shadow: 0 0 0 5px #fbe7b0, 0 0 40px 12px rgba(251, 231, 176, 0.85);
-  }
 }
 
 .reveal-caption {
   margin-top: 18px;
-  color: #fbe7b0;
-  font-size: 14px;
+  color: #FBE7B0;
+  font-size: 16px;
   letter-spacing: 0.5px;
-  opacity: 0;
-  animation: revealFadeUp 0.5s ease forwards;
-  animation-delay: 0.65s;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 .reveal-btn {
-  margin-top: 22px;
-  width: 220px;
-  opacity: 0;
-  animation: revealFadeUp 0.5s ease forwards;
-  animation-delay: 0.85s;
+  margin-top: 20px;
+  width: 240px;
+  padding: 13px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #F3D279 0%, #C99726 100%);
+  color: #260707;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+  animation: pulseGoldButton 2s infinite;
 }
 
-@keyframes revealFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes pulseGoldButton {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.6); }
+  50% { box-shadow: 0 0 0 14px rgba(212, 175, 55, 0); }
 }
 
-/* ปุ่มทอง */
-.btn-gold {
+/* ===========================================================
+   STEP 3: แยก 2 ฝั่ง (SPLIT SCREEN REVEAL)
+   =========================================================== */
+.siemsee-split-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: center;
+  animation: splitContainerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes splitContainerIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 🌟 ฝั่งซ้าย: เอาแต่แท่งเซียมซีที่มีเลขติดที่ไม้ และมีออร่าหมุนข้างหลัง */
+.split-left-stick-panel {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pure-stick-stage {
   position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width: 320px;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-gold::after {
-  content: '';
+/* ออร่าหมุนข้างหลังแท่งไม้ */
+.stick-rotating-aura {
   position: absolute;
-  top: -50%;
-  left: -60%;
-  width: 20%;
-  height: 200%;
-  background: linear-gradient(
-    60deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
-  transform: rotate(30deg);
-  animation: shineGlow 3s infinite;
-}
-
-@keyframes shineGlow {
-  0% { left: -60%; }
-  20% { left: 140%; }
-  100% { left: 140%; }
-}
-
-.btn-gold:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-}
-
-.btn-gold:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-}
-
-/* ออร่ากระบอก */
-.siemsee-stage::before {
-  content: '';
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(251, 231, 176, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-  border-radius: 50%;
+  top: 52%;
+  left: 52%;
+  width: 420px;
+  height: 420px;
+  border-radius: 52%;
+  transform: translate(-52%, -52%);
+  animation: auraSpin 12s linear infinite;
+  mix-blend-mode: screen;
   pointer-events: none;
   z-index: 1;
-  animation: pulseAura 4s ease-in-out infinite alternate;
+  opacity: 0.85;
 }
 
-@keyframes pulseAura {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
-  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
-
-/* การ์ดผลลัพธ์ */
-.talisman-card {
-  position: relative;
-  border: 2px solid var(--primary-gold, #d4af37) !important;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #fffcf5 0%, #fff7e6 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(212, 175, 55, 0.1);
-  animation: cardUnfold 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  overflow: hidden;
-}
-
-@keyframes cardUnfold {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.talisman-card p {
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.talisman-card p:hover {
-  background-color: rgba(212, 175, 55, 0.12);
-}
-
-.reveal-overlay::before {
-  content: '';
+.stick-rotating-aura img {
   position: absolute;
-  inset: 0;
-  background-image: 
-    radial-gradient(rgba(251, 231, 176, 0.3) 1px, transparent 0),
-    radial-gradient(rgba(255, 215, 0, 0.2) 1px, transparent 0);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
-  animation: particleFloat 20s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes particleFloat {
-  from { background-position: 0 0, 20px 20px; }
-  to { background-position: 0 -400px, 20px -380px; }
-}
-
-.siemsee-stage::after {
-  content: '';
-  position: absolute;
-  top: -100px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
   width: 100%;
-  max-width: 600px;
-  height: 600px;
-  background-image: 
-    radial-gradient(rgba(212, 175, 55, 0.08) 2px, transparent 2px),
-    radial-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+
+/* ตัวแท่งไม้เซียมซีและเลข */
+.pure-stick-wrapper {
+  position: relative;
+  width: 140px;
+  height: 440px;
+  z-index: 2;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  animation: stickFloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes stickFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-8px); }
+}
+
+.pure-stick-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.stick-embedded-number {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  background: #8B1E1E;
+  color: #FBE7B0;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FBE7B0;
+  box-shadow: 0 0 0 3px rgba(251, 231, 176, 0.4), 0 0 20px rgba(212, 175, 55, 0.6);
+}
+
+/* 📜 ฝั่งขวา: ใบเซียมซีคำทำนาย (Talisman Card)[cite: 19] */
+.split-right-fortune-panel {
+  width: 100%;
+  max-width: 560px; /* ขยายความกว้างสูงสุดให้แผ่นการ์ดดูกว้างสมส่วน */
+  display: flex;
+  justify-content: center;
+}
+
+.chinese-paper-talisman {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  /* สัดส่วนตามภาพใหม่ (1080 / 1380 ≈ 1 / 1.28) */
+  aspect-ratio: 1080 / 1380;
+  background-image: url('../assets/talisman_bg.png'); /* ตรวจสอบ path รูปภาพ */
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  padding: 5% 7% 4%;
+}
+
+/* 🏷️ ตำแหน่งป้ายสีแดงด้านบน */
+.chinese-talisman-top-banner {
+  /* คำนวณระยะความสูงให้อยู่ในกรอบป้ายแดงของภาพพอดี */
+  height: 15%;
+  margin-top: 0.5%;
+  margin-left: 12%; /* เว้นช่องเมฆสีแดงด้านซ้าย */
+  margin-right: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1px;
   pointer-events: none;
-  z-index: 0;
-  mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%);
-  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%);
 }
 
-h2[style*="color: var(--primary-red)"] {
-  color: #fbe7b0 !important;
-  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.4), 0 0 20px rgba(139, 30, 30, 0.8);
+.talisman-banner-number {
+  font-family: 'Noto Serif Thai', 'Sarabun', serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #F8E7BE;
   letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  line-height: 1.1;
 }
 
-p[style*="color: var(--text-sub)"] {
-  color: #d1b894 !important;
+.talisman-banner-title {
+  margin: 0;
+  font-family: 'Noto Serif Thai', 'Kanit', sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #FFFDF5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* 📜 บริเวณพื้นที่เขียนคำทำนายสีครีม */
+.chinese-talisman-content {
+  flex: 1;
+  margin-top: 6.5%; /* ระยะเว้นจากป้ายแดงและเส้นลายขีด */
+  margin-bottom: 2%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 0 4%;
+  box-sizing: border-box;
+}
+
+.chinese-fortune-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px dashed rgba(168, 120, 80, 0.22);
+  padding-bottom: 7px;
+}
+
+.chinese-fortune-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ป้ายหัวข้อหมวด (เช่น การงาน, การเงิน) */
+.chinese-fortune-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(140, 59, 59, 0.12);
+  border: 1px solid rgba(140, 59, 59, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #7A1C28;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.chinese-fortune-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #38241B;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* จัดกล่องฝั่งซ้ายให้แสดงแท่งไม้และปุ่มเรียงแนวตั้ง */
+.pure-stick-stage {
+  position: relative;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* กล่องหุ้มปุ่มเสี่ยงเซียมซีใหม่ฝั่งซ้าย */
+.stick-action-wrap {
+  z-index: 5;
+  margin-top: -10px; /* ขยับขึ้นมาให้อยู่ใต้ปลายแท่งไม้พอดี */
+}
+
+/* ปุ่มเสี่ยงเซียมซีใหม่ฝั่งซ้าย (สไตล์สีทองขอบมนเด่น) */
+.reshake-btn-left {
+  background: linear-gradient(135deg, #FFFDF7 0%, #FDF4DE 100%);
+  border: 1.5px solid #C99726;
+  color: #7A530E;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(201, 151, 38, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reshake-btn-left:hover {
+  background: linear-gradient(135deg, #FDE68A 0%, #D4AF37 100%);
+  color: #3A0C14;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(201, 151, 38, 0.45);
+}
+
+.chinese-talisman-action-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  /* ดันปุ่มขึ้นมาเหนือกึ่งกลางขอบล่างของรูปภาพ */
+  margin-top: auto;
+  margin-bottom: 3.5%;
+  padding-top: 10px;
+}
+
+/* สไตล์พื้นฐานของทั้ง 2 ปุ่ม */
+.btn-talisman-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* 1. ปุ่ม "เก็บใบเซียมซี" - ดีไซน์สีแดงชาด ขอบทองนูนหรูหรา */
+.btn-talisman-save {
+  background: linear-gradient(135deg, #8C3B3B 0%, #682626 100%);
+  color: #FFFDF5;
+  border: 1.5px solid #C9A03D;
+  box-shadow: 
+    0 4px 12px rgba(104, 38, 38, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-talisman-save:hover {
+  background: linear-gradient(135deg, #A24545 0%, #7A2C2C 100%);
+  border-color: #E2BF65;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(104, 38, 38, 0.45);
+}
+
+.btn-talisman-save:active {
+  transform: translateY(0);
+}
+
+/* 2. ปุ่ม "ทิ้งเซียมซี" - ดีไซน์สไตล์กระดาษโบราณมินิมอล ขอบแดงซอฟต์ */
+.btn-talisman-discard {
+  background: rgba(253, 248, 237, 0.85);
+  backdrop-filter: blur(4px);
+  color: #8C3B3B;
+  border: 1.5px solid rgba(140, 59, 59, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.btn-talisman-discard:hover {
+  background: #FFF2F2;
+  border-color: #8C3B3B;
+  color: #5C1919;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(140, 59, 59, 0.18);
+}
+
+.btn-talisman-discard:active {
+  transform: translateY(0);
+}
+
+/* ปรับระยะในจอคอมพิวเตอร์ / โน้ตบุ๊ก */
+@media (min-width: 960px) {
+  .btn-talisman-action {
+    padding: 9px 20px;
+    font-size: 13.5px;
+  }
+}
+
+/* ===========================================================
+   💻 Desktop / Notebook Responsive (>= 960px)
+   =========================================================== */
+@media (min-width: 960px) {
+  .siemsee-split-container {
+    display: grid;
+    grid-template-columns: 0.9fr 1.2fr; /* ซ้าย 42% (ไม้+ออร่า) : ขวา 58% (คำทำนาย) */
+    gap: 48px;
+    align-items: center;
+    padding-top: 16px;
+  }
+
+  .pure-stick-stage {
+    width: 360px;
+    height: 520px;
+  }
+
+  .stick-rotating-aura {
+    width: 480px;
+    height: 480px;
+  }
+
+  .pure-stick-wrapper {
+    width: 160px;
+    height: 480px;
+  }
+
+  .talisman-card {
+    padding: 30px 28px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
