@@ -135,6 +135,27 @@ router.post('/auth/google', async (req, res) => {
     });
   }
 });
+router.post('/auth/dev-token', async (req, res) => {
+  const { email } = req.body;
+  
+  // หา user จากอีเมล
+  const user = await dbClient.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // สร้าง JWT Token ให้ทันที
+  const appToken = jwt.sign(
+    { userId: user.id, email: user.email },
+    process.env.JWT_SECRET || 'khorsuanboon_super_secret_key_2026',
+    { expiresIn: '7d' }
+  );
+
+  return res.json({ success: true, token: appToken });
+});
 
 router.post('/auth/logout', (req, res) => {
   return res.json({ 

@@ -1,21 +1,19 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { sql, eq, desc } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import { dbClient } from '../db/client.js';
-import { temples, reviews, users } from '../db/schema.js';
+import { temples, reviews } from '../db/schema.js';
 import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
-
 
 const router = Router();
 
-// สูตร Haversine สำหรับคำนวณระยะทาง 
 function calculateDistance(
   lat1: number,
   lon1: number,
   lat2: number,
   lon2: number
 ): number {
-  const R = 6371; // รัศมีโลก
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -28,17 +26,14 @@ function calculateDistance(
   return Math.round(R * c * 100) / 100;
 }
 
-// สร้าง URL รูปผ่าน proxy ของเราเอง (ไม่เอา API key ไปใส่ใน URL ที่ส่งให้ client)
-// ถ้า frontend อยู่คนละ host กับ backend ให้ตั้ง PUBLIC_API_URL เช่น http://localhost:3000
 function getPhotoUrl(photos: GooglePlaceItem["photos"]): string | undefined {
   const photoName = photos?.[0]?.name;
   if (!photoName) return undefined;
-  const base = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-  return `${base}/api/temples/photo/${photoName}`;
+  return `/api/temples/photo/${photoName}`;
 }
 
 interface TempleForUpsert {
-  id: string; // google place id
+  id: string;
   name: string;
   address: string;
   rating: number;
@@ -79,11 +74,9 @@ async function upsertTemples(items: TempleForUpsert[]) {
         },
       });
   } catch (error) {
-    // ไม่ให้ error ตรงนี้ทำให้ response หลักพัง แค่ log ไว้เฉยๆ
     console.error("Upsert Temples Error:", error);
   }
 }
-
 
 async function checkTemplewithDB(googlePlaceId: string): Promise<number | null> {
   const existing = await dbClient
@@ -139,18 +132,13 @@ async function checkTemplewithDB(googlePlaceId: string): Promise<number | null> 
   return retry.length > 0 ? retry[0].id : null;
 }
 
-
 interface NearbyQueryParams {
   lat?: string;
   lng?: string;
   radius?: string;
+  query?: string;
 }
 
-interface ReviewBody {
-  rating: number;
-  text?: string;
-}
-// Interfaces กำหนดประเภทข้อมูลป้องกัน 'unknown'
 interface GoogleReview {
   authorAttribution?: {
     displayName?: string;
@@ -178,44 +166,6 @@ interface GoogleSearchResponse {
   error?: any;
 }
 
-// ดึงรีวิวที่ผู้ใช้เขียนในแอปเราเอง (อิงจาก google place id)
-async function getAppReviews(googlePlaceId: string) {
-  try {
-    const rows = await dbClient
-      .select({
-        author: users.name,
-        rating: reviews.rating,
-        comment: reviews.comment,
-        createdAt: reviews.createdAt,
-      })
-      .from(reviews)
-      .innerJoin(temples, eq(reviews.templeId, temples.id))
-      .leftJoin(users, eq(reviews.userId, users.id))
-      .where(eq(temples.googlePlaceId, googlePlaceId))
-      .orderBy(desc(reviews.createdAt));
-
-    return rows.map((r) => ({
-      author: r.author || "ผู้ใช้งาน",
-      rating: r.rating,
-      relativeTime: r.createdAt
-        ? new Date(r.createdAt).toLocaleDateString("th-TH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
-        : "",
-      text: r.comment || "",
-      source: "แอปขอส่วนบุญ", // frontend แสดงเป็น badge อยู่แล้ว
-    }));
-  } catch (error) {
-    // ถ้าดึงจาก DB พลาด ยังให้แสดงรีวิว Google ต่อได้
-    console.error("Get App Reviews Error:", error);
-    return [];
-  }
-}
-
-
-// GET /api/temples/photo/places/xxx/photos/yyy — proxy รูปจาก Google (ซ่อน API key)
 router.get(/^\/photo\/(.+)$/, async (req: Request, res: Response) => {
   try {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
@@ -223,14 +173,7 @@ router.get(/^\/photo\/(.+)$/, async (req: Request, res: Response) => {
       return res.status(500).send();
     }
 
-    // req.params[0] จะได้ path ต่อจาก /photo/ เช่น "places/xxx/photos/yyy"
-    const photoPath = (req.params as any)[0] as string;
-
-    // ตรวจรูปแบบ path กันคนยิงมั่วมากิน quota
-    if (!/^places\/[\w-]+\/photos\/[\w-]+$/.test(photoPath)) {
-      return res.status(400).send();
-    }
-
+    const photoPath = req.params[0];
     const googleUrl = `https://places.googleapis.com/v1/${photoPath}/media?maxHeightPx=400&key=${apiKey}`;
 
     const googleRes = await fetch(googleUrl);
@@ -239,7 +182,7 @@ router.get(/^\/photo\/(.+)$/, async (req: Request, res: Response) => {
     }
 
     res.set("Content-Type", googleRes.headers.get("content-type") || "image/jpeg");
-    res.set("Cache-Control", "public, max-age=86400"); // cache 1 วัน ลด quota การยิง Google ซ้ำ
+    res.set("Cache-Control", "public, max-age=86400");
     const buffer = await googleRes.arrayBuffer();
     return res.send(Buffer.from(buffer));
   } catch (error) {
@@ -248,39 +191,72 @@ router.get(/^\/photo\/(.+)$/, async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/temples — ค้นหาวัด + คำนวณระยะทางจากพิกัด Lat/Lng ผู้ใช้ 
 router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Response): Promise<Response> => {
   try {
-    const { lat, lng, radius = "5000" } = req.query;
-
-    if (!lat || !lng) {
-      return res.status(400).json({
-        success: false,
-        message: "กรุณาระบุพิกัด lat และ lng ใน Query Parameter",
-      });
-    }
-
-    const userLat = parseFloat(lat);
-    const userLng = parseFloat(lng);
+    const { lat, lng, radius = "5000", query } = req.query;
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({ success: false, message: "API Key ไม่ถูกต้อง" });
     }
 
-    const googleResponse = await fetch(
-      "https://places.googleapis.com/v1/places:searchNearby",
-      {
+    const hasCoords = !!lat && !!lng;
+    const userLat = hasCoords ? parseFloat(lat!) : null;
+    const userLng = hasCoords ? parseFloat(lng!) : null;
+    const trimmedQuery = query?.trim();
+
+    if (!trimmedQuery && !hasCoords) {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณาระบุคำค้นหา หรือพิกัด lat และ lng",
+      });
+    }
+
+    const fieldMask =
+      "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos";
+
+    let googleResponse: Response | globalThis.Response;
+
+    if (trimmedQuery) {
+      const body: any = {
+        textQuery: trimmedQuery.includes("วัด") ? trimmedQuery : `วัด ${trimmedQuery}`,
+        includedType: "buddhist_temple",
+        strictTypeFiltering: false,
+        languageCode: "th",
+        regionCode: "TH",
+        pageSize: 20,
+      };
+
+      if (hasCoords) {
+        body.locationBias = {
+          circle: {
+            center: { latitude: userLat, longitude: userLng },
+            radius: 50000,
+          },
+        };
+      }
+
+      googleResponse = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask":
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos",
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify(body),
+      });
+    } else {
+      googleResponse = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
         },
         body: JSON.stringify({
           includedTypes: ["buddhist_temple"],
           maxResultCount: 20,
+          languageCode: "th",
           locationRestriction: {
             circle: {
               center: { latitude: userLat, longitude: userLng },
@@ -288,22 +264,24 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
             },
           },
         }),
-      }
-    );
+      });
+    }
 
     const result = (await googleResponse.json()) as GoogleSearchResponse;
 
     if (!googleResponse.ok) {
+      console.error("Google Places API Error:", result.error);
       return res.status(googleResponse.status).json({ success: false, error: result.error });
     }
 
     const places = result.places || [];
 
-    const templeList = places.map((place: GooglePlaceItem) => {
+    const templesList = places.map((place: GooglePlaceItem) => {
       const placeLat = place.location?.latitude || 0;
       const placeLng = place.location?.longitude || 0;
 
-      const distanceKm = calculateDistance(userLat, userLng, placeLat, placeLng);
+      const distanceKm =
+        hasCoords ? calculateDistance(userLat!, userLng!, placeLat, placeLng) : null;
 
       return {
         id: place.id,
@@ -311,28 +289,29 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
         address: place.formattedAddress || "",
         rating: place.rating || 0,
         userRatingCount: place.userRatingCount || 0,
-        distanceKm: distanceKm,
+        distanceKm,
         location: { lat: placeLat, lng: placeLng },
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${placeLat},${placeLng}&query_place_id=${place.id}`,
         imageUrl: getPhotoUrl(place.photos),
       };
     });
 
-    templeList.sort((a, b) => a.distanceKm - b.distanceKm);
+    if (hasCoords && !trimmedQuery) {
+      templesList.sort((a: any, b: any) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+    }
 
-    upsertTemples(templeList);
+    upsertTemples(templesList);
 
-    return res.json({ success: true, totalCount: templeList.length, data: templeList });
+    return res.json({ success: true, totalCount: templesList.length, data: templesList });
   } catch (error) {
     console.error("Fetch Error:", error);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
 
-// 🟢 2. GET /api/temples/:id — ดึงรายละเอียดวัด + รีวิวทั้งหมด (Google + รีวิวในแอป)
 router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
-    const templeId = req.params.id;
+    const templeId = String(req.params.id);
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
     if (!apiKey) {
@@ -340,14 +319,12 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
     }
 
     const googleResponse = await fetch(
-      `https://places.googleapis.com/v1/places/${templeId}`,
+      `https://places.googleapis.com/v1/places/${encodeURIComponent(templeId)}?languageCode=th&regionCode=TH`,
       {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask":
-            "id,displayName,formattedAddress,location,rating,userRatingCount,reviews,photos",
+          "X-Goog-FieldMask": "id,displayName,formattedAddress,location,rating,userRatingCount,reviews,photos",
         },
       }
     );
@@ -358,9 +335,6 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
       return res.status(googleResponse.status).json({ success: false, error: place.error });
     }
 
-    // รีวิวที่ผู้ใช้เขียนในแอปเราเอง (จาก DB)
-    const appReviews = await getAppReviews(place.id);
-
     const templeDetail = {
       id: place.id,
       name: place.displayName?.text || "ไม่ระบุชื่อ",
@@ -369,15 +343,12 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
       userRatingCount: place.userRatingCount || 0,
       location: { lat: place.location?.latitude, lng: place.location?.longitude },
       imageUrl: getPhotoUrl(place.photos),
-      reviews: [
-        ...appReviews, // รีวิวในแอปขึ้นก่อน
-        ...(place.reviews || []).map((rev: GoogleReview) => ({
-          author: rev.authorAttribution?.displayName || "ผู้ใช้งาน",
-          rating: rev.rating || 0,
-          relativeTime: rev.relativePublishTimeDescription || "",
-          text: rev.text?.text || "",
-        })),
-      ],
+      reviews: (place.reviews || []).map((rev: GoogleReview) => ({
+        author: rev.authorAttribution?.displayName || "ผู้ใช้งาน",
+        rating: rev.rating || 0,
+        relativeTime: rev.relativePublishTimeDescription || "",
+        text: rev.text?.text || "",
+      })),
     };
 
     if (templeDetail.location.lat != null && templeDetail.location.lng != null) {
@@ -401,11 +372,10 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
   }
 });
 
-// 🟢 3. POST /api/temples/:id/reviews — ให้ดาว (1-5) และเพิ่มข้อความรีวิว
 router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const templeId = String(req.params.id);
-    const { rating, text } = req.body as ReviewBody;
+    const { rating, text } = req.body;
     const userId = req.userId!;
 
     if (!rating || rating < 1 || rating > 5) {
@@ -415,13 +385,11 @@ router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response)
       });
     }
 
-    // หา/สร้างวัดใน DB ก่อน (reviews.templeId อ้างอิง temples.id ที่เป็น serial)
     const templeDbId = await checkTemplewithDB(templeId);
     if (!templeDbId) {
       return res.status(404).json({ success: false, message: "ไม่พบข้อมูลวัดนี้" });
     }
 
-    //insert ลง DB
     const insertedReview = await dbClient
       .insert(reviews)
       .values({
@@ -432,7 +400,6 @@ router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response)
       })
       .returning();
 
-    // อัปเดต rating เฉลี่ย + จำนวนรีวิวของวัด
     const allReviews = await dbClient
       .select()
       .from(reviews)
@@ -445,7 +412,6 @@ router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response)
       .set({ ratingAvg: avgRating, ratingCount: allReviews.length })
       .where(eq(temples.id, templeDbId));
 
-    // ดึงชื่อ user จริงจาก DB (ไม่ใช้ authorName ที่ client กรอกเองแบบเดิม กันปลอมชื่อ)
     const userRow = await dbClient.query.users.findFirst({
       where: (u, { eq }) => eq(u.id, userId),
     });

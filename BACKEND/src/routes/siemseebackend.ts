@@ -4,16 +4,13 @@ import { dbClient as db } from '../db/client.js';
 import { fortunes, siemseeHistories } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
-import { generatePersonalizedSiamsi } from '../services/aisimsee.js';
 
 const router = Router();
 
-// GET /api/siemsee/draw?name=สมชาย
+// GET /api/siemsee/draw
 router.get('/draw', async (req: Request, res: Response) => {
   try {
-    const name = req.query.name as string | undefined;
-
-    // 1. สุ่มใบเซียมซีจากฐานข้อมูล
+    // สุ่มใบเซียมซีจากฐานข้อมูล
     const fortuneList = await db
       .select()
       .from(fortunes)
@@ -25,22 +22,10 @@ router.get('/draw', async (req: Request, res: Response) => {
     }
 
     const fortune = fortuneList[0];
-let personalizedFortune: string | null = null;
-
-// 2. ถ้ามีการส่งชื่อเข้ามา ให้เรียกใช้ Gemini AI แปลคำทำนาย
-if (name) {
-  try {
-    const aiResult = await generatePersonalizedSiamsi(fortune, { name }); // 🆕 ส่งเป็น object { name }
-    personalizedFortune = aiResult.text; // 🆕 ดึงแค่ field .text ออกมา (ไม่ใช่ทั้ง object)
-  } catch (aiError) {
-    console.error('Gemini AI Generation Error:', aiError);
-  }
-}
 
     return res.json({ 
       success: true, 
-      data: fortune,
-      personalizedFortune 
+      data: fortune
     });
   } catch (error) {
     console.error('Error drawing fortune:', error);
