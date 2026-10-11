@@ -113,7 +113,7 @@ const getInitialTemples = (): TempleItem[] => {
       memoryCachedTimestamp = savedTime;
       return parsed;
     }
-  } catch {}
+  } catch { /* empty */ }
   return [];
 };
 
@@ -127,7 +127,7 @@ const getInitialCoords = (): { lat: number; lng: number } | null => {
     if (saved && isCacheValid(savedTime)) {
       return JSON.parse(saved);
     }
-  } catch {}
+  } catch { /* empty */ }
   return null;
 };
 
@@ -180,7 +180,7 @@ export default function Temple() {
         try {
           sessionStorage.setItem("cached_coords", JSON.stringify(coords));
           sessionStorage.setItem("cached_temples_time", String(now));
-        } catch {}
+        } catch { /* empty */ }
 
         try {
           const res = await api.get("/temples", {
@@ -194,7 +194,7 @@ export default function Temple() {
             try {
               sessionStorage.setItem("cached_temples", JSON.stringify(res.data.data));
               sessionStorage.setItem("cached_temples_time", String(now));
-            } catch {}
+            } catch { /* empty */ }
           } else {
             setErrorMsg(res.data.message || "ไม่สามารถดึงข้อมูลวัดได้");
           }
