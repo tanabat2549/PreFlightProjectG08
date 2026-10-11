@@ -321,6 +321,34 @@
   color: #FFFFFF;
 }
 
+/* ป้ายคำทำนายภาพรวมประจำวัน */
+.daily-overview-banner {
+  background: linear-gradient(135deg, rgba(201, 151, 38, 0.08) 0%, rgba(122, 28, 40, 0.04) 100%);
+  border: 1px dashed rgba(201, 151, 38, 0.35);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.overview-quote-mark {
+  font-size: 26px;
+  line-height: 1;
+  font-family: serif;
+  color: var(--sms-gold);
+  font-weight: 700;
+  user-select: none;
+}
+
+.overview-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--sms-maroon-dark);
+  font-weight: 500;
+}
+
 /* ===================================================
    Lucky Bento Grid ภายในการ์ดใหญ่
    =================================================== */

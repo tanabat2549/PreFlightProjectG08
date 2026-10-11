@@ -7,33 +7,135 @@ import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
 
 const router = Router();
 
-// GET /api/siemsee/draw
-router.get('/draw', async (req: Request, res: Response) => {
-  try {
-    // สุ่มใบเซียมซีจากฐานข้อมูล
-    const fortuneList = await db
-      .select()
-      .from(fortunes)
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
+// ---------------------------------------------------------------------------
+// ตัวช่วยสำหรับจำกัดการสุ่มวันละ 1 ครั้งต่อบัญชี
+// ---------------------------------------------------------------------------
 
-    if (fortuneList.length === 0) {
-      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
+// "วัน" นับตามเวลาไทย (UTC+7 ไม่มี daylight saving) รีเซ็ตทุกเที่ยงคืนเวลาไทย
+const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+// วันที่ปัจจุบันตามเวลาไทย รูปแบบ YYYY-MM-DD
+function bangkokToday(now = new Date()): string {
+  return new Date(now.getTime() + BANGKOK_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+// เวลาที่จะสุ่มได้อีกครั้ง = เที่ยงคืนถัดไปตามเวลาไทย
+function nextBangkokMidnight(now = new Date()): Date {
+  const local = new Date(now.getTime() + BANGKOK_OFFSET_MS);
+  const nextLocalMidnight = Date.UTC(
+    local.getUTCFullYear(),
+    local.getUTCMonth(),
+    local.getUTCDate() + 1
+  );
+  return new Date(nextLocalMidnight - BANGKOK_OFFSET_MS);
+}
+
+type Fortune = typeof fortunes.$inferSelect;
+
+interface DailyDraw {
+  date: string; // วันที่สุ่ม (เวลาไทย)
+  fortune: Promise<Fortune | undefined>; // เก็บเป็น Promise เพื่อกันกดสุ่มซ้อนกันสองครั้งพร้อมกัน
+}
+
+// เก็บในหน่วยความจำของ server: key = userId, value = ใบที่สุ่มได้วันนี้
+const dailyDraws = new Map<number, DailyDraw>();
+
+// ล้างรายการของวันก่อนๆ ทุกชั่วโมง กันหน่วยความจำโต
+setInterval(() => {
+  const today = bangkokToday();
+  for (const [userId, entry] of dailyDraws) {
+    if (entry.date !== today) dailyDraws.delete(userId);
+  }
+}, 60 * 60 * 1000).unref();
+
+// ตั้ง SIEMSEE_DAILY_LIMIT=off ใน .env เพื่อปิดการจำกัดตอนทดสอบ
+function isLimitEnabled(): boolean {
+  return process.env.SIEMSEE_DAILY_LIMIT !== 'off';
+}
+
+async function pickRandomFortune(): Promise<Fortune | undefined> {
+  const [row] = await db.select().from(fortunes).orderBy(sql`RANDOM()`).limit(1);
+  return row;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/siemsee/draw — สุ่มใบเซียมซี (ต้องล็อกอิน, วันละ 1 ครั้งต่อบัญชี)
+// ---------------------------------------------------------------------------
+router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    // ผลของแต่ละวันคงที่ ห้าม browser/proxy จำ response เก่าไว้
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
+    const userId = req.userId!;
+
+    // Sanitize: รับเฉพาะ string, ตัดช่องว่าง, จำกัดความยาว
+    const rawName = req.query.name;
+    const name = typeof rawName === 'string' ? rawName.trim().slice(0, 50) || undefined : undefined;
+    const greetingFor = (fortune: Fortune) =>
+      name ? `คุณ${name} ได้รับใบที่ ${fortune.number}` : undefined;
+
+    const today = bangkokToday();
+    const nextDrawAt = nextBangkokMidnight().toISOString();
+
+    // วันนี้สุ่มไปแล้ว: ส่งใบเดิมกลับไป ไม่สุ่มใหม่
+    const previous = dailyDraws.get(userId);
+    if (isLimitEnabled() && previous && previous.date === today) {
+      const fortune = await previous.fortune.catch(() => undefined);
+      if (fortune) {
+        const greeting = greetingFor(fortune);
+        return res.json({
+          success: true,
+          alreadyDrawn: true,
+          message: 'วันนี้คุณสุ่มเซียมซีไปแล้ว ไว้มาสุ่มใหม่พรุ่งนี้นะ',
+          nextDrawAt,
+          data: fortune,
+          ...(greeting && { greeting }),
+        });
+      }
+      // ครั้งก่อนสุ่มไม่สำเร็จ (เช่น DB ล่ม) ไม่ถือว่าใช้สิทธิ์ไปแล้ว ปล่อยให้สุ่มใหม่ต่อด้านล่าง
     }
 
-    const fortune = fortuneList[0];
+    // สุ่มใบเซียมซีจากฐานข้อมูล (ยังไม่บันทึกประวัติ จนกว่าผู้ใช้จะกด "เก็บใบเซียมซี")
+    const drawing = pickRandomFortune();
+    if (isLimitEnabled()) dailyDraws.set(userId, { date: today, fortune: drawing });
 
-    return res.json({ 
-      success: true, 
-      data: fortune
+    let fortune: Fortune | undefined;
+    try {
+      fortune = await drawing;
+    } catch (error) {
+      dailyDraws.delete(userId); // สุ่มพลาด คืนสิทธิ์
+      throw error;
+    }
+
+    if (!fortune) {
+      dailyDraws.delete(userId);
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล',
+      });
+    }
+
+    const greeting = greetingFor(fortune);
+    return res.json({
+      success: true,
+      alreadyDrawn: false,
+      nextDrawAt,
+      data: fortune,
+      ...(greeting && { greeting }),
     });
   } catch (error) {
     console.error('Error drawing fortune:', error);
-    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
   }
 });
 
-// POST /api/siemsee/save — บันทึกลงประวัติ
+// ---------------------------------------------------------------------------
+// POST /api/siemsee/save — บันทึกประวัติใบเซียมซี (เก็บใบเซียมซี)
+// (รวมจากสองบล็อกเดิมที่ซ้ำกัน ใช้ข้อความตอบกลับของบล็อกแรกที่ทำงานอยู่จริงก่อนหน้านี้)
+// ---------------------------------------------------------------------------
 router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const fortuneId = Number(req.body?.fortuneId);
@@ -56,9 +158,35 @@ router.post('/save', requireAuth, async (req: AuthRequest, res: Response) => {
       fortuneId,
     });
 
-    return res.status(201).json({ success: true, message: 'เก็บใบเซียมซีเรียบร้อยแล้ว' });
+    return res.status(201).json({ success: true, message: 'บันทึกใบเซียมซีเรียบร้อยแล้ว' });
   } catch (error) {
-    console.error('Save siemsee error:', error);
+    console.error('Error saving fortune history:', error);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+// DELETE /api/siemsee/history/:id — ทิ้ง/ลบใบเซียมซีออกจากประวัติ
+router.delete('/history/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const historyId = Number(req.params.id);
+
+    if (!historyId || isNaN(historyId)) {
+      return res.status(400).json({ success: false, message: 'กรุณาระบุ history id ให้ถูกต้อง' });
+    }
+
+    const deleted = await db
+      .delete(siemseeHistories)
+      .where(sql`${siemseeHistories.id} = ${historyId} AND ${siemseeHistories.userId} = ${userId}`)
+      .returning();
+
+    if (deleted.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการที่ต้องการลบ หรือไม่มีสิทธิ์ลบ' });
+    }
+
+    return res.json({ success: true, message: 'ทิ้งใบเซียมซีเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Delete siemsee history error:', error);
     return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
@@ -71,7 +199,7 @@ router.get('/fortunes', async (_req: Request, res: Response) => {
     return res.json({
       success: true,
       total: allFortunes.length,
-      data: allFortunes
+      data: allFortunes,
     });
   } catch (error) {
     console.error('Error fetching all fortunes:', error);
@@ -97,13 +225,13 @@ router.get('/:number', async (req: Request, res: Response) => {
     if (fortuneList.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `ไม่พบข้อมูลใบเซียมซีหมายเลข ${fortuneNumber}`
+        message: `ไม่พบข้อมูลใบเซียมซีหมายเลข ${fortuneNumber}`,
       });
     }
 
     return res.json({
       success: true,
-      data: fortuneList[0]
+      data: fortuneList[0],
     });
   } catch (error) {
     console.error(`Error fetching fortune #${req.params.number}:`, error);

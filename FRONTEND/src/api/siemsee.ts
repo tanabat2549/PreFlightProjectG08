@@ -92,3 +92,28 @@ export async function getFortuneByNumber(num: number): Promise<Fortune> {
     throw error;
   }
 }
+
+// ทิ้ง/ลบใบเซียมซีออกจากประวัติ (ต้องล็อกอิน)
+export async function deleteSiemseeHistory(historyId: string | number): Promise<void> {
+  if (USE_MOCK) {
+    await wait(300);
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('กรุณาเข้าสู่ระบบก่อน');
+
+  try {
+    const response = await api.delete<APIResponse<null>>(`/user/siemsee-history/${historyId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'ทิ้งใบเซียมซีไม่สำเร็จ');
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      throw new Error(error.response.data.message, { cause: error });
+    }
+    throw error;
+  }
+}

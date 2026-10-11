@@ -90,12 +90,53 @@ const getFullImageUrl = (url?: string) => {
   return url.startsWith("/") ? url : `/${url}`;
 };
 
+// ⚡ การตั้งค่าแคช (TTL 5 นาที = 300,000 ms)
+const CACHE_TTL_MS = 5 * 60 * 1000;
+let memoryCachedTemples: TempleItem[] = [];
+let memoryCachedCoords: { lat: number; lng: number } | null = null;
+let memoryCachedTimestamp = 0;
+
+const isCacheValid = (timestamp: number) => {
+  return timestamp > 0 && Date.now() - timestamp < CACHE_TTL_MS;
+};
+
+const getInitialTemples = (): TempleItem[] => {
+  if (memoryCachedTemples.length > 0 && isCacheValid(memoryCachedTimestamp)) {
+    return memoryCachedTemples;
+  }
+  try {
+    const saved = sessionStorage.getItem("cached_temples");
+    const savedTime = Number(sessionStorage.getItem("cached_temples_time") || 0);
+    if (saved && isCacheValid(savedTime)) {
+      const parsed = JSON.parse(saved);
+      memoryCachedTemples = parsed;
+      memoryCachedTimestamp = savedTime;
+      return parsed;
+    }
+  } catch {}
+  return [];
+};
+
+const getInitialCoords = (): { lat: number; lng: number } | null => {
+  if (memoryCachedCoords && isCacheValid(memoryCachedTimestamp)) {
+    return memoryCachedCoords;
+  }
+  try {
+    const saved = sessionStorage.getItem("cached_coords");
+    const savedTime = Number(sessionStorage.getItem("cached_temples_time") || 0);
+    if (saved && isCacheValid(savedTime)) {
+      return JSON.parse(saved);
+    }
+  } catch {}
+  return null;
+};
+
 export default function Temple() {
-  const [temples, setTemples] = useState<TempleItem[]>([]);
+  const [temples, setTemples] = useState<TempleItem[]>(getInitialTemples);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => getInitialTemples().length === 0);
   const [errorMsg, setErrorMsg] = useState("");
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(getInitialCoords);
 
   const [selectedTemple, setSelectedTemple] = useState<TempleDetail | null>(null);
   const [pageLoading, setPageLoading] = useState(false);
@@ -106,20 +147,41 @@ export default function Temple() {
   const [authorName, setAuthorName] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  // 1. ค้นหาวัดใกล้ฉันผ่าน GPS
-  const fetchNearbyTemples = () => {
+  // 1. ค้นหาวัดใกล้ฉันผ่าน GPS (รองรับ Cache และรีเฟรชข้อมูลอัตโนมัติเมื่อครบ 5 นาที)
+  const fetchNearbyTemples = (forceRefresh = false) => {
     if (!navigator.geolocation) {
       setErrorMsg("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง GPS");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setErrorMsg("");
+    const hasCache = temples.length > 0 || memoryCachedTemples.length > 0;
+    if (!hasCache || forceRefresh) {
+      setLoading(true);
+      setErrorMsg("");
+    }
+
+    // ตัวเลือก Geolocation: ถ้าบังคับรีเฟรชให้ใช้ maximumAge: 0 เพื่อขอพิกัดล่าสุด
+    const geoOptions: PositionOptions = {
+      enableHighAccuracy: false,
+      maximumAge: forceRefresh ? 0 : CACHE_TTL_MS,
+      timeout: 6000,
+    };
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-        setUserCoords({ lat: latitude, lng: longitude });
+        const coords = { lat: latitude, lng: longitude };
+        const now = Date.now();
+
+        setUserCoords(coords);
+        memoryCachedCoords = coords;
+        memoryCachedTimestamp = now;
+        try {
+          sessionStorage.setItem("cached_coords", JSON.stringify(coords));
+          sessionStorage.setItem("cached_temples_time", String(now));
+        } catch {}
+
         try {
           const res = await api.get("/temples", {
             params: { lat: latitude, lng: longitude, radius: "10000" },
@@ -127,6 +189,12 @@ export default function Temple() {
 
           if (res.data.success) {
             setTemples(res.data.data);
+            memoryCachedTemples = res.data.data;
+            memoryCachedTimestamp = now;
+            try {
+              sessionStorage.setItem("cached_temples", JSON.stringify(res.data.data));
+              sessionStorage.setItem("cached_temples_time", String(now));
+            } catch {}
           } else {
             setErrorMsg(res.data.message || "ไม่สามารถดึงข้อมูลวัดได้");
           }
@@ -138,8 +206,11 @@ export default function Temple() {
       },
       () => {
         setLoading(false);
-        setErrorMsg("กรุณาอนุญาตการเข้าถึงพิกัดตำแหน่ง (Location Permission)");
-      }
+        if (!hasCache) {
+          setErrorMsg("กรุณาอนุญาตการเข้าถึงพิกัดตำแหน่ง (Location Permission)");
+        }
+      },
+      geoOptions
     );
   };
 
@@ -172,7 +243,37 @@ export default function Temple() {
   };
 
   useEffect(() => {
-    fetchNearbyTemples();
+    // ⚡ ตรวจสอบว่ามีข้อมูลวัดในแคชที่ยังไม่หมดอายุ (ไม่เกิน 5 นาที) หรือไม่
+    const savedTime = memoryCachedTimestamp || Number(sessionStorage.getItem("cached_temples_time") || 0);
+    const validCache = temples.length > 0 && isCacheValid(savedTime);
+
+    if (!validCache) {
+      fetchNearbyTemples(true);
+    } else {
+      setLoading(false);
+    }
+
+    // ⏱️ ตั้งเวลา Auto-Refresh อัตโนมัติทุกๆ 5 นาที (300,000 ms)
+    // เพื่อดึงข้อมูลวัดและระยะทางล่าสุดใหม่อัตโนมัติโดยไม่ต้องรีเฟรชหน้าจอทั้งหน้า
+    const intervalId = setInterval(() => {
+      fetchNearbyTemples(true);
+    }, CACHE_TTL_MS);
+
+    // 🔄 ถ้าผู้ใช้สลับแท็บไปนานกว่า 5 นาทีแล้วกลับมา ให้ดึงข้อมูลใหม่ทันที
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const lastTime = memoryCachedTimestamp || Number(sessionStorage.getItem("cached_temples_time") || 0);
+        if (!isCacheValid(lastTime)) {
+          fetchNearbyTemples(true);
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const handleOpenDetail = async (id: string) => {
@@ -267,9 +368,37 @@ export default function Temple() {
                 }}
               />
             ) : (
-              <div className={styles.heroPlaceholder} style={{ backgroundImage: `url(${iconTemple})`, backgroundSize: '50%', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
-                {/* ปรับให้แสดงรูป iconTemple จางๆ หรือกึ่งกลางแทนข้อความเปล่าๆ */}
-                <span style={{ marginTop: 80, backgroundColor: 'rgba(255,255,255,0.7)', padding: '2px 8px', borderRadius: '4px' }}>ไม่มีรูปภาพตัวอย่าง</span>
+              <div
+                className={styles.heroPlaceholder}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#FDFBF7",
+                  padding: "20px",
+                }}
+              >
+                <img
+                  src={iconTemple}
+                  alt={selectedTemple.name}
+                  style={{
+                    width: "90px",
+                    height: "90px",
+                    objectFit: "contain",
+                    marginBottom: "10px",
+                    opacity: 0.85,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "0.86rem",
+                    color: "var(--sms-sub)",
+                    fontWeight: 500,
+                  }}
+                >
+                  ไม่มีรูปภาพตัวอย่าง
+                </span>
               </div>
             )}
           </div>
@@ -414,7 +543,7 @@ export default function Temple() {
               className={styles.primaryButton}
               onClick={() => {
                 setSearchQuery("");
-                fetchNearbyTemples();
+                fetchNearbyTemples(true);
               }}
             >
               <Icons.MapPin size={14} />
