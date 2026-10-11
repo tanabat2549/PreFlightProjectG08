@@ -4,13 +4,18 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 
+
+// นำเข้า Router ฝั่ง User & Public
 import siemseeRouter from './routes/siemseebackend.js';
 import authRouter from './routes/LoginBackend.js';
 import horoscopeRouter from './routes/horoscopebackend.js';
 import calendarRouter from './routes/calendarbackend.js';
 import templeRouter from './routes/templebackend.js';
 import profileRouter from './routes/profilebackend.js';
-import superAdminRouter from './routes/superAdminBackend.js'; // 👈 เพิ่มบรรทัดนี้
+
+import adminRouter from './routes/admin/index.js';
+
+
 
 const app = express();
 app.disable('etag');
@@ -39,21 +44,26 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-// เพิ่ม middleware สำหรับแปลง request body เป็น JSON
+
 app.use(express.json());
 
+// ==========================================
+// ลงทะเบียน Path ทั้งหมดในระบบ
+// ==========================================
 app.use('/api/siemsee', siemseeRouter);
 app.use('/api/horoscope', horoscopeRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/temples', templeRouter);
 app.use('/api/user', profileRouter);
-app.use('/api/admin', superAdminRouter);
 app.use('/api', authRouter);
 
+//ลงทะเบียน Path ฝั่ง Admin (รวมทุกฟีเจอร์หลังบ้านไว้ที่นี่)
+app.use('/api/admin', adminRouter);
 app.get('/health', (_req, res) => {
   res.json({ message: 'Khor Suan Boon Backend is running!' });
 });
 
-app.listen(port, () => {
+// เริ่มรันเซิร์ฟเวอร์เพียงครั้งเดียวและเก็บใส่ตัวแปร server ไว้ใช้ทำ Graceful Shutdown
+const server = app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });

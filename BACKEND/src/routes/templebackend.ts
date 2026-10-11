@@ -472,11 +472,10 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
   }
 });
 
-// 🟢 3. POST /api/temples/:id/reviews — ให้ดาว (1-5) และเพิ่มข้อความรีวิว
 router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const templeId = String(req.params.id);
-    const { rating, text } = req.body as ReviewBody;
+    const { rating, text } = req.body;
     const userId = req.userId!;
 
     if (!rating || rating < 1 || rating > 5) {
@@ -486,7 +485,6 @@ router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response)
       });
     }
 
-    // หา/สร้างวัดใน DB ก่อน (reviews.templeId อ้างอิง temples.id ที่เป็น serial)
     const templeDbId = await checkTemplewithDB(templeId);
     if (!templeDbId) {
       return res.status(404).json({ success: false, message: "ไม่พบข้อมูลวัดนี้" });
@@ -503,7 +501,6 @@ router.post("/:id/reviews", requireAuth, async (req: AuthRequest, res: Response)
       })
       .returning();
 
-    // อัปเดต rating เฉลี่ย + จำนวนรีวิวของวัด
     const allReviews = await dbClient
       .select()
       .from(reviews)
