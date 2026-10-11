@@ -63,16 +63,29 @@ async function pickRandomFortune(): Promise<Fortune | undefined> {
 // ---------------------------------------------------------------------------
 router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
+<<<<<<< HEAD
     // ผลของแต่ละวันคงที่ ห้าม browser/proxy จำ response เก่าไว้
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+=======
+    const rawName = req.query.name as string | undefined;
+>>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
 
     const userId = req.userId!;
 
+<<<<<<< HEAD
     // Sanitize: รับเฉพาะ string, ตัดช่องว่าง, จำกัดความยาว
     const rawName = req.query.name;
     const name = typeof rawName === 'string' ? rawName.trim().slice(0, 50) || undefined : undefined;
     const greetingFor = (fortune: Fortune) =>
       name ? `คุณ${name} ได้รับใบที่ ${fortune.number}` : undefined;
+=======
+    // 1. สุ่มใบเซียมซีจากฐานข้อมูล (ยังไม่บันทึกประวัติ จนกว่าผู้ใช้จะกด "เก็บใบเซียมซี")
+    const fortuneList = await db
+      .select()
+      .from(fortunes)
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+>>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
 
     const today = bangkokToday();
     const nextDrawAt = nextBangkokMidnight().toISOString();
@@ -115,7 +128,17 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
       });
     }
 
+<<<<<<< HEAD
     const greeting = greetingFor(fortune);
+=======
+    const fortune = fortuneList[0];
+
+    // 2. ถ้ามีชื่อส่งมา ใส่คำทักทายส่วนตัวในข้อความคำทำนาย
+    const greeting = name
+      ? `คุณ${name} ได้รับใบที่ ${fortune.number}`
+      : undefined;
+
+>>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
     return res.json({
       success: true,
       alreadyDrawn: false,

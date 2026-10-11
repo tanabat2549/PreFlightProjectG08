@@ -286,7 +286,8 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
         const tLng = t.longitude || 0;
         const imageUrl = isRealTempleImage(t.imageUrl) ? t.imageUrl : null;
         return {
-          id: t.googlePlaceId,
+          dbId: t.id,
+          id: t.googlePlaceId || `osm_${t.id}`,
           name: t.name,
           address: t.address || "",
           rating: t.ratingAvg || 4.8,
@@ -302,6 +303,25 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
     // ⚡ ถ้าใน Database มีวัดในรัศมีรอบตัวผู้ใช้เพียงพอ (ตั้งแต่ 5 วัดขึ้นไป) -> ดึงจาก Database ตอบกลับทันที!
     if (nearbyFromDb.length >= 5) {
       nearbyFromDb.sort((a, b) => a.distanceKm - b.distanceKm);
+
+      // 🔄 ตรวจสอบและดึงรูปจาก Wikipedia ให้วัดใน DB ที่ยังไม่มีรูป (Auto-healing Cache)
+      await Promise.all(
+        nearbyFromDb.map(async (t) => {
+          if (!t.imageUrl) {
+            const freshImage = await fetchTempleImage(t.name);
+            if (freshImage) {
+              t.imageUrl = freshImage;
+              // อัปเดตรูปใหม่กลับลง DB เพื่อให้ครั้งถัดไปไม่ต้องดึงซ้ำ
+              await dbClient
+                .update(temples)
+                .set({ imageUrl: freshImage, updatedAt: new Date() })
+                .where(eq(temples.id, t.dbId))
+                .catch(() => {});
+            }
+          }
+        })
+      );
+
       return res.json({
         success: true,
         source: "database_cache",
@@ -421,7 +441,17 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
       .leftJoin(users, eq(reviews.userId, users.id))
       .where(eq(reviews.templeId, t.id));
 
-    const imageUrl = isRealTempleImage(t.imageUrl) ? t.imageUrl : null;
+    let imageUrl = isRealTempleImage(t.imageUrl) ? t.imageUrl : null;
+    if (!imageUrl) {
+      imageUrl = await fetchTempleImage(t.name);
+      if (imageUrl) {
+        await dbClient
+          .update(temples)
+          .set({ imageUrl, updatedAt: new Date() })
+          .where(eq(temples.id, t.id))
+          .catch(() => {});
+      }
+    }
 
     const templeDetail = {
       id: t.googlePlaceId,
