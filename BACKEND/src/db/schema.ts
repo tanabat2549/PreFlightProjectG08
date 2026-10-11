@@ -1,17 +1,12 @@
 import { 
   pgTable, serial, varchar, text, integer, doublePrecision, 
-  timestamp, date, boolean, unique, index, time, pgEnum 
+  timestamp, date, boolean, unique, index, time, pgEnum, jsonb 
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// ==========================================
-// 0. Enums (ประกาศค่าคงที่ที่ตายตัว)
-// ==========================================
-export const zodiacEnum = pgEnum('zodiac_sign', [
-  'aries', 'taurus', 'gemini', 'cancer', 
-  'leo', 'virgo', 'libra', 'scorpio', 
-  'sagittarius', 'capricorn', 'aquarius', 'pisces'
-]);
+
+
+export const roleEnum = pgEnum('user_role', ['user', 'superadmin']);
 
 // ==========================================
 // 1. ตารางผู้ใช้งาน
@@ -26,6 +21,8 @@ export const users = pgTable('users', {
   blessing: text('blessing'),
   picture: text('picture'),
   googleId: varchar('google_id', { length: 255 }),
+  role: roleEnum('role').notNull().default('user'),
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().$onUpdateFn(() => new Date()).notNull(),
 }, (t) => ({
@@ -103,14 +100,13 @@ export const siemseeHistories = pgTable('siemsee_histories', {
 // ==========================================
 export const dailyHoroscopes = pgTable('daily_horoscopes', {
   id: serial('id').primaryKey(),
-  zodiacSign: zodiacEnum('zodiac_sign').notNull(),
-  date: date('date').notNull(),
+  description: text('description').notNull(),
   luckyColor: varchar('lucky_color', { length: 50 }).notNull(),
   luckyNumber: varchar('lucky_number', { length: 50 }).notNull(),
-  description: text('description').notNull(),
-}, (t) => ({
-  unq: unique('zodiac_date_idx').on(t.zodiacSign, t.date),
-}));
+  friends: varchar('friends').notNull(),
+  tips: varchar('tips').notNull(),
+  
+}, (t) => ({}));
 
 // ==========================================
 // 7. ตารางปฏิทินวันพระ / วันมงคล
@@ -122,6 +118,20 @@ export const auspiciousDays = pgTable('auspicious_days', {
   isAuspiciousDay: boolean('is_auspicious_day').default(false),
   title: varchar('title', { length: 255 }).notNull(),
   recommendedActivities: text('recommended_activities'),
+});
+
+// ==========================================
+// 8. ตารางประวัติการใช้งาน (Audit Logs)
+// ==========================================
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  actorId: integer('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  action: varchar('action', { length: 100 }).notNull(),
+  targetType: varchar('target_type', { length: 50 }),
+  targetId: integer('target_id'),
+  details: jsonb('details'),
+  ip: varchar('ip', { length: 50 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // ==========================================
@@ -162,3 +172,4 @@ export const siemseeHistoriesRelations = relations(siemseeHistories, ({ one }) =
     references: [fortunes.id],
   }),
 }));
+//

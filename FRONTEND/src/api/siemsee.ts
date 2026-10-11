@@ -15,7 +15,7 @@ const USE_MOCK = false;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// เขย่าเซียมซี (สุ่ม)
+// เขย่าเซียมซี (สุ่ม) — ยังไม่บันทึกลงประวัติ ต้องกด "เก็บใบเซียมซี" ก่อน
 export async function drawFortune(): Promise<Fortune> {
   if (USE_MOCK) {
     await wait(400); // delay for ux
@@ -24,10 +24,7 @@ export async function drawFortune(): Promise<Fortune> {
   }
 
   try {
-    const token = localStorage.getItem('token');
-    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw', {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
+    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw');
     const { success, data, message } = response.data;
 
     if (!success || !data) {
@@ -35,6 +32,33 @@ export async function drawFortune(): Promise<Fortune> {
     }
 
     return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      throw new Error(error.response.data.message, { cause: error });
+    }
+    throw error;
+  }
+}
+
+// เก็บใบเซียมซีลงประวัติ (ต้องล็อกอิน)
+export async function saveFortune(fortuneId: number): Promise<void> {
+  if (USE_MOCK) {
+    await wait(300);
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('กรุณาเข้าสู่ระบบก่อนเก็บใบเซียมซี');
+
+  try {
+    const response = await api.post<APIResponse<null>>(
+      '/siemsee/save',
+      { fortuneId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'เก็บใบเซียมซีไม่สำเร็จ');
+    }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       throw new Error(error.response.data.message, { cause: error });
@@ -61,6 +85,31 @@ export async function getFortuneByNumber(num: number): Promise<Fortune> {
     }
 
     return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      throw new Error(error.response.data.message, { cause: error });
+    }
+    throw error;
+  }
+}
+
+// ทิ้ง/ลบใบเซียมซีออกจากประวัติ (ต้องล็อกอิน)
+export async function deleteSiemseeHistory(historyId: string | number): Promise<void> {
+  if (USE_MOCK) {
+    await wait(300);
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('กรุณาเข้าสู่ระบบก่อน');
+
+  try {
+    const response = await api.delete<APIResponse<null>>(`/user/siemsee-history/${historyId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'ทิ้งใบเซียมซีไม่สำเร็จ');
+    }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       throw new Error(error.response.data.message, { cause: error });

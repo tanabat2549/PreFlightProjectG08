@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { drawFortune } from '../api/siemsee';
+import { drawFortune, saveFortune } from '../api/siemsee';
 import { type Fortune } from '../types/fortune';
 import cylinderImg from '../assets/cylinder.png';
 import stickImg from '../assets/stick.png';
@@ -80,9 +80,11 @@ const rand = (min: number, max: number) => Math.random() * (max - min) + min;
 export default function SiemseePage() {
   const [stage, setStage] = useState<Stage>('idle');
   const [picked, setPicked] = useState<Fortune | null>(null);
-  const [showFullStickModal, setShowFullStickModal] = useState(false); // Step 2[cite: 21]
-  const [isSplitView, setIsSplitView] = useState(false); // Step 3[cite: 21]
+  const [showFullStickModal, setShowFullStickModal] = useState(false); // Step 2
+  const [isSplitView, setIsSplitView] = useState(false); // Step 3
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearTimers = () => {
@@ -92,7 +94,7 @@ export default function SiemseePage() {
 
   useEffect(() => clearTimers, []);
 
-  // ล็อค Scroll ตอนขึ้น Step 2 เต็มจอ[cite: 21]
+  // ล็อค Scroll ตอนขึ้น Step 2 เต็มจอ
   useEffect(() => {
     if (showFullStickModal) {
       const prev = document.body.style.overflow;
@@ -116,15 +118,16 @@ export default function SiemseePage() {
     []
   );
 
-  const isBusy = stage === 'loading' || stage === 'shaking' || stage === 'popping'; //[cite: 21]
+  const isBusy = stage === 'loading' || stage === 'shaking' || stage === 'popping';
 
-  // Step 1 -> เด้งไม้ -> เปิด Step 2[cite: 21]
+  // Step 1 -> เด้งไม้ -> เปิด Step 2
   const handleShake = async () => {
     if (isBusy) return;
     clearTimers();
     setIsSplitView(false);
     setShowFullStickModal(false);
     setError(null);
+    setIsSaved(false);
     setStage('loading');
 
     try {
@@ -146,13 +149,27 @@ export default function SiemseePage() {
     }
   };
 
-  // Step 2 -> Step 3: กดเปิดอ่านคำทำนาย แล้วคลี่ออก 2 ฝั่ง[cite: 21]
+  // Step 2 -> Step 3: กดเปิดอ่านคำทำนาย แล้วคลี่ออก 2 ฝั่ง
   const handleOpenFortune = () => {
     setShowFullStickModal(false);
     setIsSplitView(true);
   };
 
-  // รีเซ็ตเพื่อเขย่าใหม่[cite: 21]
+  // เก็บใบเซียมซีลงประวัติ (บันทึกเมื่อกดปุ่มนี้เท่านั้น)
+  const handleSave = async () => {
+    if (!picked || isSaved || isSaving) return;
+    setIsSaving(true);
+    try {
+      await saveFortune(picked.id);
+      setIsSaved(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'เก็บใบเซียมซีไม่สำเร็จ');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // รีเซ็ตเพื่อเขย่าใหม่ (ใช้เป็น "ทิ้งเซียมซี" ด้วย เพราะยังไม่ได้เก็บอะไรลง DB)
   const handleReset = () => {
     clearTimers();
     setStage('idle');
@@ -160,6 +177,7 @@ export default function SiemseePage() {
     setShowFullStickModal(false);
     setIsSplitView(false);
     setError(null);
+    setIsSaved(false);
   };
 
   return (
@@ -263,20 +281,20 @@ export default function SiemseePage() {
           ========================================================================= */}
       {isSplitView && picked && (
         <div className="siemsee-split-container">
-          
+
           {/* 🌟 ฝั่งซ้าย: แท่งไม้เซียมซี + ออร่าหมุน + ปุ่มเสี่ยงเซียมซีใหม่ */}
           <section className="split-left-stick-panel">
             <div className="pure-stick-stage">
               <div className="stick-rotating-aura">
                 <img src={lightImg} alt="ออร่าแสง" draggable={false} />
               </div>
-              
+
               <div className="pure-stick-wrapper">
                 <img src={stickImg} alt="ไม้เซียมซี" draggable={false} />
                 <span className="stick-embedded-number">{picked.number}</span>
               </div>
 
-              {/* 🔘 ย้ายปุ่ม "เสี่ยงเซียมซีใหม่" มาไว้ใต้แท่งไม้ฝั่งซ้าย */}
+              {/* 🔘 ปุ่ม "เสี่ยงเซียมซีใหม่" ใต้แท่งไม้ฝั่งซ้าย */}
               <div className="stick-action-wrap">
                 <button
                   type="button"
@@ -290,10 +308,10 @@ export default function SiemseePage() {
             </div>
           </section>
 
-          {/* 📜 ฝั่งขวา: ใบเซียมซีคำทำนาย (เหลือปุ่ม เก็บใบเซียมซี และ ทิ้งเซียมซี) */}
+          {/* 📜 ฝั่งขวา: ใบเซียมซีคำทำนาย (ปุ่ม เก็บใบเซียมซี และ ทิ้งเซียมซี) */}
           <section className="split-right-fortune-panel">
             <div className="chinese-paper-talisman">
-              
+
               {/* 🏷️ ป้ายแถบสีแดงด้านบน */}
               <div className="chinese-talisman-top-banner">
                 <span className="talisman-banner-number">
@@ -352,12 +370,13 @@ export default function SiemseePage() {
                 <button
                   type="button"
                   className="btn-talisman-action btn-talisman-save"
-                  onClick={() => {
-                    alert('บันทึกใบเซียมซีลงในประวัติสำเร็จ');
-                  }}
+                  onClick={handleSave}
+                  disabled={isSaved || isSaving}
                 >
                   <Icons.Sparkles size={15} color="#FDF6E2" />
-                  <span>เก็บใบเซียมซี</span>
+                  <span>
+                    {isSaved ? 'เก็บแล้ว' : isSaving ? 'กำลังบันทึก...' : 'เก็บใบเซียมซี'}
+                  </span>
                 </button>
 
                 <button
