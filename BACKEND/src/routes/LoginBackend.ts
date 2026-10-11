@@ -5,8 +5,13 @@ import { eq } from 'drizzle-orm';
 import { dbClient } from '../db/client.js';
 import { users } from '../db/schema.js';
 import axios from 'axios';
-
+import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
 const router = express.Router();
+function jwtSecret(): string {
+  const s = process.env.JWT_SECRET;
+  if (!s) throw new Error('JWT_SECRET is not set');
+  return s;
+}
 
 router.post('/auth/google', async (req, res) => {
   // 🟢 1. ดักรับค่าทั้ง camelCase และ snake_case จาก Frontend
@@ -84,6 +89,15 @@ router.post('/auth/google', async (req, res) => {
       });
     }
 
+    // บัญชีที่ถูกล็อกโดย Super Admin ห้ามเข้าสู่ระบบ
+    if (existingUser && !existingUser.isActive) {
+      return res.status(403).json({
+        success: false,
+        code: 'ACCOUNT_LOCKED',
+        message: 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ',
+      });
+    }
+
     let user;
 
     if (!existingUser) {
@@ -110,8 +124,8 @@ router.post('/auth/google', async (req, res) => {
 
     const appToken = jwt.sign(
       { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'khorsuanboon_super_secret_key_2026',
-      { expiresIn: '7d' }
+  jwtSecret(),
+  { expiresIn: '7d' }
     );
 
     console.log('✅ Login Successful!');
@@ -123,6 +137,7 @@ router.post('/auth/google', async (req, res) => {
         name: user.name,
         email: user.email,
         picture: user.picture,
+        role: user.role,
       },
     });
 
@@ -135,9 +150,16 @@ router.post('/auth/google', async (req, res) => {
     });
   }
 });
+// ⚠️ สำหรับพัฒนาเท่านั้น: endpoint นี้ออก JWT ให้ทุกอีเมลโดยไม่ต้องยืนยันตัวตน
+// (รวมถึงบัญชี superadmin) จึงปิดเป็นค่าเริ่มต้น และเปิดได้เฉพาะเมื่อตั้ง
+// ENABLE_DEV_TOKEN=true ใน .env ของเครื่อง dev และ NODE_ENV ต้องไม่ใช่ production
 router.post('/auth/dev-token', async (req, res) => {
+  if (process.env.NODE_ENV === 'production' || process.env.ENABLE_DEV_TOKEN !== 'true') {
+    return res.status(404).json({ success: false, message: 'Not found' });
+  }
+
   const { email } = req.body;
-  
+
   // หา user จากอีเมล
   const user = await dbClient.query.users.findFirst({
     where: eq(users.email, email),
@@ -147,11 +169,15 @@ router.post('/auth/dev-token', async (req, res) => {
     return res.status(404).json({ success: false, message: 'User not found' });
   }
 
+  if (!user.isActive) {
+    return res.status(403).json({ success: false, code: 'ACCOUNT_LOCKED', message: 'บัญชีนี้ถูกระงับการใช้งาน' });
+  }
+
   // สร้าง JWT Token ให้ทันที
   const appToken = jwt.sign(
     { userId: user.id, email: user.email },
-    process.env.JWT_SECRET || 'khorsuanboon_super_secret_key_2026',
-    { expiresIn: '7d' }
+  jwtSecret(),
+  { expiresIn: '7d' }
   );
 
   return res.json({ success: true, token: appToken });
@@ -162,6 +188,11 @@ router.post('/auth/logout', (req, res) => {
     success: true, 
     message: 'Logged out successfully' 
   });
+});
+
+// เช็กว่า token ยังใช้ได้ไหม (ผู้ใช้ถูกลบ/ล็อก จะได้ 401/403 จาก requireAuth)
+router.get('/session', requireAuth, (req: AuthRequest, res) => {
+  return res.json({ success: true, data: req.actor });
 });
 
 export default router;

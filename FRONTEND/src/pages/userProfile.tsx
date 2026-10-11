@@ -70,6 +70,7 @@ export default function UserProfile() {
   const [templeReviews, setTempleReviews] = useState<TempleReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
+  const [totalDraws, setTotalDraws] = useState<number>(0);
   // 🆕 ประวัติเซียมซีจริงของ user ที่ดึงมาจาก backend
   const [siemseeHistory, setSiemseeHistory] = useState<SiamsiHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -86,10 +87,15 @@ export default function UserProfile() {
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('userData', JSON.stringify(userData));
         }
-      } catch (error) {
-        console.error('Login Error:', error);
-        alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
-      }
+      } catch (error: any) {
+      console.error('Login Error:', error);
+  const data = error?.response?.data;
+  alert(
+    data?.code === 'ACCOUNT_LOCKED'
+      ? (data.message ?? 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ')
+      : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
+  );
+}
     },
     onError: () => console.log('Login Failed'),
   });
@@ -203,6 +209,7 @@ export default function UserProfile() {
         });
         if (res.data.success) {
           setSiemseeHistory(res.data.history);
+          setTotalDraws(res.data.history.length);
         }
       } catch (error) {
         console.error('Failed to fetch siemsee history:', error);
@@ -314,7 +321,7 @@ export default function UserProfile() {
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
             {[
               // 🔧 นับจากประวัติเซียมซีจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
-              { label: 'เขย่าเซียมซี', value: siemseeHistory.length, unit: 'รอบ' },
+              { label: 'เขย่าเซียมซี', value: totalDraws, unit: 'รอบ' },
               // นับจากรีวิวจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
               { label: 'รีวิวสถานที่มงคล', value: templeReviews.length, unit: 'ครั้ง' },
             ].map((stat) => (

@@ -4,6 +4,7 @@ import { dbClient as db } from '../../db/client.js';
 import { auspiciousDays } from '../../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import type { AdminRequest } from '../../middlewares/roles.js';
+import { logAudit } from '../../utils/audit.js';
 
 const router = Router();
 
@@ -44,6 +45,8 @@ router.post('/', async (req: AdminRequest, res: Response) => {
       })
       .returning();
 
+    await logAudit(req, 'calendar.create', 'calendar', created.id, { date: created.date, title });
+
     return res.status(201).json({ success: true, data: created });
   } catch (error) {
     console.error('Create auspicious day error:', error);
@@ -80,6 +83,8 @@ router.put('/:id', async (req: AdminRequest, res: Response) => {
       return res.status(404).json({ success: false, message: 'ไม่พบรายการนี้' });
     }
 
+    await logAudit(req, 'calendar.update', 'calendar', id);
+
     return res.json({ success: true, data: updated });
   } catch (error) {
     console.error('Update auspicious day error:', error);
@@ -104,6 +109,8 @@ router.delete('/:id', async (req: AdminRequest, res: Response) => {
     if (!deleted) {
       return res.status(404).json({ success: false, message: 'ไม่พบรายการนี้' });
     }
+
+    await logAudit(req, 'calendar.delete', 'calendar', id, { date: deleted.date, title: deleted.title });
 
     return res.json({ success: true, message: 'ลบรายการเรียบร้อยแล้ว' });
   } catch (error) {

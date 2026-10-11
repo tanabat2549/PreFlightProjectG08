@@ -7,10 +7,11 @@ import Siemsee from './pages/Siemsee';
 import Calendar from './pages/Calendar';
 import UserProfile from './pages/userProfile';
 import BottomNav from './components/BottomNav';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import { adminRoute } from './admin/routes';
+import { useSessionGuard } from './hooks/useSessionGuard';
 
 export default function App() {
+  useSessionGuard();
   return (
     <BrowserRouter>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -21,8 +22,7 @@ export default function App() {
             <Route path="/siemsee" element={<Siemsee />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/profile" element={<UserProfile />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+            {adminRoute}
           </Routes>
         </main>
       </div>

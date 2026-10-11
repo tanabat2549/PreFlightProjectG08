@@ -57,25 +57,23 @@ router.delete('/:id', async (req: AdminRequest, res: Response) => {
     await db.delete(reviews).where(eq(reviews.id, id));
 
     const [statsResult] = await db
-      .select({
-        avgRating: sql<number>`coalesce(avg(${reviews.rating}), 0)`,
-      })
-      .from(reviews)
-      .where(eq(reviews.templeId, templeId));
+  .select({
+    avgRating: sql<number>`coalesce(avg(${reviews.rating}), 0)`,
+    cnt: sql<number>`count(*)::int`,
+  })
+  .from(reviews)
+  .where(eq(reviews.templeId, templeId));
 
-    const newAvg = Number(statsResult?.avgRating || 0);
-
-    await db
-      .update(temples)
-      .set({ ratingAvg: newAvg })
-      .where(eq(temples.id, templeId));
+    await db.update(temples)
+    .set({ ratingAvg: Number(statsResult?.avgRating || 0), ratingCount: statsResult?.cnt ?? 0 })
+    .where(eq(temples.id, templeId));
 
     await logAudit(req, 'review.delete', 'review', id, { templeId, deletedRating: review.rating });
 
     return res.json({
       success: true,
       message: 'ลบรีวิวสำเร็จ',
-      data: { id, templeId, newRatingAvg: newAvg },
+      data: { id, templeId, newRatingAvg: Number(statsResult?.avgRating || 0) },
     });
   } catch (error) {
     console.error('Delete review error:', error);
