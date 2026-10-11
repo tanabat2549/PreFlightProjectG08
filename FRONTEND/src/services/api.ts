@@ -2,29 +2,27 @@ import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-// ล้างสถานะล็อกอินทั้งหมด: token + ข้อมูลผู้ใช้ที่แอปเก็บไว้ (ไม่รู้ชื่อ key ก็ลบได้)
-function clearSession() {
-  localStorage.removeItem('token');
-  for (const store of [localStorage, sessionStorage]) {
-    for (const key of Object.keys(store)) {
-      try {
-        const v = JSON.parse(store.getItem(key) ?? 'null');
-        if (v && typeof v === 'object' && ('email' in v || 'picture' in v)) store.removeItem(key);
-      } catch {
-        /* ไม่ใช่ JSON ข้ามไป */
-      }
-    }
-  }
-}
 
+   function clearSession() {
+     localStorage.removeItem('token');
+     localStorage.removeItem('userData');
+   }
 
 let sessionEnded = false;
+
 export const api = axios.create({
   baseURL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 
 // Interceptor ใส่ Token
 api.interceptors.response.use(

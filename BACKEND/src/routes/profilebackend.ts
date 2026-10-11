@@ -5,7 +5,6 @@ import { eq, desc, and } from 'drizzle-orm';
 import { requireAuth, type AuthRequest} from '../middlewares/requireAuth.js'
 
 const router = Router();
-
 // ==========================================
 // 1. GET /api/user/profile/:email
 // ดึงข้อมูลโปรไฟล์ล่าสุดของผู้ใช้งาน
@@ -18,6 +17,7 @@ router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Respons
       return res.status(404).json({ success: false, message: 'ไม่พบผู้ใช้งานในระบบ' });
     }
 
+    const totalDraws = 'totalDraws' in foundUser ? Number((foundUser as any).totalDraws ?? 0) : 0;
     return res.json({
       success: true,
       user: {
@@ -29,6 +29,7 @@ router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Respons
         birthDayOfWeek: foundUser.weekdaydate,
         birthday: foundUser.birthDate,
         bio: foundUser.blessing,
+        totalDraws,
       },
     });
   } catch (error) {

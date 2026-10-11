@@ -3,8 +3,6 @@ import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { api } from '../services/api';
 import './userProfile.css';
 
-
-
 interface UserData {
   name: string;
   email: string;
@@ -41,8 +39,7 @@ type TabKey = 'info' | 'history' | 'reviews';
 const GENDER_OPTIONS = ['ชาย', 'หญิง', 'ไม่ระบุ'];
 const DAY_OPTIONS = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 
-
-function getFaithTier(historyCount: number): { title: string; } {
+function getFaithTier(historyCount: number): { title: string } {
   if (historyCount >= 20) return { title: 'ผู้เชี่ยวชาญสายบุญ' };
   if (historyCount >= 5) return { title: 'ผู้ศรัทธาสม่ำเสมอ' };
   return { title: 'ผู้เริ่มต้นเส้นทางบุญ' };
@@ -70,10 +67,29 @@ export default function UserProfile() {
   const [templeReviews, setTempleReviews] = useState<TempleReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  const [totalDraws, setTotalDraws] = useState<number>(0);
+  // 🌟 โหลดค่า totalDraws สะสมจาก localStorage ผูกตามอีเมล เพื่อไม่ให้ลดลงเวลารีเฟรช
+  const [totalDraws, setTotalDraws] = useState<number>(() => {
+    const savedUser = localStorage.getItem('userData');
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        if (parsed?.email) {
+          const savedTotal = localStorage.getItem(`totalDraws_${parsed.email}`);
+          return savedTotal ? Number(savedTotal) : 0;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return 0;
+  });
+
   // 🆕 ประวัติเซียมซีจริงของ user ที่ดึงมาจาก backend
   const [siemseeHistory, setSiemseeHistory] = useState<SiamsiHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // 🔧 คำนวณยศ (Faith Tier) จาก totalDraws + รีวิว
+  const faithTier = getFaithTier(totalDraws + templeReviews.length);
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -86,16 +102,22 @@ export default function UserProfile() {
           setUser(userData);
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('userData', JSON.stringify(userData));
+
+          // โหลด totalDraws ของ user คนนี้ขึ้นมาใหม่หลัง Login
+          const savedTotal = localStorage.getItem(`totalDraws_${userData.email}`);
+          if (savedTotal) {
+            setTotalDraws(Number(savedTotal));
+          }
         }
       } catch (error: any) {
-      console.error('Login Error:', error);
-  const data = error?.response?.data;
-  alert(
-    data?.code === 'ACCOUNT_LOCKED'
-      ? (data.message ?? 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ')
-      : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
-  );
-}
+        console.error('Login Error:', error);
+        const data = error?.response?.data;
+        alert(
+          data?.code === 'ACCOUNT_LOCKED'
+            ? (data.message ?? 'บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ')
+            : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
+        );
+      }
     },
     onError: () => console.log('Login Failed'),
   });
@@ -111,6 +133,7 @@ export default function UserProfile() {
       setUser(null);
       setTempleReviews([]); // เคลียร์รีวิวตอน logout
       setSiemseeHistory([]); // 🆕 เคลียร์ประวัติเซียมซีตอน logout ด้วย
+      setTotalDraws(0);
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     }
@@ -132,10 +155,14 @@ export default function UserProfile() {
   };
 
   const handleSaveProfile = async () => {
-    if (!editForm) return;
+    if (!editForm || !user) return;
     setIsSaving(true);
     try {
-      const response = await api.put('/user/profile', editForm);
+      const payload = {
+        ...editForm,
+        email: user.email,
+      };
+      const response = await api.put('/user/profile', payload);
       const updatedUser = response?.data?.user ?? editForm;
       setUser(updatedUser);
       localStorage.setItem('userData', JSON.stringify(updatedUser));
@@ -148,10 +175,6 @@ export default function UserProfile() {
       setIsSaving(false);
     }
   };
-
-  // 🔧 อิงจากข้อมูลจริงทั้งรีวิว + เซียมซี แทนตัวเลข mock เดิม
-  const faithTier = getFaithTier(siemseeHistory.length + templeReviews.length);
-
 
   // เพิ่ม useEffect สำหรับดึงข้อมูลล่าสุดจาก Backend เมื่อเปิดหน้าจอ
   useEffect(() => {
@@ -170,7 +193,7 @@ export default function UserProfile() {
     };
 
     fetchLatestProfile();
-  }, []);
+  }, [user?.email]);
 
   // ดึงรีวิววัดจริงของ user จาก backend (ต้อง login แล้วเท่านั้น)
   useEffect(() => {
@@ -196,7 +219,7 @@ export default function UserProfile() {
     fetchUserReviews();
   }, [user?.email]);
 
-  // 🆕 ดึงประวัติเซียมซีจริงของ user จาก backend (ต้อง login แล้วเท่านั้น)
+  // 🆕 ดึงประวัติเซียมซีจริงของ user จาก backend พร้อมล็อคยอด totalDraws ไม่ให้ลดลงเวลารีเฟรช
   useEffect(() => {
     const fetchSiemseeHistory = async () => {
       const token = localStorage.getItem('token');
@@ -208,8 +231,16 @@ export default function UserProfile() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.success) {
-          setSiemseeHistory(res.data.history);
-          setTotalDraws(res.data.history.length);
+          const fetchedHistory = res.data.history;
+          setSiemseeHistory(fetchedHistory);
+
+          // 🌟 ล็อคยอดสะสม totalDraws ให้อิงค่าที่มากที่สุดเสมอ (ไม่ลดลงเวลารีเฟรชหรือลบประวัติ)
+          const storageKey = `totalDraws_${user.email}`;
+          const currentStored = Number(localStorage.getItem(storageKey) || 0);
+          const newTotal = Math.max(fetchedHistory.length, currentStored);
+
+          setTotalDraws(newTotal);
+          localStorage.setItem(storageKey, String(newTotal));
         }
       } catch (error) {
         console.error('Failed to fetch siemsee history:', error);
@@ -289,18 +320,6 @@ export default function UserProfile() {
           )}
         </div>
 
-        {/* แสดงเฉพาะตอนเข้าสู่ระบบแล้ว: คติธรรมนำชีวิตประจำวัน
-        {user && (
-          <div className="sms-fortune-banner">
-            <div style={{ fontSize: '12px', opacity: 0.85, letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 500 }}>
-              คติธรรมนำชีวิตประจำวัน
-            </div>
-            <p className="sms-font-fortune" style={{ fontSize: '15px', margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
-              "จิตที่ฝึกดีแล้ว นำสุขมาให้ ความเพียรในวันนี้คือโชคดีในวันหน้า"
-            </p>
-          </div>
-        )} */}
-
         {/* ปุ่ม Login กรณีที่ยังไม่ได้เข้าสู่ระบบ */}
         {!user && (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
@@ -320,9 +339,7 @@ export default function UserProfile() {
         {user && (
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
             {[
-              // 🔧 นับจากประวัติเซียมซีจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
               { label: 'เขย่าเซียมซี', value: totalDraws, unit: 'รอบ' },
-              // นับจากรีวิวจริงที่ดึงมาจาก backend แทนตัวเลข mock เดิม
               { label: 'รีวิวสถานที่มงคล', value: templeReviews.length, unit: 'ครั้ง' },
             ].map((stat) => (
               <div
@@ -392,7 +409,7 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 2: History — 🆕 ใช้ siemseeHistory จริงจาก backend แทน MOCK_HISTORY */}
+            {/* Tab 2: History */}
             {activeTab === 'history' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {historyLoading ? (
@@ -485,21 +502,7 @@ export default function UserProfile() {
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#FEE2E2';
-                            e.currentTarget.style.borderColor = '#FCA5A5';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#FEF2F2';
-                            e.currentTarget.style.borderColor = '#FECACA';
-                          }}
-                          title="ทิ้งใบเซียมซีนี้ออกจากประวัติ"
                         >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                          </svg>
                           ทิ้งใบนี้
                         </button>
                       </div>
@@ -509,7 +512,7 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 3: Reviews — ใช้ templeReviews จริงจาก backend แทน MOCK_REVIEWS */}
+            {/* Tab 3: Reviews */}
             {activeTab === 'reviews' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {reviewsLoading ? (
@@ -552,7 +555,7 @@ export default function UserProfile() {
         )}
       </div>
 
-      {/* ย้ายปุ่มออกจากระบบมาไว้ข้างล่างสุด เมื่อล็อกอินแล้ว */}
+      {/* ปุ่มออกจากระบบ */}
       {user && (
         <div style={{ marginTop: '40px', textAlign: 'center' }}>
           <button onClick={handleLogout} className="sms-logout-btn">
