@@ -63,52 +63,67 @@ async function pickRandomFortune(): Promise<Fortune | undefined> {
 // ---------------------------------------------------------------------------
 router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-<<<<<<< HEAD
-    // ผลของแต่ละวันคงที่ ห้าม browser/proxy จำ response เก่าไว้
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-=======
-    const rawName = req.query.name as string | undefined;
->>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
 
     const userId = req.userId!;
 
-<<<<<<< HEAD
-    // Sanitize: รับเฉพาะ string, ตัดช่องว่าง, จำกัดความยาว
+    // รับค่าแต้มปัจจุบันที่ส่งมาจาก Frontend
+    const currentMerit = Number(req.query.currentMerit) || 0;
+    const COST = 100; // ค่าใช้จ่ายแต้มสำหรับการสุ่มรอบเสริม
+
     const rawName = req.query.name;
     const name = typeof rawName === 'string' ? rawName.trim().slice(0, 50) || undefined : undefined;
     const greetingFor = (fortune: Fortune) =>
       name ? `คุณ${name} ได้รับใบที่ ${fortune.number}` : undefined;
-=======
-    // 1. สุ่มใบเซียมซีจากฐานข้อมูล (ยังไม่บันทึกประวัติ จนกว่าผู้ใช้จะกด "เก็บใบเซียมซี")
-    const fortuneList = await db
-      .select()
-      .from(fortunes)
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
->>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
 
     const today = bangkokToday();
     const nextDrawAt = nextBangkokMidnight().toISOString();
 
-    // วันนี้สุ่มไปแล้ว: ส่งใบเดิมกลับไป ไม่สุ่มใหม่
+    // 1. ตรวจสอบว่าวันนี้สุ่มฟรีไปแล้วหรือยัง
     const previous = dailyDraws.get(userId);
-    if (isLimitEnabled() && previous && previous.date === today) {
-      const fortune = await previous.fortune.catch(() => undefined);
-      if (fortune) {
-        const greeting = greetingFor(fortune);
-        return res.json({
-          success: true,
-          alreadyDrawn: true,
-          message: 'วันนี้คุณสุ่มเซียมซีไปแล้ว ไว้มาสุ่มใหม่พรุ่งนี้นะ',
-          nextDrawAt,
-          data: fortune,
-          ...(greeting && { greeting }),
+    const alreadyDrawnToday = isLimitEnabled() && previous && previous.date === today;
+
+    if (alreadyDrawnToday) {
+      // 🌟 ถ้าวันนี้สุ่มไปแล้ว ต้องเช็คว่าแต้มพอจะสุ่มรอบเสริม (100 แต้ม) ไหม?
+      if (currentMerit < COST) {
+        return res.status(400).json({
+          success: false,
+          message: 'วันนี้คุณสุ่มครบโควตาแล้ว และแต้มบารมีไม่ถึง 100 แต้มสำหรับสุ่มเพิ่ม',
         });
       }
-      // ครั้งก่อนสุ่มไม่สำเร็จ (เช่น DB ล่ม) ไม่ถือว่าใช้สิทธิ์ไปแล้ว ปล่อยให้สุ่มใหม่ต่อด้านล่าง
+
+      // ถ้าแต้มถึง ให้ทำการสุ่มใบใหม่รอบเสริม (และส่งแต้มที่หักแล้วกลับไปให้ Frontend อัปเดต LocalStorage)
+      const drawing = pickRandomFortune();
+      let fortune: Fortune | undefined;
+      try {
+        fortune = await drawing;
+      } catch (error) {
+        throw error;
+      }
+
+      if (!fortune) {
+        return res.status(404).json({
+          success: false,
+          message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล',
+        });
+      }
+
+      const remainingMerit = currentMerit - COST;
+      const greeting = greetingFor(fortune);
+
+      return res.json({
+        success: true,
+        alreadyDrawn: true,
+        usedMerit: true, // แจ้งหน้าบ้านว่ามีการหักแต้มรอบเสริม
+        remainingMerit,  // แต้มใหม่ส่งกลับไปเซฟทับ LocalStorage
+        message: 'ใช้ 100 แต้มบารมีสุ่มเซียมซีรอบเสริมสำเร็จ',
+        nextDrawAt,
+        data: fortune,
+        ...(greeting && { greeting }),
+      });
     }
 
-    // สุ่มใบเซียมซีจากฐานข้อมูล (ยังไม่บันทึกประวัติ จนกว่าผู้ใช้จะกด "เก็บใบเซียมซี")
+    // 2. กรณีสุ่มครั้งแรกของวัน (สุ่มฟรีตามปกติ)
     const drawing = pickRandomFortune();
     if (isLimitEnabled()) dailyDraws.set(userId, { date: today, fortune: drawing });
 
@@ -116,7 +131,7 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     try {
       fortune = await drawing;
     } catch (error) {
-      dailyDraws.delete(userId); // สุ่มพลาด คืนสิทธิ์
+      dailyDraws.delete(userId);
       throw error;
     }
 
@@ -128,24 +143,16 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
       });
     }
 
-<<<<<<< HEAD
     const greeting = greetingFor(fortune);
-=======
-    const fortune = fortuneList[0];
-
-    // 2. ถ้ามีชื่อส่งมา ใส่คำทักทายส่วนตัวในข้อความคำทำนาย
-    const greeting = name
-      ? `คุณ${name} ได้รับใบที่ ${fortune.number}`
-      : undefined;
-
->>>>>>> 06e6c70250d1bc143199fa6b24d5534fa7cda93e
     return res.json({
       success: true,
       alreadyDrawn: false,
+      remainingMerit: currentMerit, // แต้มเท่าเดิมเพราะใช้สิทธิ์ฟรี
       nextDrawAt,
       data: fortune,
       ...(greeting && { greeting }),
     });
+
   } catch (error) {
     console.error('Error drawing fortune:', error);
     return res.status(500).json({
@@ -154,7 +161,6 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     });
   }
 });
-
 // ---------------------------------------------------------------------------
 // POST /api/siemsee/save — บันทึกประวัติใบเซียมซี (เก็บใบเซียมซี)
 // (รวมจากสองบล็อกเดิมที่ซ้ำกัน ใช้ข้อความตอบกลับของบล็อกแรกที่ทำงานอยู่จริงก่อนหน้านี้)
