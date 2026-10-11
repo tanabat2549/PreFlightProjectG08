@@ -173,3 +173,12 @@ export const siemseeHistoriesRelations = relations(siemseeHistories, ({ one }) =
   }),
 }));
 //
+
+export const siemseeDailyDraws = pgTable('siemsee_daily_draws', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  drawDate: varchar('draw_date', { length: 10 }).notNull(), // รูปแบบ YYYY-MM-DD (เวลาไทย)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => ({
+  userDateIdx: index('user_date_idx').on(t.userId, t.drawDate),
+}));
