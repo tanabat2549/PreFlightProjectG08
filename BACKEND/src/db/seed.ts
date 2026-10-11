@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { sql } from 'drizzle-orm';
 import { dbClient as db } from './client.js';
-import { fortunes, auspiciousDays } from './schema.js';
+import { fortunes, auspiciousDays, dailyHoroscopes } from './schema.js';
 
 // ข้อมูลปฏิทินวันพระและวันมงคลตลอดปี 2569 (2026) ครบทั้ง 12 เดือน
 const auspiciousDaysData = [
@@ -581,6 +581,66 @@ const auspiciousDaysData = [
   },
 ];
 
+// ข้อมูลจำลองสำหรับตาราง dailyHoroscopes ให้ครอบคลุมหลายๆ สถานการณ์
+const dailyHoroscopesData = [
+  {
+    description: 'เจรจาราบรื่น ค้าขายคล่อง ได้รับเมตตาอุปถัมภ์เป็นพิเศษ', 
+    luckyColor: 'เขียวหยก, ส้มอิฐ (เลี่ยง ดำสนิท)', 
+    luckyNumber: '5, 9, 1', 
+    friends: 'คนเกิดวันศุกร์', 
+    tips: 'เติมน้ำมันตะเกียง หรือโอนทำบุญค่าน้ำ-ไฟวัดลงท้ายด้วยเลข 9 เพื่อเปิดทางสว่างให้ชีวิต',
+  },
+  {
+    description: 'ดวงการงานโดดเด่น ผู้ใหญ่เล็งเห็นผลงาน มีโอกาสได้เลื่อนขั้นหรือรับผิดชอบงานใหญ่',
+    luckyColor: 'ขาว, ครีม (เลี่ยง แดงเลือดหมู)',
+    luckyNumber: '2, 4, 8',
+    friends: 'คนเกิดวันพฤหัสบดี',
+    tips: 'ทำบุญหนังสือธรรมะหรือทุนการศึกษา เพื่อเสริมสติปัญญาและความก้าวหน้าในหน้าที่การงาน',
+  },
+  {
+    description: 'การเงินฟู่ฟ่า มีเกณฑ์รับทรัพย์ก้อนโต หรือได้ลาภลอยจากการเสี่ยงโชค',
+    luckyColor: 'ม่วง, ดำ (เลี่ยง ขาว)',
+    luckyNumber: '8, 3, 6',
+    friends: 'คนเกิดวันพุธกลางคืน',
+    tips: 'ร่วมทำบุญชำระหนี้สงฆ์ หรือบริจาคทานให้ผู้ยากไร้ เพื่อเปิดดวงรับทรัพย์',
+  },
+  {
+    description: 'ระวังเรื่องการใช้จ่ายเกินตัว และหลีกเลี่ยงการปะทะคารมกับเพื่อนร่วมงาน',
+    luckyColor: 'ฟ้า, น้ำเงิน (เลี่ยง เหลือง)',
+    luckyNumber: '7, 0, 4',
+    friends: 'คนเกิดวันจันทร์',
+    tips: 'ทำบุญโลงศพ หรือไถ่ชีวิตโคกระบือ เพื่อสะเดาะเคราะห์และลดทอนอุปสรรคปัญหา',
+  },
+  {
+    description: 'ความรักสดใส คนโสดมีเกณฑ์พบคนถูกใจจากสายงานเดียวกัน คนมีคู่ดูแลกันดีเยี่ยม',
+    luckyColor: 'ชมพู, แดง (เลี่ยง เทา)',
+    luckyNumber: '6, 2, 9',
+    friends: 'คนเกิดวันอาทิตย์',
+    tips: 'ถวายดอกไม้หอม หรือของเป็นคู่ (เช่น เทียนคู่, แจกันคู่) เพื่อเสริมเสน่ห์และเมตตามหานิยม',
+  },
+  {
+    description: 'การเดินทางไกลจะนำโชคลาภมาให้ เหมาะกับการเริ่มต้นโปรเจกต์ใหม่ๆ หรือทำธุรกิจออนไลน์',
+    luckyColor: 'ส้ม, ทอง (เลี่ยง ชมพู)',
+    luckyNumber: '1, 5, 9',
+    friends: 'คนเกิดวันพุธกลางวัน',
+    tips: 'ไหว้พระพรหม หรือสักการะสิ่งศักดิ์สิทธิ์ประจำเมืองก่อนเดินทางเพื่อความเป็นสิริมงคล',
+  },
+  {
+    description: 'ระวังปัญหาสุขภาพ ความเครียดสะสม ควรหาเวลาพักผ่อนและดูแลตัวเองให้มากขึ้น',
+    luckyColor: 'เขียวอ่อน, น้ำตาล (เลี่ยง น้ำเงิน)',
+    luckyNumber: '4, 7, 2',
+    friends: 'คนเกิดวันอังคาร',
+    tips: 'ปล่อยปลาลงแม่น้ำ หรือถวายสังฆทานยา เพื่อปัดเป่าโรคภัยไข้เจ็บ',
+  },
+  {
+    description: 'อาจมีการเปลี่ยนแปลงกะทันหัน แต่คุณจะใช้ไหวพริบแก้ไขสถานการณ์ให้ผ่านไปได้ด้วยดี',
+    luckyColor: 'เทา, บรอนซ์ (เลี่ยง เขียว)',
+    luckyNumber: '3, 8, 5',
+    friends: 'คนเกิดวันเสาร์',
+    tips: 'ทำความสะอาดหิ้งพระ หรือกวาดลานวัด เพื่อเสริมความร่มเย็นและปัญญาแก้ไขปัญหา',
+  }
+];
+
 async function seed() {
   console.log('🌱 กำลังเริ่มต้นกระบวนการ Seed ข้อมูล...');
 
@@ -588,6 +648,7 @@ async function seed() {
     // ล้างข้อมูลเก่าและ Reset Primary Key ให้เริ่มที่ 1 ใหม่
     await db.execute(sql`TRUNCATE TABLE fortunes RESTART IDENTITY CASCADE`);
     await db.execute(sql`TRUNCATE TABLE auspicious_days RESTART IDENTITY CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE daily_horoscopes RESTART IDENTITY CASCADE`);
 
     // 1. หยอดข้อมูลเซียมซี 17 ใบ
     console.log('🔮 กำลังบันทึกข้อมูลใบเซียมซี 17 ใบ...');
@@ -758,7 +819,11 @@ async function seed() {
     }));
     await db.insert(auspiciousDays).values(formattedAuspiciousDays as any);
 
-    console.log(`✅ Seed ข้อมูลสำเร็จ! (เซียมซี 17 ใบ และ วันพระ ${formattedAuspiciousDays.length} วัน)`);
+    // 3. หยอดข้อมูลดวงประจำวัน
+    console.log('✨ กำลังบันทึกข้อมูลดวงประจำวัน...');
+    await db.insert(dailyHoroscopes).values(dailyHoroscopesData);
+
+    console.log(`✅ Seed ข้อมูลสำเร็จ! (เซียมซี 17 ใบ, วันพระ ${formattedAuspiciousDays.length} วัน และดวงประจำวัน ${dailyHoroscopesData.length} วัน)`);
     process.exit(0);
   } catch (error) {
     console.error('❌ เกิดข้อผิดพลาดในการ seed ข้อมูล:', error);
