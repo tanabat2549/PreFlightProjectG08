@@ -12,10 +12,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๑',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕ / สมาธิ', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดมนต์ ฟังธรรม', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถวายสังฆทาน', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕ / สมาธิ', category: 'precept' },
+      { id: '3', title: 'สวดมนต์ ฟังธรรม', category: 'chant' },
+      { id: '4', title: 'ถวายสังฆทาน', category: 'offering' },
     ],
   },
   {
@@ -24,9 +24,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๒',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์บูชาพระ', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'สวดมนต์บูชาพระ', category: 'chant' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering' },
     ],
   },
   {
@@ -35,9 +35,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๒ (วันธงชัย)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms' },
+      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept' },
+      { id: '3', title: 'ถวายภัตตาหารเพล', category: 'offering' },
     ],
   },
   {
@@ -46,9 +46,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๒',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'เจริญจิตตภาวนา', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดพระปริตร', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'เจริญจิตตภาวนา', category: 'precept' },
+      { id: '3', title: 'สวดพระปริตร', category: 'chant' },
     ],
   },
 
@@ -59,9 +59,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๒',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ถวายน้ำดื่ม/ผ้าไตร', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant' },
+      { id: '3', title: 'ถวายน้ำดื่ม/ผ้าไตร', category: 'offering' },
     ],
   },
   {
@@ -70,9 +70,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๓',
     recommendedActivities: [
-      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์เช้า-เย็น', category: 'chant', icon: '📜' },
-      { id: '3', title: 'บำเพ็ญสาธารณประโยชน์', category: 'precept', icon: '✨' },
+      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms' },
+      { id: '2', title: 'สวดมนต์เช้า-เย็น', category: 'chant' },
+      { id: '3', title: 'บำเพ็ญสาธารณประโยชน์', category: 'precept' },
     ],
   },
   {
@@ -81,10 +81,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๓ (วันมาฆบูชา)',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาอุโบสถศีล', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ฟังเทศน์โอวาทปาติโมกข์', category: 'chant', icon: '📜' },
-      { id: '4', title: 'เวียนเทียนรอบอุโบสถ', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms' },
+      { id: '2', title: 'รักษาอุโบสถศีล', category: 'precept' },
+      { id: '3', title: 'ฟังเทศน์โอวาทปาติโมกข์', category: 'chant' },
+      { id: '4', title: 'เวียนเทียนรอบอุโบสถ', category: 'offering' },
     ],
   },
   {
@@ -93,9 +93,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๓',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดพระพุทธคุณ', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'สวดพระพุทธคุณ', category: 'chant' },
     ],
   },
 
@@ -106,9 +106,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๓',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทานอุทิศ', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทานอุทิศ', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept' },
     ],
   },
   {
@@ -117,9 +117,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๔',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์บทกรณียเมตตสูตร', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ปล่อยนกปล่อยปลา', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'สวดมนต์บทกรณียเมตตสูตร', category: 'chant' },
+      { id: '3', title: 'ปล่อยนกปล่อยปลา', category: 'offering' },
     ],
   },
   {
@@ -128,10 +128,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๔',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถือศีล ๘ ตลอดวัน', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถือศีล ๘ ตลอดวัน', category: 'precept' },
+      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering' },
     ],
   },
   {
@@ -140,9 +140,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๔',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ไหว้พระประจำวันเกิด', category: 'chant', icon: '🙏' },
-      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms' },
+      { id: '2', title: 'ไหว้พระประจำวันเกิด', category: 'chant' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept' },
     ],
   },
 
@@ -153,9 +153,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๔ ค่ำ เดือน ๔',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายน้ำดื่มแด่พระสงฆ์', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'สวดมนต์บูชาคุณพระรัตนตรัย', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายน้ำดื่มแด่พระสงฆ์', category: 'offering' },
+      { id: '3', title: 'สวดมนต์บูชาคุณพระรัตนตรัย', category: 'chant' },
     ],
   },
   {
@@ -164,9 +164,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๕',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สรงน้ำพระพุทธรูป', category: 'offering', icon: '✨' },
-      { id: '3', title: 'เจริญสติตลอดวัน', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'สรงน้ำพระพุทธรูป', category: 'offering' },
+      { id: '3', title: 'เจริญสติตลอดวัน', category: 'precept' },
     ],
   },
   {
@@ -175,10 +175,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๕ (วันเถลิงศก/วันสงกรานต์)',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญปีใหม่ไทย ตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'บังสุกุลอุทิศบรรพบุรุษ', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ถวายผ้าไตรจีวร', category: 'offering', icon: '🪷' },
-      { id: '4', title: 'รดน้ำขอพรบุพการี', category: 'precept', icon: '🙏' },
+      { id: '1', title: 'ทำบุญปีใหม่ไทย ตักบาตร', category: 'alms' },
+      { id: '2', title: 'บังสุกุลอุทิศบรรพบุรุษ', category: 'chant' },
+      { id: '3', title: 'ถวายผ้าไตรจีวร', category: 'offering' },
+      { id: '4', title: 'รดน้ำขอพรบุพการี', category: 'precept' },
     ],
   },
   {
@@ -187,9 +187,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๕',
     recommendedActivities: [
-      { id: '1', title: 'ใส่บาตรพระ', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์พระชินบัญชร', category: 'chant', icon: '📜' },
-      { id: '3', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ใส่บาตรพระ', category: 'alms' },
+      { id: '2', title: 'สวดมนต์พระชินบัญชร', category: 'chant' },
+      { id: '3', title: 'รักษาศีล ๕', category: 'precept'},
     ],
   },
 
@@ -200,9 +200,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๕',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายหลอดไฟ/ค่าน้ำค่าไฟ', category: 'offering', icon: '💡' },
-      { id: '3', title: 'สวดมนต์แผ่เมตตา', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายหลอดไฟ/ค่าน้ำค่าไฟ', category: 'offering' },
+      { id: '3', title: 'สวดมนต์แผ่เมตตา', category: 'chant' },
     ],
   },
   {
@@ -211,9 +211,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๖',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'งดเว้นเนื้อสัตว์/ทานมังสวิรัติ', category: 'precept', icon: '🥗' },
-      { id: '3', title: 'ฟังธรรมเทศนา', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms' },
+      { id: '2', title: 'งดเว้นเนื้อสัตว์/ทานมังสวิรัติ', category: 'precept' },
+      { id: '3', title: 'ฟังธรรมเทศนา', category: 'chant' },
     ],
   },
   {
@@ -222,10 +222,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๖ (วันวิสาขบูชา)',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๘ เจริญสมาธิ', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ฟังเทศน์มหาชาติ', category: 'chant', icon: '📜' },
-      { id: '4', title: 'เวียนเทียนรอบอุโบสถช่วงค่ำ', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตรใหญ่', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๘ เจริญสมาธิ', category: 'precept'},
+      { id: '3', title: 'ฟังเทศน์มหาชาติ', category: 'chant'},
+      { id: '4', title: 'เวียนเทียนรอบอุโบสถช่วงค่ำ', category: 'offering'},
     ],
   },
   {
@@ -234,9 +234,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันแรม ๘ ค่ำ เดือน ๖ (วันอัฏฐมีบูชา)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รำลึกพระธรรมสังเวช', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดพระพุทธคุณ ๑๐๘ จบ', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'รำลึกพระธรรมสังเวช', category: 'precept' },
+      { id: '3', title: 'สวดพระพุทธคุณ ๑๐๘ จบ', category: 'chant' },
     ],
   },
   {
@@ -245,9 +245,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๔ ค่ำ เดือน ๖',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายดอกไม้ธูปเทียน', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'เจริญจิตตภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายดอกไม้ธูปเทียน', category: 'offering' },
+      { id: '3', title: 'เจริญจิตตภาวนา', category: 'precept'},
     ],
   },
 
@@ -258,9 +258,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๗',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดมนต์บทมงคลสูตร', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ตักบาตรอาหารสด', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'สวดมนต์บทมงคลสูตร', category: 'chant' },
     ],
   },
   {
@@ -269,10 +269,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๗',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถือศีล ๘', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายภัตตาหารเพล', category: 'offering' },
+      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant' },
+      { id: '4', title: 'ถือศีล ๘', category: 'precept' },
     ],
   },
   {
@@ -281,9 +281,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๗',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ไหว้พระประธาน', category: 'chant', icon: '🙏' },
-      { id: '3', title: 'ปล่อยปลาปล่อยเต่า', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ไหว้พระประธาน', category: 'chant' },
+      { id: '3', title: 'ปล่อยปลาปล่อยเต่า', category: 'offering' },
     ],
   },
   {
@@ -292,9 +292,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๗',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทานยา', category: 'offering', icon: '💊' },
-      { id: '3', title: 'นั่งสมาธิระลึกความตายอย่างมีสติ', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทานยา', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิระลึกความตายอย่างมีสติ', category: 'precept' },
     ],
   },
 
@@ -305,9 +305,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๘',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์บทธัมมจักกัปปวัตตนสูตร', category: 'chant', icon: '📜' },
-      { id: '3', title: 'เจริญเมตตาภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms' },
+      { id: '2', title: 'สวดมนต์บทธัมมจักกัปปวัตตนสูตร', category: 'chant' },
+      { id: '3', title: 'เจริญเมตตาภาวนา', category: 'precept' },
     ],
   },
   {
@@ -316,10 +316,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๘ (วันอาสาฬหบูชา)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ฟังเทศน์ปฐมเทศนา', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ถวายเทียนพรรษา/หลอดไฟ', category: 'offering', icon: '🕯️' },
-      { id: '4', title: 'เวียนเทียนรำลึกพระธรรม', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ฟังเทศน์ปฐมเทศนา', category: 'chant' },
+      { id: '3', title: 'ถวายเทียนพรรษา/หลอดไฟ', category: 'offering' },
+      { id: '4', title: 'เวียนเทียนรำลึกพระธรรม', category: 'offering' },
     ],
   },
   {
@@ -328,9 +328,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันแรม ๑ ค่ำ เดือน ๘ (วันเข้าพรรษา)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรดอกไม้/อาหารสด', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ตั้งสัจจะงดเว้นอบายมุขตลอดพรรษา', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ถวายผ้าอาบน้ำฝน', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรดอกไม้/อาหารสด', category: 'alms' },
+      { id: '2', title: 'ตั้งสัจจะงดเว้นอบายมุขตลอดพรรษา', category: 'precept' },
+      { id: '3', title: 'ถวายผ้าอาบน้ำฝน', category: 'offering' },
     ],
   },
 
@@ -341,9 +341,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๘',
     recommendedActivities: [
-      { id: '1', title: 'ใส่บาตรพระ', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดมนต์บทพาหุงมหากา', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ใส่บาตรพระ', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'สวดมนต์บทพาหุงมหากา', category: 'chant' },
     ],
   },
   {
@@ -352,9 +352,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๘',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทาน', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทาน', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept'},
     ],
   },
   {
@@ -363,9 +363,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๙',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์บูชาพระแก้วมรกต', category: 'chant', icon: '🙏' },
-      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'สวดมนต์บูชาพระแก้วมรกต', category: 'chant' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering' },
     ],
   },
   {
@@ -374,10 +374,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๙',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถืออุโบสถศีล ๘', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ถืออุโบสถศีล ๘', category: 'precept' },
+      { id: '3', title: 'ฟังเทศน์ฟังธรรม', category: 'chant' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering' },
     ],
   },
 
@@ -388,9 +388,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๙',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'สวดมนต์บทโพชฌังคปริตร', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'สวดมนต์บทโพชฌังคปริตร', category: 'chant' },
     ],
   },
   {
@@ -399,9 +399,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๔ ค่ำ เดือน ๙',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทานอุทิศส่วนกุศล', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทานอุทิศส่วนกุศล', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept' },
     ],
   },
   {
@@ -410,9 +410,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๑๐',
     recommendedActivities: [
-      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์ทำวัตร', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ปล่อยสัตว์น้ำทำบุญ', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ใส่บาตรอาหารสด', category: 'alms' },
+      { id: '2', title: 'สวดมนต์ทำวัตร', category: 'chant' },
+      { id: '3', title: 'ปล่อยสัตว์น้ำทำบุญ', category: 'offering' },
     ],
   },
   {
@@ -421,10 +421,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๐ (วันสารทไทย)',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตรกระยาสารท', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'อุทิศบุญกุศลให้บรรพชน', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ถือศีล ๘ เจริญสมาธิ', category: 'precept', icon: '🧘' },
-      { id: '4', title: 'ถวายสังฆทานใหญ่', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตรกระยาสารท', category: 'alms' },
+      { id: '2', title: 'อุทิศบุญกุศลให้บรรพชน', category: 'chant' },
+      { id: '3', title: 'ถือศีล ๘ เจริญสมาธิ', category: 'precept' },
+      { id: '4', title: 'ถวายสังฆทานใหญ่', category: 'offering' },
     ],
   },
 
@@ -435,9 +435,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๑๐',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดพระปริตร', category: 'chant', icon: '📜' },
-      { id: '3', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'สวดพระปริตร', category: 'chant' },
+      { id: '3', title: 'รักษาศีล ๕', category: 'precept' },
     ],
   },
   {
@@ -446,9 +446,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๑๐',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายผ้าไตรจีวร', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายผ้าไตรจีวร', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept' },
     ],
   },
   {
@@ -457,9 +457,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๑๑',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ร่วมบุญทอดกฐิน', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ฟังพระธรรมเทศนา', category: 'chant' },
+      { id: '3', title: 'ร่วมบุญทอดกฐิน', category: 'offering' },
     ],
   },
   {
@@ -468,10 +468,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๑ (วันออกพรรษา)',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตรวันออกพรรษา', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ฟังเทศน์มหาชาติคาถาพัน', category: 'chant', icon: '📜' },
-      { id: '3', title: 'รักษาอุโบสถศีล', category: 'precept', icon: '🧘' },
-      { id: '4', title: 'ร่วมงานประเพณีทอดกฐิน', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตรวันออกพรรษา', category: 'alms' },
+      { id: '2', title: 'ฟังเทศน์มหาชาติคาถาพัน', category: 'chant' },
+      { id: '3', title: 'รักษาอุโบสถศีล', category: 'precept' },
+      { id: '4', title: 'ร่วมงานประเพณีทอดกฐิน', category: 'offering' },
     ],
   },
   {
@@ -480,9 +480,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันแรม ๑ ค่ำ เดือน ๑๑ (วันตักบาตรเทโว)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเทโวโรหณะ', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'เจริญพระพุทธมนต์', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ร่วมขบวนแห่พระพุทธรูป', category: 'offering', icon: '✨' },
+      { id: '1', title: 'ตักบาตรเทโวโรหณะ', category: 'alms' },
+      { id: '2', title: 'เจริญพระพุทธมนต์', category: 'chant' },
+      { id: '3', title: 'ร่วมขบวนแห่พระพุทธรูป', category: 'offering' },
     ],
   },
 
@@ -493,9 +493,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๑๑',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ร่วมทอดกฐินสามัคคี', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ตักบาตรตอนเช้า', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'ร่วมทอดกฐินสามัคคี', category: 'offering' },
     ],
   },
   {
@@ -504,9 +504,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๑๑',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทานบริวารกฐิน', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทานบริวารกฐิน', category: 'offering' },
+      { id: '3', title: 'นั่งสมาธิภาวนา', category: 'precept' },
     ],
   },
   {
@@ -515,9 +515,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๑๒',
     recommendedActivities: [
-      { id: '1', title: 'ใส่บาตรอาหารแห้ง', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดมนต์บทมหาจักรพรรดิ', category: 'chant', icon: '📜' },
-      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering', icon: '🐟' },
+      { id: '1', title: 'ใส่บาตรอาหารแห้ง', category: 'alms' },
+      { id: '2', title: 'สวดมนต์บทมหาจักรพรรดิ', category: 'chant' },
+      { id: '3', title: 'ปล่อยปลาทำบุญ', category: 'offering' },
     ],
   },
   {
@@ -526,10 +526,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: true,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑๒ (วันลอยกระทง)',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ขอขมาพระแม่คงคา', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'ฟังธรรมเทศนาอานิสงส์กฐิน', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถือศีล ๘ สวดมนต์', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'ขอขมาพระแม่คงคา', category: 'offering' },
+      { id: '3', title: 'ฟังธรรมเทศนาอานิสงส์กฐิน', category: 'chant' },
+      { id: '4', title: 'ถือศีล ๘ สวดมนต์', category: 'precept' },
     ],
   },
 
@@ -540,9 +540,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๘ ค่ำ เดือน ๑๒',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรเช้า', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'รักษาศีล ๕', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept', icon: '🧘' },
+      { id: '1', title: 'ตักบาตรเช้า', category: 'alms' },
+      { id: '2', title: 'รักษาศีล ๕', category: 'precept' },
+      { id: '3', title: 'นั่งสมาธิแผ่เมตตา', category: 'precept' },
     ],
   },
   {
@@ -551,9 +551,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันแรม ๑๕ ค่ำ เดือน ๑๒',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถวายสังฆทานส่งท้ายเดือน', category: 'offering', icon: '🪷' },
-      { id: '3', title: 'สวดมนต์ทำวัตรเช้า-เย็น', category: 'chant', icon: '📜' },
+      { id: '1', title: 'ทำบุญใส่บาตร', category: 'alms' },
+      { id: '2', title: 'ถวายสังฆทานส่งท้ายเดือน', category: 'offering' },
+      { id: '3', title: 'สวดมนต์ทำวัตรเช้า-เย็น', category: 'chant' },
     ],
   },
   {
@@ -562,9 +562,9 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๘ ค่ำ เดือน ๑',
     recommendedActivities: [
-      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'สวดพระพุทธคุณ', category: 'chant', icon: '📜' },
-      { id: '3', title: 'บำเพ็ญประโยชน์ต่อส่วนรวม', category: 'precept', icon: '✨' },
+      { id: '1', title: 'ตักบาตรพระสงฆ์', category: 'alms' },
+      { id: '2', title: 'สวดพระพุทธคุณ', category: 'chant' },
+      { id: '3', title: 'บำเพ็ญประโยชน์ต่อส่วนรวม', category: 'precept' },
     ],
   },
   {
@@ -573,10 +573,10 @@ const auspiciousDaysData = [
     isAuspiciousDay: false,
     title: 'วันขึ้น ๑๕ ค่ำ เดือน ๑',
     recommendedActivities: [
-      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms', icon: '🍚' },
-      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept', icon: '🧘' },
-      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant', icon: '📜' },
-      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering', icon: '🪷' },
+      { id: '1', title: 'ทำบุญตักบาตร', category: 'alms' },
+      { id: '2', title: 'ถืออุโบสถศีล', category: 'precept' },
+      { id: '3', title: 'ฟังพระธรรมเทศนา', category: 'chant' },
+      { id: '4', title: 'ถวายภัตตาหารเพล', category: 'offering' },
     ],
   },
 ];

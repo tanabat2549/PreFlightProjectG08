@@ -581,7 +581,7 @@ export default function Home() {
           <section className="sanctuary-hero">
             <div className="hero-glow-bg" />
             <div className="hero-content">
-              <span className="daily-quote-tag">คติธรรมนำชีวิตประจำวัน</span>
+              <span className="daily-quote-tag">ดวงชีวิตประจำวัน</span>
               <h3 className="hero-quote">"{auspicious.overviewDescription || 'จิตที่ฝึกดีแล้ว นำสุขมาให้'}"</h3>
               <p className="hero-sub">สะสมกุศลจิตในทุกเช้าเพื่อความสงบและสติในการดำเนินชีวิต</p>
               <button

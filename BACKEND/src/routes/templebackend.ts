@@ -418,6 +418,9 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response): Promise<
 
     const imageUrl = isRealTempleImage(t.imageUrl) ? t.imageUrl : null;
 
+    // รีวิวที่ผู้ใช้เขียนในแอปเราเอง (จาก DB)
+    const appReviews = await getAppReviews(place.id);
+
     const templeDetail = {
       id: t.googlePlaceId,
       name: t.name,
