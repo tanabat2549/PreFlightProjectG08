@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { dbClient as db } from '../db/client.js';
-import { fortunes, siemseeHistories, siemseeDailyDraws } from '../db/schema.js';
+import { fortunes, siemseeHistories, siemseeDailyDraws,users } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import { requireAuth, type AuthRequest } from '../middlewares/requireAuth.js';
 
@@ -69,8 +69,16 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
     const userId = req.userId!;
-    const currentMerit = Number(req.query.currentMerit) || 0;
     const COST = 100; // ค่าใช้จ่ายแต้มสำหรับการสุ่มรอบเสริม
+
+    // 🌟 2. ดึงข้อมูล User จาก Database เพื่อเช็กแต้มบุญจริง (ไม่รับจาก query แล้ว)
+    const [currentUser] = await db
+      .select({ points: users.points })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const currentMerit = currentUser?.points ?? 0;
 
     const rawName = req.query.name;
     const name = typeof rawName === 'string' ? rawName.trim().slice(0, 50) || undefined : undefined;
@@ -80,7 +88,7 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     const today = bangkokToday();
     const nextDrawAt = nextBangkokMidnight().toISOString();
 
-    // 1. ตรวจสอบใน Database ว่าวันนี้ User คนนี้ใช้สิทธิ์สุ่มฟรีไปหรือยัง
+    // 3. ตรวจสอบใน Database ว่าวันนี้ User คนนี้ใช้สิทธิ์สุ่มฟรีไปหรือยัง
     const [existingDraw] = await db
       .select()
       .from(siemseeDailyDraws)
@@ -90,21 +98,28 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     const alreadyDrawnToday = isLimitEnabled() && !!existingDraw;
 
     if (alreadyDrawnToday) {
-      // ถ้าวันนี้สุ่มไปแล้ว ต้องเช็คว่าแต้มพอจะสุ่มรอบเสริม (100 แต้ม) ไหม?
+      // ถ้าวันนี้สุ่มไปแล้ว ต้องเช็คว่าแต้มจริงใน DB พอจะสุ่มรอบเสริม (100 แต้ม) ไหม?
       if (currentMerit < COST) {
         return res.status(400).json({
           success: false,
-          message: 'วันนี้คุณสุ่มครบโควตาฟรีแล้ว และแต้มบารมีไม่ถึง 100 แต้มสำหรับสุ่มเพิ่ม',
+          message: 'วันนี้คุณสุ่มครบโควตาฟรีแล้ว และแต้มบุญไม่ถึง 100 แต้มสำหรับสุ่มเพิ่ม',
         });
       }
 
-      // สุ่มใบใหม่รอบเสริม (หักแต้ม)
+      // สุ่มใบใหม่รอบเสริม
       const fortune = await pickRandomFortune();
       if (!fortune) {
         return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
       }
 
       const remainingMerit = currentMerit - COST;
+
+      // 🌟 4. ตัดแต้มจริงออกจาก Database ของผู้ใช้คนนี้
+      await db
+        .update(users)
+        .set({ points: remainingMerit })
+        .where(eq(users.id, userId));
+
       const greeting = greetingFor(fortune);
 
       return res.json({
@@ -112,14 +127,14 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
         alreadyDrawn: true,
         usedMerit: true,
         remainingMerit,
-        message: 'ใช้ 100 แต้มบารมีสุ่มเซียมซีรอบเสริมสำเร็จ',
+        message: 'ใช้ 100 แต้มบุญสุ่มเซียมซีรอบเสริมสำเร็จ',
         nextDrawAt,
         data: fortune,
         ...(greeting && { greeting }),
       });
     }
 
-    // 2. กรณีสุ่มครั้งแรกของวัน (สุ่มฟรี)
+    // 5. กรณีสุ่มครั้งแรกของวัน (สุ่มฟรี)
     const fortune = await pickRandomFortune();
     if (!fortune) {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });

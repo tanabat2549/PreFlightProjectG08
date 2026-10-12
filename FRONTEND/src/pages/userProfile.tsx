@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import './userProfile.css';
 
@@ -12,6 +13,7 @@ interface UserData {
   zodiacSign?: string;
   birthDayOfWeek?: string;
   bio?: string;
+  points?: number; // 🌟 เพิ่มฟิลด์แต้มบุญจากฐานข้อมูล
 }
 
 interface SiamsiHistoryItem {
@@ -46,6 +48,8 @@ function getFaithTier(historyCount: number): { title: string } {
 }
 
 export default function UserProfile() {
+  const location = useLocation();
+
   const [user, setUser] = useState<UserData | null>(() => {
     const savedUser = localStorage.getItem('userData');
     if (savedUser) {
@@ -67,7 +71,7 @@ export default function UserProfile() {
   const [templeReviews, setTempleReviews] = useState<TempleReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // 🌟 โหลดค่า totalDraws สะสมจาก localStorage ผูกตามอีเมล เพื่อไม่ให้ลดลงเวลารีเฟรช
+  // โหลดค่า totalDraws สะสมจาก localStorage ผูกตามอีเมล เพื่อไม่ให้ลดลงเวลารีเฟรช
   const [totalDraws, setTotalDraws] = useState<number>(() => {
     const savedUser = localStorage.getItem('userData');
     if (savedUser) {
@@ -84,11 +88,11 @@ export default function UserProfile() {
     return 0;
   });
 
-  // 🆕 ประวัติเซียมซีจริงของ user ที่ดึงมาจาก backend
+  // ประวัติเซียมซีจริงของ user ที่ดึงมาจาก backend
   const [siemseeHistory, setSiemseeHistory] = useState<SiamsiHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  // 🔧 คำนวณยศ (Faith Tier) จาก totalDraws + รีวิว
+  // คำนวณยศ (Faith Tier) จาก totalDraws + รีวิว
   const faithTier = getFaithTier(totalDraws + templeReviews.length);
 
   const login = useGoogleLogin({
@@ -131,8 +135,8 @@ export default function UserProfile() {
     } finally {
       googleLogout();
       setUser(null);
-      setTempleReviews([]); // เคลียร์รีวิวตอน logout
-      setSiemseeHistory([]); // 🆕 เคลียร์ประวัติเซียมซีตอน logout ด้วย
+      setTempleReviews([]);
+      setSiemseeHistory([]);
       setTotalDraws(0);
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
@@ -176,7 +180,7 @@ export default function UserProfile() {
     }
   };
 
-  // เพิ่ม useEffect สำหรับดึงข้อมูลล่าสุดจาก Backend เมื่อเปิดหน้าจอ
+  // ดึงข้อมูลล่าสุดจาก Backend เมื่อเปิดหน้าจอ หรือเมื่อเปลี่ยนหน้ากลับมา (location.key เปลี่ยน)
   useEffect(() => {
     const fetchLatestProfile = async () => {
       if (user?.email) {
@@ -193,9 +197,9 @@ export default function UserProfile() {
     };
 
     fetchLatestProfile();
-  }, [user?.email]);
+  }, [user?.email, location.key]);
 
-  // ดึงรีวิววัดจริงของ user จาก backend (ต้อง login แล้วเท่านั้น)
+  // ดึงรีวิววัดจริงของ user จาก backend พร้อมดักจับการเปลี่ยนหน้า
   useEffect(() => {
     const fetchUserReviews = async () => {
       const token = localStorage.getItem('token');
@@ -217,9 +221,9 @@ export default function UserProfile() {
     };
 
     fetchUserReviews();
-  }, [user?.email]);
+  }, [user?.email, location.key]);
 
-  // 🆕 ดึงประวัติเซียมซีจริงของ user จาก backend พร้อมล็อคยอด totalDraws ไม่ให้ลดลงเวลารีเฟรช
+  // ดึงประวัติเซียมซีจริงของ user จาก backend พร้อมดักจับการเปลี่ยนหน้า
   useEffect(() => {
     const fetchSiemseeHistory = async () => {
       const token = localStorage.getItem('token');
@@ -234,7 +238,6 @@ export default function UserProfile() {
           const fetchedHistory = res.data.history;
           setSiemseeHistory(fetchedHistory);
 
-          // 🌟 ล็อคยอดสะสม totalDraws ให้อิงค่าที่มากที่สุดเสมอ (ไม่ลดลงเวลารีเฟรชหรือลบประวัติ)
           const storageKey = `totalDraws_${user.email}`;
           const currentStored = Number(localStorage.getItem(storageKey) || 0);
           const newTotal = Math.max(fetchedHistory.length, currentStored);
@@ -250,9 +253,9 @@ export default function UserProfile() {
     };
 
     fetchSiemseeHistory();
-  }, [user?.email]);
+  }, [user?.email, location.key]);
 
-  // 🗑️ ทิ้ง/ลบใบเซียมซีออกจากประวัติ
+  // ทิ้ง/ลบใบเซียมซีออกจากประวัติ
   const handleDeleteSiemsee = async (historyId: string, stickNumber: number) => {
     if (!window.confirm(`คุณต้องการทิ้งใบเซียมซีใบที่ ${stickNumber} ออกจากประวัติใช่หรือไม่?`)) {
       return;
@@ -273,16 +276,13 @@ export default function UserProfile() {
 
   return (
     <div className="sms-root">
-      {/* Background */}
       <div aria-hidden="true" className="sms-bg-gradient" />
 
       <div style={{ flex: 1 }}>
-        {/* Header Bar */}
         <div className={`sms-header-bar ${user ? 'left' : 'center'}`}>
           <span className="sms-font-header sms-header-title">โปรไฟล์</span>
         </div>
 
-        {/* Avatar & Halo */}
         <div className="sms-avatar-container">
           <div className="sms-halo sms-avatar-halo-inner">
             <div className="sms-avatar-bg">
@@ -302,7 +302,6 @@ export default function UserProfile() {
           </div>
         </div>
 
-        {/* User Info & Badge */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <h2 className="sms-font-header sms-username">{user ? user.name : 'ผู้มีจิตศรัทธา'}</h2>
 
@@ -320,7 +319,6 @@ export default function UserProfile() {
           )}
         </div>
 
-        {/* ปุ่ม Login กรณีที่ยังไม่ได้เข้าสู่ระบบ */}
         {!user && (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
             <button onClick={() => login()} className="sms-login-btn">
@@ -335,9 +333,27 @@ export default function UserProfile() {
           </div>
         )}
 
-        {/* แสดงเฉพาะตอนเข้าสู่ระบบแล้ว: Stat Cards */}
+        {/* แสดงเฉพาะตอนเข้าสู่ระบบแล้ว: Stat Cards (รวมแต้มบุญบารมี) */}
         {user && (
           <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            <div
+              className="sms-card-hover"
+              style={{
+                flex: 1,
+                background: '#FFF',
+                padding: '14px',
+                borderRadius: '16px',
+                border: '1px solid var(--sms-paper-deep)',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              }}
+            >
+              <div className="sms-font-header" style={{ fontSize: '22px', color: 'var(--sms-maroon)', fontWeight: 600 }}>
+                {user.points ?? 0} <span style={{ fontSize: '12px', color: 'var(--sms-sub)', fontWeight: 400 }}>แต้ม</span>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--sms-sub)', marginTop: '2px' }}>แต้มบุญบารมี</div>
+            </div>
+
             {[
               { label: 'เขย่าเซียมซี', value: totalDraws, unit: 'รอบ' },
               { label: 'รีวิวสถานที่มงคล', value: templeReviews.length, unit: 'ครั้ง' },
@@ -364,7 +380,6 @@ export default function UserProfile() {
           </div>
         )}
 
-        {/* Tabs & Content */}
         {user && (
           <>
             <div className="sms-tab-bar">
@@ -383,7 +398,6 @@ export default function UserProfile() {
               ))}
             </div>
 
-            {/* Tab 1: Info */}
             {activeTab === 'info' && (
               <div
                 className="sms-rise"
@@ -400,7 +414,6 @@ export default function UserProfile() {
                 <InfoRow label="วันที่เกิด" value={user.birthday || '—'} />
                 <InfoRow label="เกี่ยวกับฉัน / ตั้งจิตอธิษฐาน" value={user.bio || '—'} isLast />
 
-                {/* ปุ่มแก้ไขโปรไฟล์ในหน้าข้อมูลดวง */}
                 <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--sms-paper-deep)' }}>
                   <button onClick={openEdit} className="sms-edit-btn">
                     ✏️ แก้ไขโปรไฟล์
@@ -409,7 +422,6 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 2: History */}
             {activeTab === 'history' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {historyLoading ? (
@@ -512,7 +524,6 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Tab 3: Reviews */}
             {activeTab === 'reviews' && (
               <div className="sms-rise" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {reviewsLoading ? (
@@ -555,7 +566,6 @@ export default function UserProfile() {
         )}
       </div>
 
-      {/* ปุ่มออกจากระบบ */}
       {user && (
         <div style={{ marginTop: '40px', textAlign: 'center' }}>
           <button onClick={handleLogout} className="sms-logout-btn">
@@ -564,7 +574,6 @@ export default function UserProfile() {
         </div>
       )}
 
-      {/* Bottom Sheet Modal สำหรับแก้ไขข้อมูล */}
       {isEditing && editForm && (
         <div className="sms-modal-overlay" onClick={closeEdit}>
           <div className="sms-modal-sheet sms-rise" onClick={(e) => e.stopPropagation()}>
@@ -679,7 +688,6 @@ export default function UserProfile() {
   );
 }
 
-// Helpers
 function InfoRow({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
   return (
     <div

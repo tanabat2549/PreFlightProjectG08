@@ -18,6 +18,7 @@ router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Respons
     }
 
     const totalDraws = 'totalDraws' in foundUser ? Number((foundUser as any).totalDraws ?? 0) : 0;
+    const points = 'points' in foundUser ? Number((foundUser as any).points ?? 0) : 0;
     return res.json({
       success: true,
       user: {
@@ -30,6 +31,7 @@ router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Respons
         birthday: foundUser.birthDate,
         bio: foundUser.blessing,
         totalDraws,
+        points,
       },
     });
   } catch (error) {
