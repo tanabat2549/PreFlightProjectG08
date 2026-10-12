@@ -20,15 +20,9 @@ export default function BottomNav() {
   const location = useLocation();
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
-   const { pathname } = useLocation();
-  if (pathname.startsWith('/admin')) return null;
+  const { pathname } = useLocation();
 
-  // คำนวณ Index ของเมนูที่กำลังเลือกอยู่ (0 ถึง 4)
-  const activeIndex = Math.max(
-    0,
-    navItems.findIndex((item) => item.path === location.pathname)
-  );
-
+  // 🌟 ย้าย useEffect มาไว้ก่อนเงื่อนไข return เพื่อให้ Hook ถูกเรียกด้วยลำดับและจำนวนเท่ากันทุกครั้ง
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -43,6 +37,15 @@ export default function BottomNav() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // 🌟 ย้ายคำสั่งเช็คเงื่อนไข return มาไว้ตรงนี้ (หลังจากเรียก Hook ครบทุกตัวแล้ว)
+  if (pathname.startsWith('/admin')) return null;
+
+  // คำนวณ Index ของเมนูที่กำลังเลือกอยู่ (0 ถึง 4)
+  const activeIndex = Math.max(
+    0,
+    navItems.findIndex((item) => item.path === location.pathname)
+  );
 
   return (
     <nav
