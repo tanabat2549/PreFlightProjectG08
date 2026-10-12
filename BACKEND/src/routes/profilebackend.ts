@@ -5,29 +5,19 @@ import { eq, desc, and } from 'drizzle-orm';
 import { requireAuth, type AuthRequest} from '../middlewares/requireAuth.js'
 
 const router = Router();
-
 // ==========================================
 // 1. GET /api/user/profile/:email
 // ดึงข้อมูลโปรไฟล์ล่าสุดของผู้ใช้งาน
 // ==========================================
-router.get('/profile/:email', async (req: Request, res: Response): Promise<any> => {
+router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const email  = req.params.email as string;
+    const [foundUser] = await dbClient.select().from(users).where(eq(users.id, req.userId!)).limit(1);
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'กรุณาระบุอีเมล' });
-    }
-
-    // ค้นหาผู้ใช้จากฐานข้อมูล
-    const userResult = await dbClient.select().from(users).where(eq(users.email, email)).limit(1);
-
-    if (!userResult || userResult.length === 0) {
+    if (!foundUser) {
       return res.status(404).json({ success: false, message: 'ไม่พบผู้ใช้งานในระบบ' });
     }
 
-    const foundUser = userResult[0];
-
-    // ส่งข้อมูลกลับไปให้ Frontend ตาม Interface UserData
+    const totalDraws = 'totalDraws' in foundUser ? Number((foundUser as any).totalDraws ?? 0) : 0;
     return res.json({
       success: true,
       user: {
@@ -35,53 +25,43 @@ router.get('/profile/:email', async (req: Request, res: Response): Promise<any> 
         name: foundUser.name,
         email: foundUser.email,
         picture: foundUser.picture,
-        gender: foundUser.sex,               
+        gender: foundUser.sex,
         birthDayOfWeek: foundUser.weekdaydate,
         birthday: foundUser.birthDate,
-        bio: foundUser.blessing            
-      }
+        bio: foundUser.blessing,
+        totalDraws,
+      },
     });
-
   } catch (error) {
     console.error('Fetch profile error:', error);
     return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
   }
 });
 
-// ==========================================
-// 2. PUT /api/user/profile
-// อัปเดตข้อมูลดวงชะตาและโปรไฟล์
-// ==========================================
-router.put('/profile', async (req: Request, res: Response): Promise<any> => {
+// 2. PUT /api/user/profile — อัปเดตเฉพาะโปรไฟล์ของคนที่ล็อกอินอยู่
+router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const { email, name, gender, birthDayOfWeek, birthday, bio } = req.body;
+    const { name, gender, birthDayOfWeek, birthday, bio } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'ไม่พบอีเมลผู้ใช้งาน กรุณาเข้าสู่ระบบใหม่' });
-    }
-
-    // จัดฟอร์แมตวันที่ (ถ้า Frontend ส่งมาเป็นว่างๆ หรือ undefined จะได้เซ็ตเป็น null)
     let formattedDate = null;
     if (birthday && birthday.trim() !== '') {
       formattedDate = new Date(birthday).toISOString().split('T')[0];
     }
 
-    const updatedUserResult = await dbClient.update(users)
+    const [updatedUser] = await dbClient.update(users)
       .set({
         name: name,
-        sex: gender || null,              
-        weekdaydate: birthDayOfWeek || null, 
-        birthDate: formattedDate,         
-        blessing: bio || null,            
+        sex: gender || null,
+        weekdaydate: birthDayOfWeek || null,
+        birthDate: formattedDate,
+        blessing: bio || null,
       })
-      .where(eq(users.email, email)) 
+      .where(eq(users.id, req.userId!))
       .returning();
 
-    if (!updatedUserResult || updatedUserResult.length === 0) {
+    if (!updatedUser) {
       return res.status(404).json({ success: false, message: 'ไม่พบผู้ใช้งานในระบบ' });
     }
-
-    const updatedUser = updatedUserResult[0];
 
     return res.json({
       success: true,
@@ -90,13 +70,12 @@ router.put('/profile', async (req: Request, res: Response): Promise<any> => {
         name: updatedUser.name,
         email: updatedUser.email,
         picture: updatedUser.picture,
-        gender: updatedUser.sex,               
+        gender: updatedUser.sex,
         birthDayOfWeek: updatedUser.weekdaydate,
         birthday: updatedUser.birthDate,
-        bio: updatedUser.blessing            
-      }
+        bio: updatedUser.blessing,
+      },
     });
-
   } catch (error) {
     console.error('Update profile error:', error);
     return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' });

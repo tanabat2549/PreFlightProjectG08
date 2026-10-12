@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import type { AdminRequest } from '../../middlewares/roles.js';
 import { logAudit } from '../../utils/audit.js';
 
+
 const router = Router();
 
 // GET /api/admin/fortunes — ดึงรายการเซียมซีทั้งหมด
@@ -93,21 +94,24 @@ router.patch('/:id', async (req: AdminRequest, res: Response) => {
 });
 
 // DELETE /api/admin/fortunes/:id — ลบใบเซียมซี
-router.delete('/:id', async (req: AdminRequest, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id)) return res.status(400).json({ success: false, message: 'id ต้องเป็นตัวเลข' });
+ router.delete('/:id', async (req: AdminRequest, res: Response) => {
+     try {
+       const id = Number(req.params.id);
+       if (!Number.isInteger(id)) return res.status(400).json({ success: false, message: 'id ต้องเป็นตัวเลข' });
 
-    const [deleted] = await db.delete(fortunes).where(eq(fortunes.id, id)).returning();
-    if (!deleted) return res.status(404).json({ success: false, message: 'ไม่พบใบเซียมซีนี้' });
+       const [deleted] = await db.delete(fortunes).where(eq(fortunes.id, id)).returning();
+       if (!deleted) return res.status(404).json({ success: false, message: 'ไม่พบใบเซียมซีนี้' });
 
-    await logAudit(req, 'fortune.delete', 'fortune', id, { number: deleted.number });
+       await logAudit(req, 'fortune.delete', 'fortune', id, { number: deleted.number });
 
-    return res.json({ success: true, message: 'ลบใบเซียมซีสำเร็จ', data: { id } });
-  } catch (error) {
-    console.error('Delete fortune error:', error);
-    return res.status(500).json({ success: false, message: 'Internal Server Error' });
-  }
-});
-
+       return res.json({ success: true, message: 'ลบใบเซียมซีสำเร็จ', data: { id } });
+     } catch (error) {
+       // 23503 = foreign key violation (มีผู้ใช้เก็บใบนี้ไว้ในประวัติ)
+       if ((error as any)?.code === '23503' || (error as any)?.cause?.code === '23503') {
+         return res.status(409).json({ success: false, message: 'ใบนี้มีผู้ใช้เก็บไว้ในประวัติ จึงลบไม่ได้' });
+       }
+       console.error('Delete fortune error:', error);
+       return res.status(500).json({ success: false, message: 'Internal Server Error' });
+     }
+   });
 export default router;

@@ -43,7 +43,16 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ success: false, message: "ไม่พบผู้ใช้งานนี้ในระบบ" });
     }
 
-    // 3. แนบข้อมูลทั้งหมดเข้ากับ Request object
+    // 3. บัญชีที่ถูกล็อกโดย Super Admin ใช้งานต่อไม่ได้ แม้ Token จะยังไม่หมดอายุ
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        code: "ACCOUNT_LOCKED",
+        message: "บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ",
+      });
+    }
+
+    // 4. แนบข้อมูลทั้งหมดเข้ากับ Request object
     req.userId = user.id;
     req.actor = {
       id: user.id,

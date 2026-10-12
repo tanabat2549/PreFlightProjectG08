@@ -213,6 +213,7 @@ interface NearbyQueryParams {
   query?: string;
 }
 
+
 interface ReviewBody {
   rating: number;
   text: string;

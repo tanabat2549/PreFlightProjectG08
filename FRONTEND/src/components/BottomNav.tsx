@@ -20,6 +20,8 @@ export default function BottomNav() {
   const location = useLocation();
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
+   const { pathname } = useLocation();
+  if (pathname.startsWith('/admin')) return null;
 
   // คำนวณ Index ของเมนูที่กำลังเลือกอยู่ (0 ถึง 4)
   const activeIndex = Math.max(

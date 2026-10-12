@@ -373,7 +373,7 @@ export default function Home() {
   // 2. แต้มบารมี & การถวายประทีปประจำวัน
   const [meritCount, setMeritCount] = useState<number>(() => {
     const saved = localStorage.getItem('user_merit_score');
-    return saved ? Number(saved) : 1280;
+    return saved ? Number(saved) : 0;
   });
 
   const [hasOffered, setHasOffered] = useState<boolean>(() => {
