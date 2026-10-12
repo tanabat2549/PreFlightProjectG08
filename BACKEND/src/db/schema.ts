@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   googleId: varchar('google_id', { length: 255 }),
   role: roleEnum('role').notNull().default('user'),
   isActive: boolean('is_active').notNull().default(true),
+  points: integer('points').notNull().default(100),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().$onUpdateFn(() => new Date()).notNull(),
 }, (t) => ({

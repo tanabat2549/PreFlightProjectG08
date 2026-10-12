@@ -372,10 +372,23 @@ export default function Home() {
 
   // 2. แต้มบารมี & การถวายประทีปประจำวัน
   const [meritCount, setMeritCount] = useState<number>(() => {
-    const saved = localStorage.getItem('user_merit_score');
-    return saved ? Number(saved) : 0;
+    try {
+      const saved = localStorage.getItem('userData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.points !== undefined) return Number(parsed.points);
+      }
+    } catch {}
+    return 0;
   });
 
+  // 🌟 ซิงค์ค่าแต้มเมื่อข้อมูล user ในหน้าแรกมีการเปลี่ยนแปลงหรือโหลดเสร็จ
+  useEffect(() => {
+    if (user?.points !== undefined) {
+      setMeritCount(user.points);
+    }
+  }, [user?.points]);
+  
   const [hasOffered, setHasOffered] = useState<boolean>(() => {
     const todayStr = getTodayDateString();
     return localStorage.getItem('last_offered_date') === todayStr;
