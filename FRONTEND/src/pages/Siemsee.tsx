@@ -80,11 +80,15 @@ const rand = (min: number, max: number) => Math.random() * (max - min) + min;
 export default function SiemseePage() {
   const [stage, setStage] = useState<Stage>('idle');
   const [picked, setPicked] = useState<Fortune | null>(null);
-  const [showFullStickModal, setShowFullStickModal] = useState(false); // Step 2
-  const [isSplitView, setIsSplitView] = useState(false); // Step 3
+  const [showFullStickModal, setShowFullStickModal] = useState(false);
+  const [isSplitView, setIsSplitView] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // State สำหรับเด้ง Modal ยืนยันใช้แต้มบุญสุ่มรอบเสริม
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearTimers = () => {
@@ -120,7 +124,37 @@ export default function SiemseePage() {
 
   const isBusy = stage === 'loading' || stage === 'shaking' || stage === 'popping';
 
-  // Step 1 -> เด้งไม้ -> เปิด Step 2
+  // ฟังก์ชันแยกสำหรับแสดง Animation การสุ่ม
+  const processDrawAnimation = (fortune: Fortune) => {
+    setPicked(fortune);
+    setStage('shaking');
+
+    timers.current.push(setTimeout(() => setStage('popping'), 850));
+    timers.current.push(setTimeout(() => setStage('landed'), 850 + 650));
+    timers.current.push(
+      setTimeout(() => {
+        setStage('revealed');
+        setShowFullStickModal(true);
+      }, 850 + 650 + 400)
+    );
+
+    // บันทึกสถิติยอดเขย่าสะสมลง localStorage (ไม่ลดลงแม้จะกดลบประวัติ)[cite: 3]
+    const savedUser = localStorage.getItem('userData');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser?.email) {
+          const storageKey = `totalDraws_${parsedUser.email}`;
+          const currentTotal = Number(localStorage.getItem(storageKey) || 0);
+          localStorage.setItem(storageKey, String(currentTotal + 1));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  // ฟังก์ชันกดเขย่าเซียมซีหลัก (ถ้าโควตาฟรีหมด จะเด้ง Modal ถามยืนยันใช้แต้ม)[cite: 4]
   const handleShake = async () => {
     if (isBusy) return;
     clearTimers();
@@ -131,31 +165,70 @@ export default function SiemseePage() {
     setStage('loading');
 
     try {
-      const fortune = await drawFortune();
-      setPicked(fortune);
-      setStage('shaking');
+      const response: any = await drawFortune();
+      
+      // ตรวจสอบกรณีโควตาหมดและต้องการยืนยันใช้แต้ม
+      if (response?.alreadyDrawn && response?.needsConfirmation) {
+        setShowConfirmModal(true);
+        setStage('idle');
+        return;
+      }
 
-      timers.current.push(setTimeout(() => setStage('popping'), 850));
-      timers.current.push(setTimeout(() => setStage('landed'), 850 + 650));
-      timers.current.push(
-        setTimeout(() => {
-          setStage('revealed');
-          setShowFullStickModal(true);
-        }, 850 + 650 + 400)
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+      const fortune = response?.success && response?.data ? response.data : response;
+      if (!fortune || typeof fortune.number !== 'number') {
+        setError('สุ่มเซียมซีไม่สำเร็จ ลองใหม่อีกครั้ง');
+        setStage('idle');
+        return;
+      }
+
+      processDrawAnimation(fortune);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || err.message || '';
+      
+      if (err.response?.status === 400 || errorMsg.includes('โควตา') || errorMsg.includes('แต้ม')) {
+        setShowConfirmModal(true);
+        setStage('idle');
+      } else {
+        setError(errorMsg || 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง');
+        setStage('idle');
+      }
+    }
+  };
+
+  // ฟังก์ชันยืนยันเมื่อผู้ใช้กด "ตกลง (-100 แต้ม)" ใน Modal[cite: 4]
+  const handleConfirmUsePoints = async () => {
+    setShowConfirmModal(false);
+    setStage('loading');
+    clearTimers();
+    setError(null);
+
+    try {
+      // ส่งพารามิเตอร์ true ไปบอก Backend ว่าต้องการใช้แต้มบุญสุ่มรอบเสริม
+      const result: any = await drawFortune(true);
+
+      const fortune: Fortune | undefined =
+        result?.success && result?.data ? result.data : result;
+
+      if (!fortune || typeof fortune.number !== 'number') {
+        setError(result?.message || 'สุ่มรอบเสริมไม่สำเร็จ ลองใหม่อีกครั้ง');
+        setStage('idle');
+        return;
+      }
+
+      processDrawAnimation(fortune);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'สุ่มรอบเสริมไม่สำเร็จ ลองใหม่อีกครั้ง');
       setStage('idle');
     }
   };
 
-  // Step 2 -> Step 3: กดเปิดอ่านคำทำนาย แล้วคลี่ออก 2 ฝั่ง
+  // Step 2 -> Step 3: กดเปิดอ่านคำทำนาย แล้วคลี่ออก 2 ฝั่ง[cite: 4]
   const handleOpenFortune = () => {
     setShowFullStickModal(false);
     setIsSplitView(true);
   };
 
-  // เก็บใบเซียมซีลงประวัติ (บันทึกเมื่อกดปุ่มนี้เท่านั้น)
+  // เก็บใบเซียมซีลงประวัติ[cite: 4]
   const handleSave = async () => {
     if (!picked || isSaved || isSaving) return;
     setIsSaving(true);
@@ -169,7 +242,7 @@ export default function SiemseePage() {
     }
   };
 
-  // รีเซ็ตเพื่อเขย่าใหม่ (ใช้เป็น "ทิ้งเซียมซี" ด้วย เพราะยังไม่ได้เก็บอะไรลง DB)
+  // รีเซ็ตเพื่อเขย่าใหม่[cite: 4]
   const handleReset = () => {
     clearTimers();
     setStage('idle');
@@ -182,7 +255,7 @@ export default function SiemseePage() {
 
   return (
     <div className={`siemsee-page-container ${isSplitView ? 'layout-split-active' : ''}`}>
-      {/* ส่วนหัวของหน้าเว็บ */}
+      {/* ส่วนหัวของหน้าเว็บ[cite: 4] */}
       <header className="siemsee-header-wrap">
         <h2>
           <span className="shaking-title">เขย่าเซียมซี</span>
@@ -201,7 +274,7 @@ export default function SiemseePage() {
       </header>
 
       {/* =========================================================================
-          STEP 1: หน้าจอเขย่าเต็มจอตรงกลาง (กระบอก + ไม้เริ่มเด้ง)
+          STEP 1: หน้าจอเขย่าเต็มจอตรงกลาง[cite: 4]
           ========================================================================= */}
       {!isSplitView && (
         <div className="siemsee-center-fullscreen-stage">
@@ -255,7 +328,7 @@ export default function SiemseePage() {
       )}
 
       {/* =========================================================================
-          STEP 2: MODAL แสดงผลไม้เซียมซีขนาดเต็มจอ + แสงหมุน + ปุ่มเปิดอ่านคำทำนาย
+          STEP 2: MODAL แสดงผลไม้เซียมซีขนาดเต็มจอ[cite: 4]
           ========================================================================= */}
       {showFullStickModal && picked && (
         <div className="reveal-overlay">
@@ -277,12 +350,10 @@ export default function SiemseePage() {
       )}
 
       {/* =========================================================================
-          STEP 3: แยก 2 ฝั่ง (SPLIT SCREEN REVEAL)
+          STEP 3: SPLIT SCREEN REVEAL[cite: 4]
           ========================================================================= */}
       {isSplitView && picked && (
         <div className="siemsee-split-container">
-
-          {/* 🌟 ฝั่งซ้าย: แท่งไม้เซียมซี + ออร่าหมุน + ปุ่มเสี่ยงเซียมซีใหม่ */}
           <section className="split-left-stick-panel">
             <div className="pure-stick-stage">
               <div className="stick-rotating-aura">
@@ -294,7 +365,6 @@ export default function SiemseePage() {
                 <span className="stick-embedded-number">{picked.number}</span>
               </div>
 
-              {/* 🔘 ปุ่ม "เสี่ยงเซียมซีใหม่" ใต้แท่งไม้ฝั่งซ้าย */}
               <div className="stick-action-wrap">
                 <button
                   type="button"
@@ -308,11 +378,8 @@ export default function SiemseePage() {
             </div>
           </section>
 
-          {/* 📜 ฝั่งขวา: ใบเซียมซีคำทำนาย (ปุ่ม เก็บใบเซียมซี และ ทิ้งเซียมซี) */}
           <section className="split-right-fortune-panel">
             <div className="chinese-paper-talisman">
-
-              {/* 🏷️ ป้ายแถบสีแดงด้านบน */}
               <div className="chinese-talisman-top-banner">
                 <span className="talisman-banner-number">
                   ใบที่ {toThaiNumber(picked.number)}
@@ -322,7 +389,6 @@ export default function SiemseePage() {
                 </h3>
               </div>
 
-              {/* 📜 เนื้อหาคำทำนายทั้ง 5 ด้าน */}
               <div className="chinese-talisman-content">
                 <div className="chinese-fortune-item">
                   <div className="chinese-fortune-badge">
@@ -365,7 +431,6 @@ export default function SiemseePage() {
                 </div>
               </div>
 
-              {/* 🔘 ปุ่มควบคุมฝั่งขวา: เก็บใบเซียมซี และ ทิ้งเซียมซี */}
               <div className="chinese-talisman-action-group">
                 <button
                   type="button"
@@ -388,10 +453,76 @@ export default function SiemseePage() {
                   <span>ทิ้งเซียมซี</span>
                 </button>
               </div>
-
             </div>
           </section>
+        </div>
+      )}
 
+      {/* =========================================================================
+          MODAL ยืนยันการใช้แต้มบุญสุ่มรอบเสริม (100 แต้ม)[cite: 4]
+          ========================================================================= */}
+      {showConfirmModal && (
+        <div className="reveal-overlay" style={{ background: 'rgba(0, 0, 0, 0.75)', zIndex: 1000 }}>
+          <div 
+            className="sms-rise"
+            style={{
+              background: '#FFF',
+              padding: '24px',
+              borderRadius: '20px',
+              width: '90%',
+              maxWidth: '360px',
+              textAlign: 'center',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+              border: '1px solid var(--sms-paper-deep)'
+            }}
+          >
+            <div style={{ fontSize: '36px', marginBottom: '10px' }}>🪙</div>
+            <h3 className="sms-font-header" style={{ color: 'var(--sms-maroon-deep)', fontSize: '18px', marginBottom: '8px', fontWeight: 600 }}>
+              ใช้แต้มบุญสุ่มรอบเสริม?
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--sms-sub)', marginBottom: '20px', lineHeight: 1.5 }}>
+              วันนี้คุณใช้สิทธิ์สุ่มฟรีไปแล้ว การสุ่มเพิ่มจะต้องใช้ <b>100 แต้มบุญบารมี</b> ท่านต้องการดำเนินการต่อหรือไม่?
+            </p>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--sms-sub)',
+                  background: '#FFF',
+                  color: 'var(--sms-ink)',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                ไม่ต้องการ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmUsePoints}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'var(--sms-maroon)',
+                  color: 'var(--sms-gold-light)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(122,28,40,0.2)',
+                  fontFamily: 'inherit',
+                }}
+              >
+                ตกลง (-100 แต้ม)
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
