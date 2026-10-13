@@ -446,13 +446,13 @@ export default function Temple() {
                 <h3 style={{ margin: "0 0 10px 0", fontSize: "0.98rem", color: "var(--sms-maroon)" }}>
                   แบ่งปันประสบการณ์ทำบุญ
                 </h3>
-                <input
+                {/* <input
                   type="text"
                   className={styles.formInput}
                   placeholder="ชื่อของคุณ (ไม่ระบุก็ได้)"
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
-                />
+                /> */}
 
                 <div className={styles.ratingSelectGroup}>
                   <label>ให้คะแนน:</label>
