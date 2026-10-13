@@ -183,10 +183,18 @@ export default function UserProfile() {
   // ดึงข้อมูลล่าสุดจาก Backend เมื่อเปิดหน้าจอ หรือเมื่อเปลี่ยนหน้ากลับมา (location.key เปลี่ยน)
   useEffect(() => {
     const fetchLatestProfile = async () => {
-      if (user?.email) {
+      const savedUserStr = localStorage.getItem('userData');
+      let targetEmail = user?.email;
+      if (!targetEmail && savedUserStr) {
         try {
-          const res = await api.get(`/user/profile/${user.email}`);
-          if (res.data.success && res.data.user) {
+          targetEmail = JSON.parse(savedUserStr)?.email;
+        } catch {}
+      }
+
+      if (targetEmail) {
+        try {
+          const res = await api.get(`/user/profile/${targetEmail}`);
+          if (res.data?.success && res.data?.user) {
             setUser(res.data.user);
             localStorage.setItem('userData', JSON.stringify(res.data.user));
           }
@@ -197,7 +205,7 @@ export default function UserProfile() {
     };
 
     fetchLatestProfile();
-  }, [user?.email, location.key]);
+  }, [location.key]);
 
   // ดึงรีวิววัดจริงของ user จาก backend พร้อมดักจับการเปลี่ยนหน้า
   useEffect(() => {

@@ -11,7 +11,13 @@ const router = Router();
 // ==========================================
 router.get(['/profile', '/profile/:email'], requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const [foundUser] = await dbClient.select().from(users).where(eq(users.id, req.userId!)).limit(1);
+    let foundUser;
+    if (req.params?.email) {
+      [foundUser] = await dbClient.select().from(users).where(eq(users.email, String(req.params.email).toLowerCase())).limit(1);
+    }
+    if (!foundUser && req.userId) {
+      [foundUser] = await dbClient.select().from(users).where(eq(users.id, req.userId)).limit(1);
+    }
 
     if (!foundUser) {
       return res.status(404).json({ success: false, message: 'ไม่พบผู้ใช้งานในระบบ' });
@@ -76,6 +82,7 @@ router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Pro
         birthDayOfWeek: updatedUser.weekdaydate,
         birthday: updatedUser.birthDate,
         bio: updatedUser.blessing,
+        points: Number(updatedUser.points ?? 0),
       },
     });
   } catch (error) {

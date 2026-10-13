@@ -111,11 +111,14 @@ router.post('/auth/google', async (req, res) => {
       user = newUser;
     } else {
       console.log('🔄 Updating existing user in DB...');
+      // 🌟 หากผู้ใช้เคยมีชื่อใน Database (หรือเคยเปลี่ยนชื่อ) ให้ใช้ชื่อจาก Database เดิมเสมอ ห้ามเอาชื่อ Google มาทับ
+      const customDbName = existingUser.name?.trim() ? existingUser.name : (name || 'Google User');
+
       const [updatedUser] = await dbClient.update(users)
         .set({
           googleId: googleId,
           picture: picture || existingUser.picture,
-          name: name || existingUser.name,
+          name: customDbName,
         })
         .where(eq(users.id, existingUser.id))
         .returning();
