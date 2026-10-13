@@ -83,7 +83,40 @@ router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Pro
     return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' });
   }
 });
+router.post('/bless', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const userId = req.userId!;
+    const ADD_POINTS = 50;
 
+    const [currentUser] = await dbClient
+      .select({ points: users.points })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!currentUser) {
+      return res.status(404).json({ success: false, message: 'ไม่พบผู้ใช้งาน' });
+    }
+
+    const currentPoints = Number(currentUser.points ?? 0);
+    const newPoints = currentPoints + ADD_POINTS;
+
+    await dbClient
+      .update(users)
+      .set({ points: newPoints })
+      .where(eq(users.id, userId));
+
+    return res.json({
+      success: true,
+      addedPoints: ADD_POINTS,
+      totalPoints: newPoints,
+      message: 'อนุโมทนาบุญสำเร็จ รับ 50 บารมี',
+    });
+  } catch (error) {
+    console.error('Bless points error:', error);
+    return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการรับแต้มบุญ' });
+  }
+});
 
 // ==========================================
 // 🆕 3. GET /api/user/reviews — ดึงรีวิววัดทั้งหมดที่ user คนนี้เคยเขียน
