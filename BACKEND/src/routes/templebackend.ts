@@ -27,6 +27,60 @@ function calculateDistance(
   return Math.round(R * c * 100) / 100;
 }
 
+// 🧹 กรองชื่อสถานที่ที่ไม่ใช่วัด (เช่น ซอย, ถนน, เส้นทางศึกษาธรรมชาติ, ตลาด, โรงเรียน ฯลฯ)
+export function isValidTempleName(rawName?: string | null): boolean {
+  if (!rawName) return false;
+  const name = rawName.trim();
+
+  const invalidPrefixes = [
+    "ซอย",
+    "ถนน",
+    "เส้นทาง",
+    "ทาง",
+    "สะพาน",
+    "สี่แยก",
+    "สามแยก",
+    "แยก",
+    "ป้าย",
+    "สถานี",
+    "โรงเรียน",
+    "รร.",
+    "ชุมชน",
+    "หมู่บ้าน",
+    "ตลาด",
+    "ลานจอด",
+    "ที่จอดรถ",
+    "สุสาน",
+    "ฌาปนสถาน",
+    "เมรุ",
+    "สำนักงาน",
+    "เทศบาล",
+    "อบต",
+    "อบจ",
+    "Soi",
+    "Thanon",
+    "Road",
+    "Trail",
+    "Path",
+  ];
+
+  for (const prefix of invalidPrefixes) {
+    if (name.startsWith(prefix) || name.toLowerCase().startsWith(prefix.toLowerCase())) {
+      return false;
+    }
+  }
+
+  // ต้องขึ้นต้นด้วยชื่อวัด, สำนักสงฆ์, อาราม หรือ Wat
+  return (
+    name.startsWith("วัด") ||
+    name.startsWith("สำนักสงฆ์") ||
+    name.startsWith("อาราม") ||
+    name.startsWith("ม่อน") ||
+    name.toLowerCase().startsWith("wat ") ||
+    name.toLowerCase().startsWith("wat")
+  );
+}
+
 // 🏛️ คลังภาพสำรอง (Fallback Images) สำหรับวัดที่ไม่มีใน Wikipedia (ภาพวัดไทยแท้ 100%)
 const FALLBACK_TEMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=800&q=80", // วัดอรุณ / วัดไทย
@@ -113,6 +167,91 @@ interface TempleForUpsert {
   location: { lat: number; lng: number };
   imageUrl?: string | null;
 }
+
+// 🌟 รายชื่อวัดสำคัญในเชียงใหม่ เพื่อการันตีว่าวัดดังจะแสดงเสมอ (เช่น วัดอุโมงค์, ดอยสุเทพ, พระสิงห์)
+const FAMOUS_TEMPLES: TempleForUpsert[] = [
+  {
+    id: "osm_240714484",
+    name: "วัดอุโมงค์ (สวนพุทธธรรม)",
+    address: "135 หมู่ 10 ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.7831026, lng: 98.9525787 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Wat_Umong_%28I%29.jpg/330px-Wat_Umong_%28I%29.jpg",
+  },
+  {
+    id: "osm_239847120",
+    name: "วัดพระธาตุดอยสุเทพราชวรวิหาร",
+    address: "9 หมู่ 9 ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.9,
+    userRatingCount: 0,
+    location: { lat: 18.8049755, lng: 98.9215886 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Wat_Phra_That_Doi_Suthep_02.jpg/330px-Wat_Phra_That_Doi_Suthep_02.jpg",
+  },
+  {
+    id: "osm_239847121",
+    name: "วัดพระสิงห์วรมหาวิหาร",
+    address: "ถนนสามล้าน ตำบลพระสิงห์ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.788506, lng: 98.981881 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Wat_Phra_Singh_Chiang_Mai.jpg/330px-Wat_Phra_Singh_Chiang_Mai.jpg",
+  },
+  {
+    id: "osm_239847122",
+    name: "วัดเจดีย์หลวงวรวิหาร",
+    address: "103 ถนนพระปกเกล้า ตำบลศรีภูมิ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.786967, lng: 98.986588 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Wat_Chedi_Luang_Chiang_Mai.jpg/330px-Wat_Chedi_Luang_Chiang_Mai.jpg",
+  },
+  {
+    id: "osm_239847123",
+    name: "วัดสวนดอก (พระอารามหลวง)",
+    address: "139 ถนนสุเทพ ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.788939, lng: 98.967812 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Wat_Suan_Dok_Chiang_Mai.jpg/330px-Wat_Suan_Dok_Chiang_Mai.jpg",
+  },
+  {
+    id: "osm_239847124",
+    name: "วัดผาลาด (สกทาคามี)",
+    address: "ถนนศรีวิชัย ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.800057, lng: 98.934898 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Wat_Pha_Lat_01.jpg/330px-Wat_Pha_Lat_01.jpg",
+  },
+  {
+    id: "osm_239847125",
+    name: "วัดเจ็ดยอด (พระอารามหลวง)",
+    address: "ถนนซุปเปอร์ไฮเวย์ ตำบลช้างเผือก อำเภอเมืองเชียงใหม่ เชียงใหม่ 50300",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.808892, lng: 98.971556 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Wat_Jed_Yod_Chiang_Mai.jpg/330px-Wat_Jed_Yod_Chiang_Mai.jpg",
+  },
+  {
+    id: "osm_239847126",
+    name: "วัดร่ำเปิง (ตโปทาราม)",
+    address: "หมู่ 5 ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.775833, lng: 98.948333 },
+    imageUrl: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Wat_Ram_Poeng.jpg/330px-Wat_Ram_Poeng.jpg",
+  },
+  {
+    id: "osm_239847127",
+    name: "วัดป่าแดงมหาวิหาร",
+    address: "ตำบลสุเทพ อำเภอเมืองเชียงใหม่ เชียงใหม่ 50200",
+    rating: 4.8,
+    userRatingCount: 0,
+    location: { lat: 18.788333, lng: 98.956667 },
+    imageUrl: null,
+  },
+];
 
 // บันทึก/อัปเดตวัดลง Database
 async function upsertTemples(items: TempleForUpsert[]) {
@@ -236,7 +375,7 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
       const searchKeyword = query.trim();
       const osmSearchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
         searchKeyword
-      )}&format=json&limit=20&addressdetails=1&accept-language=th&namedetails=1`;
+      )}&format=json&limit=25&addressdetails=1&accept-language=th&namedetails=1`;
 
       const osmRes = await fetch(osmSearchUrl, {
         headers: { "User-Agent": "KhorSuanBoonApp/1.0", "Accept-Language": "th" },
@@ -247,8 +386,19 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
       }
 
       const rawItems = (await osmRes.json()) as any[];
+      // กรองเฉพาะสถานที่ที่เป็นวัดจริง
+      const validItems = rawItems.filter((item) => {
+        const name =
+          item.namedetails?.["name:th"] ||
+          item.namedetails?.name ||
+          item.name ||
+          item.display_name?.split(",")[0]?.trim() ||
+          "";
+        return isValidTempleName(name);
+      });
+
       const templeList = await Promise.all(
-        rawItems.map(async (item) => {
+        validItems.map(async (item) => {
           const placeLat = parseFloat(item.lat);
           const placeLng = parseFloat(item.lon);
           const name = item.namedetails?.["name:th"] || item.namedetails?.name || item.name || item.display_name?.split(",")[0]?.trim() || "วัด";
@@ -280,8 +430,18 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
     // กรณีที่ 2: ค้นหาวัดรอบตัวด้วย GPS (Nearby Search)
     // ⚡ ขั้นตอน Caching: ตรวจสอบใน Database ก่อนเป็นอันดับแรก
     // ─────────────────────────────────────────────
+
+    // ล้างสถานที่ที่ไม่ใช่วัด (เช่น ซอย, ถนน, เส้นทางศึกษาธรรมชาติ) ออกจากแคชใน DB
+    await dbClient
+      .execute(sql`DELETE FROM temples WHERE name LIKE 'ซอย%' OR name LIKE 'ถนน%' OR name LIKE 'เส้นทาง%'`)
+      .catch(() => {});
+
+    // บันทึกวัดสำคัญให้มีใน DB เสมอ (เช่น วัดอุโมงค์, ดอยสุเทพ, พระสิงห์)
+    await upsertTemples(FAMOUS_TEMPLES);
+
     const allDbTemples = await dbClient.select().from(temples);
     const nearbyFromDb = allDbTemples
+      .filter((t) => isValidTempleName(t.name))
       .map((t) => {
         const tLat = t.latitude || 0;
         const tLng = t.longitude || 0;
@@ -343,7 +503,7 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
 
     const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
       "วัด"
-    )}&format=json&bounded=1&viewbox=${viewbox}&limit=25&addressdetails=1&accept-language=th&namedetails=1`;
+    )}&format=json&bounded=1&viewbox=${viewbox}&limit=60&addressdetails=1&accept-language=th&namedetails=1`;
 
     const osmResponse = await fetch(osmUrl, {
       headers: { "User-Agent": "KhorSuanBoonApp/1.0", "Accept-Language": "th" },
@@ -353,7 +513,16 @@ router.get("/", async (req: Request<{}, {}, {}, NearbyQueryParams>, res: Respons
       return res.status(500).json({ success: false, message: "ไม่สามารถเชื่อมต่อ OpenStreetMap ได้" });
     }
 
-    const places = (await osmResponse.json()) as any[];
+    const rawPlaces = (await osmResponse.json()) as any[];
+    const places = rawPlaces.filter((place) => {
+      const name =
+        place.namedetails?.["name:th"] ||
+        place.namedetails?.name ||
+        place.name ||
+        place.display_name?.split(",")[0]?.trim() ||
+        "วัด";
+      return isValidTempleName(name);
+    });
 
     const templeList = await Promise.all(
       places.map(async (place) => {
