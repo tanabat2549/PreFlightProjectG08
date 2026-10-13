@@ -86,7 +86,7 @@ const Icons = {
   Settings: ({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   ),
   ArrowRight: ({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) => (
@@ -360,7 +360,6 @@ const getTodayDateString = () => {
 };
 
 export default function Home() {
-  // 1. ผู้ใช้งานที่ล็อกอิน
   const [user, setUser] = useState<any>(() => {
     try {
       const saved = localStorage.getItem('userData');
@@ -370,7 +369,6 @@ export default function Home() {
     }
   });
 
-  // 2. แต้มบารมี & การถวายประทีปประจำวัน
   const [meritCount, setMeritCount] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('userData');
@@ -382,7 +380,6 @@ export default function Home() {
     return 0;
   });
 
-  // 🌟 ซิงค์ค่าแต้มเมื่อข้อมูล user ในหน้าแรกมีการเปลี่ยนแปลงหรือโหลดเสร็จ
   useEffect(() => {
     if (user?.points !== undefined) {
       setMeritCount(user.points);
@@ -401,14 +398,10 @@ export default function Home() {
       : 'ถวายประทีปบูชาประจำวัน';
   });
 
-  // 3. วันพระถัดไป (ดึงจาก API /calendar/next)
   const [nextBuddhaDay, setNextBuddhaDay] = useState<BuddhaDayData | null>(null);
   const [buddhaDaysLeft, setBuddhaDaysLeft] = useState<number>(2);
-
-  // 4. วัดใกล้เคียง (ดึงจาก Cache หรือ API /temples)
   const [nearestTemple, setNearestTemple] = useState<TempleItem | null>(null);
 
-  // 5. ดวงประจำวันแบบสุ่ม (ดึงจาก seed ตาราง dailyHoroscopes และล็อกรายวันด้วย localStorage)
   const userBirthDayName = getUserBirthDayDisplay(user);
   const userDayKey = mapThaiDayToKey(user?.birthDayOfWeek) || getTodayKey();
   const fallbackAuspicious = ALL_DAYS_DATA[userDayKey] || ALL_DAYS_DATA.thursday;
@@ -433,13 +426,11 @@ export default function Home() {
 
   const auspicious = randomHoroscope || fallbackAuspicious;
 
-  // ฟังก์ชันโหลด/สุ่มดวงประจำวัน (เช็คตามวันที่ใน localStorage ก่อนสุ่มใหม่)
   const fetchOrLoadDailyHoroscope = async (forceRandom: boolean = false) => {
     const todayStr = getTodayDateString();
     const savedDate = localStorage.getItem('daily_horoscope_date');
     const savedData = localStorage.getItem('daily_horoscope_data');
 
-    // ถ้าไม่ได้กดปุ่มสุ่มใหม่ และมีข้อมูลของวันนี้เก็บไว้แล้ว ให้ใช้ข้อมูลเดิมทันที
     if (!forceRandom && savedDate === todayStr && savedData) {
       try {
         const item: DailyHoroscopeItem = JSON.parse(savedData);
@@ -453,7 +444,6 @@ export default function Home() {
       }
     }
 
-    // ถ้าเป็นวันใหม่หรือกดสุ่มดวงใหม่ ให้ดึงจาก Backend
     setHoroscopeLoading(true);
     try {
       const res = await api.get('/horoscope/daily');
@@ -474,12 +464,10 @@ export default function Home() {
     }
   };
 
-  // โหลดดวงประจำวันตามวันที่ใน localStorage หรือเมื่อวันเกิดเปลี่ยน
   useEffect(() => {
     fetchOrLoadDailyHoroscope(false);
   }, [userBirthDayName]);
 
-  // โหลดวันพระถัดไปจาก Backend
   useEffect(() => {
     const fetchNextBuddhaDay = async () => {
       try {
@@ -488,7 +476,6 @@ export default function Home() {
           const item: BuddhaDayData = res.data.data;
           setNextBuddhaDay(item);
 
-          // คำนวณวันนับถอยหลัง
           const [y, m, d] = item.date.split('-').map(Number);
           const target = new Date(y, m - 1, d);
           target.setHours(0, 0, 0, 0);
@@ -505,11 +492,9 @@ export default function Home() {
     fetchNextBuddhaDay();
   }, []);
 
-  // โหลดวัดใกล้เคียง
   useEffect(() => {
     const loadNearestTemple = async () => {
       try {
-        // ตรวจสอบแคชใน sessionStorage ก่อน
         const cached = sessionStorage.getItem('cached_temples');
         if (cached) {
           const parsed: TempleItem[] = JSON.parse(cached);
@@ -519,7 +504,6 @@ export default function Home() {
           }
         }
 
-        // ถ้าไม่มีในแคช ดึงจาก API /temples
         const res = await api.get('/temples', {
           params: { radius: '10000' },
         });
@@ -534,7 +518,6 @@ export default function Home() {
     loadNearestTemple();
   }, []);
 
-  // อัปเดตข้อมูล user ล่าสุดหากมีการล็อกอิน
   useEffect(() => {
     try {
       const saved = localStorage.getItem('userData');
@@ -542,21 +525,48 @@ export default function Home() {
     } catch {}
   }, []);
 
-  const handleDailyMerit = () => {
-    if (!hasOffered) {
-      const todayStr = getTodayDateString();
-      setHasOffered(true);
-      const newScore = meritCount + 50;
-      setMeritCount(newScore);
-      setOfferText('อนุโมทนา สาธุ (+50 บารมี)');
-      localStorage.setItem('user_merit_score', String(newScore));
-      localStorage.setItem('last_offered_date', todayStr);
+  // ฟังก์ชันกดอนุโมทนาเพื่อรับแต้มบารมี (เรียกตรงผ่านพอร์ต 3001 ของ Backend)
+  const handleDailyMerit = async () => {
+    if (hasOffered) {
+      alert('คุณได้อนุโมทนาบุญสำหรับวันนี้ไปแล้วครับ');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('กรุณาเข้าสู่ระบบก่อนอนุโมทนาบุญ');
+        return;
+      }
+
+      const res = await api.post('/user/bless', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data.success) {
+        const todayStr = getTodayDateString();
+        setHasOffered(true);
+        setMeritCount(res.data.totalPoints);
+        setOfferText('อนุโมทนา สาธุ (+50 บารมี)');
+        localStorage.setItem('last_offered_date', todayStr);
+        
+        if (user) {
+          const updatedUser = { ...user, points: res.data.totalPoints };
+          setUser(updatedUser);
+          localStorage.setItem('userData', JSON.stringify(updatedUser));
+        }
+
+        alert(res.data.message);
+      }
+    } catch (error: any) {
+      console.error('Bless error:', error);
+      const errorMsg = error.response?.data?.message || 'ไม่สามารถอนุโมทนาบุญได้ในขณะนี้';
+      alert(errorMsg);
     }
   };
 
   return (
     <div className="home-container">
-      {/* 1. Header Bar: Profile & Merit Score */}
       <header className="home-header">
         <div className="header-greeting">
           <div className="avatar-circle">
@@ -585,12 +595,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 🌟 Dashboard Layout แบบ 2 คอลัมน์บน Desktop */}
       <div className="home-dashboard-layout">
-
-        {/* คอลัมน์หลักฝั่งซ้าย: Hero Banner + Master Card มงคลประจำวัน */}
         <div className="dashboard-main-col">
-          {/* 2. Interactive Digital Sanctuary Hero */}
           <section className="sanctuary-hero">
             <div className="hero-glow-bg" />
             <div className="hero-content">
@@ -608,9 +614,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* 3. Daily Auspicious Guide (กล่องใหญ่ครอบข้อมูลดวงวันเกิดทั้งหมด) */}
           <section className="auspicious-master-card">
-            {/* ส่วนหัวในกล่องใหญ่ */}
             <div className="master-card-header">
               <div className="title-with-icon">
                 <div className="title-text-group">
@@ -645,9 +649,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* กล่อง Bento ภายในกล่องใหญ่ */}
             <div className="lucky-bento-grid">
-              {/* Card: สีมงคล */}
               <div className="bento-card bento-colors">
                 <div className="card-top-label">
                   <Icons.Palette size={13} />
@@ -673,7 +675,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Card: เลขมงคล */}
               <div className="bento-card bento-numbers">
                 <div className="card-top-label">
                   <Icons.Hash size={13} />
@@ -689,7 +690,6 @@ export default function Home() {
                 <p className="number-note">เหมาะสำหรับเจรจาหรือเลือกเวลามงคล</p>
               </div>
 
-              {/* Card: คนวันเกิดถูกชะตา */}
               <div className="bento-card bento-friend">
                 <div className="card-top-label">
                   <Icons.Users size={13} />
@@ -701,7 +701,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Card: เคล็ดลับเสริมดวงประจำวัน */}
               <div className="bento-card bento-tip">
                 <div className="tip-left">
                   <div className="tip-icon-wrap">
@@ -723,9 +722,7 @@ export default function Home() {
           </section>
         </div>
 
-        {/* คอลัมน์ขวา: ฟีเจอร์เสริม (เซียมซี, ปฏิทินวันพระ, วัดใกล้คุณ) */}
         <aside className="dashboard-side-col">
-          {/* เซียมซีการ์ด */}
           <section className="interactive-siemsee-card">
             <div className="siemsee-decor">
               <Icons.ScrollText size={72} strokeWidth={1} color="var(--sms-gold)" />
@@ -741,7 +738,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* ปฏิทินวันพระ Widget */}
           <section className="buddhist-calendar-card">
             <div className="calendar-header">
               <span className="cal-tag">
@@ -774,7 +770,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* วัดใกล้ฉัน Section */}
           <section className="temples-showcase-section">
             <div className="section-title-wrap">
               <div className="title-with-icon">
@@ -824,7 +819,6 @@ export default function Home() {
             </div>
           </section>
         </aside>
-
       </div>
     </div>
   );
