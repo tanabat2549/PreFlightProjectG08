@@ -144,7 +144,7 @@ export default function Temple() {
 
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState("");
-  const [authorName, setAuthorName] = useState("");
+  // const [authorName, setAuthorName] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
   // 1. ค้นหาวัดใกล้ฉันผ่าน GPS (รองรับ Cache และรีเฟรชข้อมูลอัตโนมัติเมื่อครบ 5 นาที)
