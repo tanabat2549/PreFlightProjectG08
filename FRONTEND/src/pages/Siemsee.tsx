@@ -215,6 +215,20 @@ export default function SiemseePage() {
         return;
       }
 
+      // 🌟 อัปเดตแต้มคงเหลือใหม่ลง userData ใน localStorage ทันที เพื่อให้หน้าอื่น (Home, Profile) ได้แต้มล่าสุด
+      if (result?.remainingMerit !== undefined) {
+        const saved = localStorage.getItem('userData');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            parsed.points = result.remainingMerit;
+            localStorage.setItem('userData', JSON.stringify(parsed));
+          } catch (e) {
+            console.error('Failed to sync remaining merit in localStorage:', e);
+          }
+        }
+      }
+
       processDrawAnimation(fortune);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'สุ่มรอบเสริมไม่สำเร็จ ลองใหม่อีกครั้ง');

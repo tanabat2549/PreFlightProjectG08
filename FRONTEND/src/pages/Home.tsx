@@ -518,11 +518,36 @@ export default function Home() {
     loadNearestTemple();
   }, []);
 
+  // 🌟 โหลดข้อมูล User จาก localStorage ก่อน และซิงค์แต้มล่าสุดจาก Backend ในพื้นหลัง (Background Fetch)
   useEffect(() => {
     try {
       const saved = localStorage.getItem('userData');
-      if (saved) setUser(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        if (parsed?.points !== undefined) {
+          setMeritCount(Number(parsed.points));
+        }
+      }
     } catch {}
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      api.get('/user/profile')
+        .then((res) => {
+          if (res.data?.success && res.data?.user) {
+            const latestUser = res.data.user;
+            setUser(latestUser);
+            if (latestUser.points !== undefined) {
+              setMeritCount(Number(latestUser.points));
+            }
+            localStorage.setItem('userData', JSON.stringify(latestUser));
+          }
+        })
+        .catch(() => {
+          // หากออฟไลน์หรือดึงไม่ได้ ให้ใช้ค่าเดิมใน localStorage ต่อไปเงียบๆ
+        });
+    }
   }, []);
 
   // ฟังก์ชันกดอนุโมทนาเพื่อรับแต้มบารมี (เรียกตรงผ่านพอร์ต 3001 ของ Backend)

@@ -9,7 +9,7 @@ const router = Router();
 // 1. GET /api/user/profile/:email
 // ดึงข้อมูลโปรไฟล์ล่าสุดของผู้ใช้งาน
 // ==========================================
-router.get('/profile/:email', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
+router.get(['/profile', '/profile/:email'], requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const [foundUser] = await dbClient.select().from(users).where(eq(users.id, req.userId!)).limit(1);
 
