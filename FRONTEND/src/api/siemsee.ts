@@ -7,16 +7,17 @@ interface APIResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
+  alreadyDrawn?: boolean;
+  needsConfirmation?: boolean;
 }
 
 // 🔧 สลับ true/false เพื่อใช้ mock data แทนของจริงตอนทำ UI
-// พร้อม integrate จริงเมื่อไหร่ ค่อยเปลี่ยนเป็น false
 const USE_MOCK = false;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// เขย่าเซียมซี (สุ่ม) — ยังไม่บันทึกลงประวัติ ต้องกด "เก็บใบเซียมซี" ก่อน
-export async function drawFortune(): Promise<Fortune> {
+// เขย่าเซียมซี (สุ่ม) — รองรับการส่ง usePoints=true เมื่อต้องการใช้แต้มสุ่มรอบเสริม
+export async function drawFortune(usePoints: boolean = false): Promise<any> {
   if (USE_MOCK) {
     await wait(400); // delay for ux
     const randomIndex = Math.floor(Math.random() * mockFortunes.length);
@@ -24,14 +25,11 @@ export async function drawFortune(): Promise<Fortune> {
   }
 
   try {
-    const response = await api.get<APIResponse<Fortune>>('/siemsee/draw');
-    const { success, data, message } = response.data;
-
-    if (!success || !data) {
-      throw new Error(message || 'ไม่สามารถเขย่าเซียมซีได้');
-    }
-
-    return data;
+    const endpoint = usePoints ? '/siemsee/draw?usePoints=true' : '/siemsee/draw';
+    const response = await api.get<APIResponse<Fortune>>(endpoint);
+    
+    // ส่ง response ทั้งก้อนกลับไป เพื่อให้ฝั่ง UI (Siemsee.tsx) ตรวจสอบเงื่อนไข alreadyDrawn / needsConfirmation ได้ถูกต้อง
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       throw new Error(error.response.data.message, { cause: error });

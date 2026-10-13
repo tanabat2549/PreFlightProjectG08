@@ -69,9 +69,9 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
     const userId = req.userId!;
-    const COST = 100; // ค่าใช้จ่ายแต้มสำหรับการสุ่มรอบเสริม
+    const COST = 100;
+    const usePoints = req.query.usePoints === 'true'; // 🌟 เช็กว่ากดยืนยันใช้แต้มมาหรือยัง
 
-    // 🌟 2. ดึงข้อมูล User จาก Database เพื่อเช็กแต้มบุญจริง (ไม่รับจาก query แล้ว)
     const [currentUser] = await db
       .select({ points: users.points })
       .from(users)
@@ -79,16 +79,10 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
       .limit(1);
 
     const currentMerit = currentUser?.points ?? 0;
-
-    const rawName = req.query.name;
-    const name = typeof rawName === 'string' ? rawName.trim().slice(0, 50) || undefined : undefined;
-    const greetingFor = (fortune: Fortune) =>
-      name ? `คุณ${name} ได้รับใบที่ ${fortune.number}` : undefined;
-
     const today = bangkokToday();
     const nextDrawAt = nextBangkokMidnight().toISOString();
 
-    // 3. ตรวจสอบใน Database ว่าวันนี้ User คนนี้ใช้สิทธิ์สุ่มฟรีไปหรือยัง
+    // 1. ตรวจสอบโควตารายวัน
     const [existingDraw] = await db
       .select()
       .from(siemseeDailyDraws)
@@ -97,30 +91,45 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
 
     const alreadyDrawnToday = isLimitEnabled() && !!existingDraw;
 
-    if (alreadyDrawnToday) {
-      // ถ้าวันนี้สุ่มไปแล้ว ต้องเช็คว่าแต้มจริงใน DB พอจะสุ่มรอบเสริม (100 แต้ม) ไหม?
-      if (currentMerit < COST) {
-        return res.status(400).json({
+   if (alreadyDrawnToday) {
+      if (!usePoints) {
+        return res.json({
           success: false,
-          message: 'วันนี้คุณสุ่มครบโควตาฟรีแล้ว และแต้มบุญไม่ถึง 100 แต้มสำหรับสุ่มเพิ่ม',
+          alreadyDrawn: true,
+          needsConfirmation: true,
+          message: 'วันนี้คุณสุ่มครบโควตาฟรีแล้ว ต้องการใช้ 100 แต้มบุญเพื่อสุ่มเพิ่มหรือไม่?',
         });
       }
 
-      // สุ่มใบใหม่รอบเสริม
+      const numericMerit = Number(currentMerit);
+      if (isNaN(numericMerit) || numericMerit < COST) {
+        return res.status(400).json({
+          success: false,
+          message: `แต้มบุญของคุณไม่พอ (มีอยู่ ${numericMerit} แต้ม ต้องการ 100 แต้ม)`,
+        });
+      }
+
       const fortune = await pickRandomFortune();
       if (!fortune) {
         return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
       }
 
-      const remainingMerit = currentMerit - COST;
+      const remainingMerit = numericMerit - COST;
 
-      // 🌟 4. ตัดแต้มจริงออกจาก Database ของผู้ใช้คนนี้
+      // 1. อัปเดตหักแต้มลง Database
       await db
         .update(users)
         .set({ points: remainingMerit })
         .where(eq(users.id, userId));
 
-      const greeting = greetingFor(fortune);
+      // 🌟 2. บันทึกประวัติการสุ่มรอบเสริม (อัปเดตสิทธิ์ของวันนี้เพื่อให้ระบบจำกัดการสุ่มต่อรอบถัดไปถูกต้อง)
+      if (isLimitEnabled()) {
+        // ลบอันเก่าหรือใช้เงื่อนไขบันทึกเพิ่มรอบ (ขึ้นอยู่กับตาราง ถ้าตารางเก็บบันทึกรายครั้ง ให้ Insert เพิ่มได้เลย)
+        await db.insert(siemseeDailyDraws).values({
+          userId,
+          drawDate: today,
+        });
+      }
 
       return res.json({
         success: true,
@@ -130,17 +139,15 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
         message: 'ใช้ 100 แต้มบุญสุ่มเซียมซีรอบเสริมสำเร็จ',
         nextDrawAt,
         data: fortune,
-        ...(greeting && { greeting }),
       });
     }
 
-    // 5. กรณีสุ่มครั้งแรกของวัน (สุ่มฟรี)
+    // 2. กรณีสุ่มครั้งแรกของวัน (สุ่มฟรี)
     const fortune = await pickRandomFortune();
     if (!fortune) {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลใบเซียมซีในฐานข้อมูล' });
     }
 
-    // บันทึกลงตารางโควตารายวันว่าวันนี้ได้สิทธิ์สุ่มฟรีแล้ว
     if (isLimitEnabled()) {
       await db.insert(siemseeDailyDraws).values({
         userId,
@@ -148,14 +155,12 @@ router.get('/draw', requireAuth, async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const greeting = greetingFor(fortune);
     return res.json({
       success: true,
       alreadyDrawn: false,
       remainingMerit: currentMerit,
       nextDrawAt,
       data: fortune,
-      ...(greeting && { greeting }),
     });
 
   } catch (error) {
